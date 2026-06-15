@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tornalyx | Copa Regional Fútbol 2026</title>
+  
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="../assets/favicon.ico" />
+  <link rel="stylesheet" href="../css/variables.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <style>
+    /* Hero del torneo */
+    .torneo-hero {
+      position:relative; overflow:hidden;
+      padding:clamp(44px,7vw,80px) 0;
+      border-bottom:1px solid var(--line-soft);
+    }
+    .torneo-hero .glow-hero {
+      position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse 70% 60% at 30% 50%,rgba(236,28,36,.15),transparent 65%);
+    }
+    .torneo-hero-in { position:relative; z-index:2; }
+    .torneo-hero__grid { display:grid; grid-template-columns:1fr; gap:var(--space-6); }
+    @media(min-width:768px) { .torneo-hero__grid { grid-template-columns:1fr auto; align-items:center; } }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      border-bottom:1px solid var(--line-soft);
+      padding:var(--space-3) 0;
+      font-size:var(--font-size-sm);
+      color:var(--muted);
+    }
+    .breadcrumb a { color:var(--muted); transition:color .15s; }
+    .breadcrumb a:hover { color:var(--red-bright); }
+    .breadcrumb span { color:var(--muted-2); margin:0 6px; }
+
+    /* Info boxes */
+    .info-grid { display:grid; grid-template-columns:1fr; gap:var(--space-4); margin-bottom:var(--space-6); }
+    @media(min-width:640px) { .info-grid { grid-template-columns:repeat(3,1fr); } }
+    .info-box {
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:var(--space-5);
+      text-align:center;
+      background:var(--bg-card);
+      transition:border-color .2s;
+    }
+    .info-box:hover { border-color:var(--red-deep); }
+    .info-box__value {
+      font-family:var(--head); font-size:var(--font-size-2xl); font-weight:800;
+      background:linear-gradient(180deg,#fff,var(--red-bright));
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+    }
+    .info-box__label { font-size:var(--font-size-sm); color:var(--muted); margin-top:6px; }
+
+    /* Tabla de posiciones */
+    .table-pos { width:100%; border-collapse:collapse; font-size:var(--font-size-sm); }
+    .table-pos th {
+      font-family:var(--mono); font-size:10px; letter-spacing:1px;
+      text-transform:uppercase; color:var(--muted-2); text-align:left;
+      padding:var(--space-2) var(--space-3); background:rgba(255,255,255,.02);
+      border-bottom:1px solid var(--line); font-weight:500;
+    }
+    .table-pos td { padding:var(--space-3); border-bottom:1px solid var(--line-soft); color:var(--muted); }
+    .table-pos tr:last-child td { border-bottom:none; }
+    .table-pos tr:hover td { background:rgba(255,255,255,.025); }
+    .pos-badge {
+      width:28px; height:28px; border-radius:8px;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:12px; font-family:var(--head);
+    }
+    .pos-1 { background:rgba(251,191,36,.15); color:#fbbf24; border:1px solid rgba(251,191,36,.3); }
+    .pos-2 { background:rgba(148,163,184,.1); color:#94a3b8; border:1px solid rgba(148,163,184,.2); }
+    .pos-3 { background:rgba(217,119,6,.12); color:#fbbf24; border:1px solid rgba(217,119,6,.25); }
+    .equipo-tag { display:inline-flex; align-items:center; gap:var(--space-2); color:var(--ink); font-weight:500; }
+
+    /* Resultado de partido */
+    .partido-row {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:var(--space-3) var(--space-4);
+      border-radius:12px; border:1px solid var(--line);
+      margin-bottom:var(--space-2); background:var(--bg-card);
+      transition:border-color .2s;
+    }
+    .partido-row:hover { border-color:var(--red-deep); }
+    .partido-score {
+      font-family:var(--head); font-size:var(--font-size-xl); font-weight:800;
+      text-align:center; min-width:64px; color:var(--ink);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile nav -->
+  <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
+    <button class="mobile-close" id="mobileClose" aria-label="Cerrar">?</button>
+    <a href="index.html">Inicio</a>
+    <a href="torneos.html">Torneos</a>
+    <a class="btn btn-primary mobile-cta" href="login.html">Entrar</a>
+  </div>
+
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="index.html">
+        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" onerror="this.style.display='none'">
+        Tornalyx
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">Inicio</a>
+        <a href="torneos.html" style="color:var(--ink)">Torneos</a>
+      </nav>
+      <div class="nav-right">
+        <a class="ghost-link" href="login.html">Entrar</a>
+        <a class="btn btn-primary btn-sm" href="registro.html">Crear cuenta</a>
+      </div>
+      <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Ubicación">
+    <div class="wrap">
+      <a href="index.html">Inicio</a><span>›</span>
+      <a href="torneos.html">Torneos</a><span>›</span>
+      Copa Regional Fútbol 2026
+    </div>
+  </nav>
+
+  <!-- Hero del torneo -->
+  <div class="torneo-hero">
+    <div class="glow-hero"></div>
+    <div class="wrap torneo-hero-in">
+      <div class="torneo-hero__grid">
+        <div>
+          <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-3)">
+            <span class="badge badge-green">Activo</span>
+            <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)">? Fútbol</span>
+            <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)">Liga</span>
+          </div>
+          <h1 style="margin-bottom:var(--space-3)">Copa Regional Fútbol 2026</h1>
+          <p class="lead" style="max-width:580px;margin-bottom:var(--space-5)">
+            Torneo de fútbol por sistema de liga entre los mejores equipos de Montevideo. Todos los equipos se enfrentan entre sí en un partido de ida y vuelta.
+          </p>
+          <div style="display:flex;flex-wrap:wrap;gap:var(--space-4);font-size:var(--font-size-sm);color:var(--muted)">
+            <span>? Inicio: 10 mar 2026</span>
+            <span>??? Estimado: 30 ago 2026</span>
+            <span>?? Montevideo, Uruguay</span>
+            <span>??? Organiza: FC Deportivo Norte</span>
+          </div>
+        </div>
+        <div>
+          <a href="login.html" class="btn btn-primary btn-lg" style="white-space:nowrap">Inscribir equipo ?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="section" style="padding-top:clamp(28px,4vw,48px)">
+    <div class="wrap">
+
+      <!-- Info boxes -->
+      <div class="info-grid" data-reveal>
+        <div class="info-box">
+          <div class="info-box__value">12</div>
+          <div class="info-box__label">Equipos inscritos</div>
+        </div>
+        <div class="info-box">
+          <div class="info-box__value">Jornada 8</div>
+          <div class="info-box__label">de 22 jornadas</div>
+        </div>
+        <div class="info-box">
+          <div class="info-box__value">67%</div>
+          <div class="info-box__label">Partidos jugados</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-list" role="tablist">
+        <button class="tab active" role="tab" data-tab="posiciones">Posiciones</button>
+        <button class="tab" role="tab" data-tab="partidos">Resultados</button>
+        <button class="tab" role="tab" data-tab="equipos">Equipos</button>
+        <button class="tab" role="tab" data-tab="info">Información</button>
+      </div>
+
+      <!-- Tab: Posiciones -->
+      <div class="tab-content active" id="tab-posiciones" role="tabpanel">
+        <div class="card">
+          <div class="card__header">
+            <h3>Tabla de posiciones</h3>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="table-pos">
+              <thead>
+                <tr>
+                  <th>#</th><th>Equipo</th><th>PJ</th><th>G</th>
+                  <th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="pos-badge pos-1">1</span></td>
+                  <td><span class="equipo-tag">? Atlético Norte</span></td>
+                  <td>8</td><td>6</td><td>1</td><td>1</td><td>18</td><td>7</td><td>+11</td>
+                  <td><strong style="font-family:var(--head);color:var(--ink)">19</strong></td>
+                </tr>
+                <tr>
+                  <td><span class="pos-badge pos-2">2</span></td>
+                  <td><span class="equipo-tag">? Deportivo Sur</span></td>
+                  <td>8</td><td>5</td><td>2</td><td>1</td><td>14</td><td>8</td><td>+6</td>
+                  <td><strong style="font-family:var(--head);color:var(--ink)">17</strong></td>
+                </tr>
+                <tr>
+                  <td><span class="pos-badge pos-3">3</span></td>
+                  <td><span class="equipo-tag">? Club Rivera FC</span></td>
+                  <td>8</td><td>5</td><td>1</td><td>2</td><td>12</td><td>9</td><td>+3</td>
+                  <td><strong style="font-family:var(--head);color:var(--ink)">16</strong></td>
+                </tr>
+                <tr><td>4</td><td>FC Este</td><td>8</td><td>4</td><td>1</td><td>3</td><td>11</td><td>10</td><td>+1</td><td>13</td></tr>
+                <tr><td>5</td><td>Unión Central</td><td>8</td><td>3</td><td>2</td><td>3</td><td>9</td><td>11</td><td>-2</td><td>11</td></tr>
+                <tr><td>6</td><td>Los Guerreros</td><td>8</td><td>2</td><td>3</td><td>3</td><td>8</td><td>10</td><td>-2</td><td>9</td></tr>
+                <tr><td>7</td><td>Montevideo FC</td><td>8</td><td>2</td><td>1</td><td>5</td><td>7</td><td>14</td><td>-7</td><td>7</td></tr>
+                <tr><td>8</td><td>Cerro Verde</td><td>8</td><td>1</td><td>0</td><td>7</td><td>4</td><td>14</td><td>-10</td><td>3</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card__footer" style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">
+            PJ: Partidos jugados · G: Ganados · E: Empatados · P: Perdidos · GF/GC: Goles · DG: Diferencia · Pts: Puntos
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Resultados -->
+      <div class="tab-content" id="tab-partidos" role="tabpanel">
+        <h3 style="margin-bottom:var(--space-4);color:var(--ink)">Jornada 8 · Resultados</h3>
+        <div>
+          <div class="partido-row">
+            <span style="flex:1;text-align:right;font-weight:600;color:var(--ink)">Atlético Norte</span>
+            <div class="partido-score">3 · 1</div>
+            <span style="flex:1;font-weight:600;color:var(--ink)">Los Guerreros</span>
+          </div>
+          <div class="partido-row">
+            <span style="flex:1;text-align:right;font-weight:600;color:var(--ink)">Deportivo Sur</span>
+            <div class="partido-score">2 · 2</div>
+            <span style="flex:1;font-weight:600;color:var(--ink)">Club Rivera FC</span>
+          </div>
+          <div class="partido-row">
+            <span style="flex:1;text-align:right;font-weight:600;color:var(--ink)">FC Este</span>
+            <div class="partido-score">1 · 0</div>
+            <span style="flex:1;font-weight:600;color:var(--ink)">Cerro Verde</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Equipos -->
+      <div class="tab-content" id="tab-equipos" role="tabpanel">
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card__body">
+              <h4 style="color:var(--ink);margin-bottom:6px">? Atlético Norte</h4>
+              <p style="color:var(--muted);font-size:var(--font-size-sm)">15 jugadores · Fundado 2018</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__body">
+              <h4 style="color:var(--ink);margin-bottom:6px">? Deportivo Sur</h4>
+              <p style="color:var(--muted);font-size:var(--font-size-sm)">14 jugadores · Fundado 2015</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__body">
+              <h4 style="color:var(--ink);margin-bottom:6px">? Club Rivera FC</h4>
+              <p style="color:var(--muted);font-size:var(--font-size-sm)">16 jugadores · Fundado 2020</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Info -->
+      <div class="tab-content" id="tab-info" role="tabpanel">
+        <div class="card">
+          <div class="card__body">
+            <h3 style="margin-bottom:var(--space-4);color:var(--ink)">Reglamento del torneo</h3>
+            <ul style="display:flex;flex-direction:column;gap:var(--space-3)">
+              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
+                <span style="color:var(--red-bright);flex:none">•</span> Todos los equipos se enfrentan entre sí en partidos de ida y vuelta.
+              </li>
+              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
+                <span style="color:var(--red-bright);flex:none">•</span> Victoria: 3 puntos · Empate: 1 punto · Derrota: 0 puntos.
+              </li>
+              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
+                <span style="color:var(--red-bright);flex:none">•</span> En caso de empate en puntos, se desempata por diferencia de goles.
+              </li>
+              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
+                <span style="color:var(--red-bright);flex:none">•</span> Los 4 mejores clasificados pasan a playoff final.
+              </li>
+              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
+                <span style="color:var(--red-bright);flex:none">•</span> Alineaciones deben registrarse 30 minutos antes de cada partido.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer-wrap">
+    <div class="wrap">
+      <div class="foot-bottom" style="border:none;margin:0">
+        <span>© 2026 Tornalyx · Bachillerato Tecnológico en TI · Telyux Software Development</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+</body>
+</html>
+
+

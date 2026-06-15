@@ -1,0 +1,76 @@
+<!--
+  TORNALYX – components/sidebar.html
+  Barra lateral colapsable para los dashboards privados.
+  En PHP: <?php include 'components/sidebar.html'; ?>
+
+  Uso: pasar $sidebarItems (array de secciones) y $currentUser desde el controlador.
+  Los ítems se marcan con data-section y data-title para que dashboard.js
+  gestione la navegación SPA-lite sin recargas.
+-->
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<aside class="sidebar" id="sidebar">
+
+  <!-- Brand -->
+  <a class="sidebar-brand" href="/pages/index.html">
+    <img class="mark" src="/assets/tornalyx-logo.svg" alt="Tornalyx"
+         onerror="this.outerHTML='<div class=\'mark-fallback\'>TX</div>'">
+    Tornalyx
+  </a>
+
+  <!-- Navegación -->
+  <nav class="sidebar__nav" aria-label="Menú del panel">
+    <!--
+      PHP generará aquí los ítems según el rol del usuario:
+      <?php foreach ($sidebarItems as $item): ?>
+        <a class="sidebar__item <?= $item['active'] ? 'active' : '' ?>"
+           data-section="<?= $item['key'] ?>"
+           data-title="<?= $item['label'] ?>">
+          <span class="icon"><?= $item['icon'] ?></span>
+          <?= $item['label'] ?>
+        </a>
+      <?php endforeach; ?>
+
+      Ejemplo estático (Admin):
+    -->
+    <div class="sidebar__section">Principal</div>
+    <a class="sidebar__item active" data-section="inicio" data-title="Dashboard">
+      <span class="icon">📊</span> Dashboard
+    </a>
+
+    <div class="sidebar__section">Gestión</div>
+    <a class="sidebar__item" data-section="usuarios" data-title="Usuarios">
+      <span class="icon">👥</span> Usuarios
+    </a>
+    <a class="sidebar__item" data-section="torneos" data-title="Torneos">
+      <span class="icon">🏆</span> Torneos
+    </a>
+    <a class="sidebar__item" data-section="equipos" data-title="Equipos">
+      <span class="icon">⚽</span> Equipos
+    </a>
+    <a class="sidebar__item" data-section="resultados" data-title="Resultados">
+      <span class="icon">📋</span> Resultados
+    </a>
+
+    <div class="sidebar__section">Sistema</div>
+    <a class="sidebar__item" data-section="reportes" data-title="Reportes">
+      <span class="icon">📈</span> Reportes
+    </a>
+    <a class="sidebar__item" data-section="config" data-title="Configuración">
+      <span class="icon">⚙️</span> Configuración
+    </a>
+  </nav>
+
+  <!-- Footer del sidebar: datos del usuario -->
+  <div class="sidebar__footer">
+    <div class="user-row">
+      <div class="user-avatar">A</div>
+      <div>
+        <div class="user-name">Administrador</div>
+        <div class="user-role">admin</div>
+      </div>
+    </div>
+  </div>
+
+</aside>

@@ -1,0 +1,19 @@
+Options -Indexes
+
+RewriteEngine On
+
+# Redirigir todo al index.php (Front Controller)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+# Seguridad: bloquear acceso a archivos sensibles
+<FilesMatch "\.(env|json|md|sql|sh|log)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Headers de seguridad básicos
+Header always set X-Content-Type-Options "nosniff"
+Header always set X-Frame-Options "DENY"
+Header always set X-XSS-Protection "1; mode=block"

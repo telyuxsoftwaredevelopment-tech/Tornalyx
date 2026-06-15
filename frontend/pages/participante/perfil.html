@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tornalyx | Mi Perfil</title>
+  
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="../assets/favicon.ico" />
+  <link rel="stylesheet" href="../../css/main.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <style>
+    /* Profile header */
+    .profile-hero {
+      position:relative; overflow:hidden;
+      padding:clamp(36px,5vw,64px) 0 clamp(28px,4vw,48px);
+      border-bottom:1px solid var(--line-soft);
+    }
+    .profile-hero::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background:radial-gradient(ellipse 55% 80% at 20% 50%,rgba(236,28,36,.12),transparent 60%);
+    }
+    .profile-hero-in { position:relative; z-index:2; }
+    .profile-grid {
+      display:flex; align-items:flex-start; gap:var(--space-6); flex-wrap:wrap;
+    }
+    .avatar {
+      width:88px; height:88px; border-radius:50%; flex:none;
+      background:linear-gradient(135deg,var(--red),var(--red-deep));
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--head); font-weight:900; font-size:2rem; color:#fff;
+      box-shadow:0 0 0 3px var(--bg-2), 0 0 0 5px var(--red-deep), 0 12px 40px -8px var(--red-glow);
+    }
+    .profile-info { flex:1; min-width:0; }
+    .profile-name { font-size:var(--font-size-2xl); font-family:var(--head); font-weight:800; color:var(--ink); margin-bottom:4px; }
+    .profile-meta { font-size:var(--font-size-sm); color:var(--muted); display:flex; flex-wrap:wrap; gap:var(--space-4); margin-top:var(--space-2); }
+
+    /* Stat cards */
+    .stat-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+      gap:var(--space-4); margin-bottom:var(--space-6);
+    }
+    .stat-card {
+      background:var(--bg-card); border:1px solid var(--line);
+      border-radius:16px; padding:var(--space-5); text-align:center;
+      transition:border-color .2s;
+    }
+    .stat-card:hover { border-color:var(--red-deep); }
+    .stat-card__value {
+      font-family:var(--head); font-size:2rem; font-weight:800; line-height:1;
+      background:linear-gradient(180deg,#fff,var(--red-bright));
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      margin-bottom:6px;
+    }
+    .stat-card__label { font-size:12px; color:var(--muted); }
+
+    /* Progress bars for sports */
+    .sport-row {
+      display:flex; align-items:center; gap:var(--space-4);
+      margin-bottom:var(--space-4);
+    }
+    .sport-row__name { width:100px; flex:none; font-size:var(--font-size-sm); color:var(--ink); font-weight:500; }
+    .sport-row__bar  { flex:1; height:6px; background:var(--line); border-radius:3px; overflow:hidden; }
+    .sport-row__fill { height:100%; border-radius:3px; background:var(--red); transition:width .6s ease; }
+    .sport-row__pct  { width:40px; text-align:right; font-size:12px; font-family:var(--mono); color:var(--muted-2); flex:none; }
+
+    /* Data table */
+    .data-table { width:100%; border-collapse:collapse; }
+    .data-table th {
+      font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted-2); text-align:left; padding:var(--space-2) var(--space-4);
+      background:rgba(255,255,255,.02); border-bottom:1px solid var(--line);
+    }
+    .data-table td {
+      padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--line-soft);
+      font-size:var(--font-size-sm); color:var(--muted);
+    }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:rgba(255,255,255,.02); }
+    .data-table td:first-child { color:var(--ink); font-weight:500; }
+
+    /* Team cards */
+    .team-card {
+      background:var(--bg-card); border:1px solid var(--line);
+      border-radius:14px; padding:var(--space-4);
+      transition:border-color .2s;
+    }
+    .team-card:hover { border-color:var(--red-deep); }
+    .team-card__icon  { font-size:2rem; margin-bottom:var(--space-2); }
+    .team-card__name  { font-family:var(--head); font-weight:700; color:var(--ink); margin-bottom:4px; }
+    .team-card__meta  { font-size:12px; color:var(--muted-2); }
+
+    /* Form */
+    .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
+    @media(max-width:560px) { .form-grid-2 { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile nav -->
+  <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
+    <button class="mobile-close" id="mobileClose" aria-label="Cerrar">?</button>
+    <a href="../index.html">Inicio</a>
+    <a href="../torneos.html">Torneos</a>
+    <a class="btn btn-ghost mobile-cta" href="../login.html">Cerrar sesión</a>
+  </div>
+
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="../index.html">
+        <img class="badge" src="../../assets/ICONO.png" alt="Tornalyx" width="32" height="32"
+             onerror="this.style.display='none'">
+        Tornalyx
+      </a>
+      <nav class="nav-links">
+        <a href="../torneos.html">Torneos</a>
+        <a href="#" style="color:var(--ink)">Mi perfil</a>
+      </nav>
+      <div class="nav-right">
+        <a class="ghost-link" href="../login.html">Cerrar sesión</a>
+      </div>
+      <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Profile hero -->
+  <div class="profile-hero">
+    <div class="wrap profile-hero-in">
+      <div class="profile-grid">
+        <div class="avatar">CG</div>
+        <div class="profile-info">
+          <div class="profile-name">Carlos García</div>
+          <div style="margin-bottom:var(--space-2)">
+            <span class="badge badge-blue">Participante</span>
+          </div>
+          <div class="profile-meta">
+            <span>? Miembro desde mar 2026</span>
+            <span>?? Montevideo, Uruguay</span>
+            <span>? Fútbol · ? Tenis</span>
+          </div>
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn btn-ghost btn-sm" onclick="document.querySelector('[data-tab=datos]').click()">Editar perfil</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="section" style="padding-top:clamp(28px,4vw,48px)">
+    <div class="wrap">
+
+      <!-- Stats -->
+      <div class="stat-grid" data-reveal>
+        <div class="stat-card">
+          <div class="stat-card__value">7</div>
+          <div class="stat-card__label">Torneos jugados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">3</div>
+          <div class="stat-card__label">Equipos activos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">24</div>
+          <div class="stat-card__label">Partidos disputados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__value">2</div>
+          <div class="stat-card__label">Títulos ganados</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-list" role="tablist">
+        <button class="tab active" role="tab" data-tab="torneos">Mis torneos</button>
+        <button class="tab" role="tab" data-tab="equipos">Mis equipos</button>
+        <button class="tab" role="tab" data-tab="stats">Estadísticas</button>
+        <button class="tab" role="tab" data-tab="datos">Mis datos</button>
+      </div>
+
+      <!-- MIS TORNEOS -->
+      <div class="tab-content active" id="tab-torneos" role="tabpanel">
+        <div class="card">
+          <div class="card__header"><h3>Historial de torneos</h3></div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr><th>Torneo</th><th>Deporte</th><th>Equipo</th><th>Posición</th><th>Estado</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Copa Regional Fútbol 2026</td>
+                  <td>? Fútbol</td>
+                  <td>Atlético Norte</td>
+                  <td><span style="font-family:var(--head);color:var(--red-bright);font-weight:700">1°</span></td>
+                  <td><span class="badge badge-green">Activo</span></td>
+                </tr>
+                <tr>
+                  <td>Copa Tenis Rápido 2026</td>
+                  <td>? Tenis</td>
+                  <td>Individual</td>
+                  <td>3°</td>
+                  <td><span class="badge badge-green">Activo</span></td>
+                </tr>
+                <tr>
+                  <td>Liga Fútbol Invierno 2025</td>
+                  <td>? Fútbol</td>
+                  <td>Atlético Norte</td>
+                  <td><span style="font-family:var(--head);color:var(--red-bright);font-weight:700">1°</span></td>
+                  <td><span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Finalizado</span></td>
+                </tr>
+                <tr>
+                  <td>Torneo Basket Amateur 2025</td>
+                  <td>??? Básquetbol</td>
+                  <td>Norte United</td>
+                  <td>4°</td>
+                  <td><span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Finalizado</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIS EQUIPOS -->
+      <div class="tab-content" id="tab-equipos" role="tabpanel">
+        <div class="cards-grid">
+          <div class="team-card">
+            <div class="team-card__icon">?</div>
+            <div class="team-card__name">Atlético Norte</div>
+            <div class="team-card__meta">Fútbol · 15 jugadores · Capitán: Carlos García</div>
+            <div style="margin-top:var(--space-3)">
+              <span class="badge badge-green" style="font-size:11px">Activo en Copa Regional</span>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-card__icon">???</div>
+            <div class="team-card__name">Norte United</div>
+            <div class="team-card__meta">Básquetbol · 10 jugadores · Miembro</div>
+            <div style="margin-top:var(--space-3)">
+              <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);font-size:11px">Sin torneo activo</span>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-card__icon">?</div>
+            <div class="team-card__name">Individual · Tenis</div>
+            <div class="team-card__meta">Inscripción individual · Copa Tenis Rápido</div>
+            <div style="margin-top:var(--space-3)">
+              <span class="badge badge-green" style="font-size:11px">Activo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESTAD??STICAS -->
+      <div class="tab-content" id="tab-stats" role="tabpanel">
+        <div style="display:grid;grid-template-columns:1fr;gap:var(--space-5)">
+          <div class="card">
+            <div class="card__header"><h3>Actividad por deporte</h3></div>
+            <div class="card__body">
+              <div class="sport-row">
+                <span class="sport-row__name">? Fútbol</span>
+                <div class="sport-row__bar"><div class="sport-row__fill" style="width:78%"></div></div>
+                <span class="sport-row__pct">78%</span>
+              </div>
+              <div class="sport-row">
+                <span class="sport-row__name">? Tenis</span>
+                <div class="sport-row__bar"><div class="sport-row__fill" style="width:15%;background:var(--red-bright)"></div></div>
+                <span class="sport-row__pct">15%</span>
+              </div>
+              <div class="sport-row">
+                <span class="sport-row__name">??? Basket</span>
+                <div class="sport-row__bar"><div class="sport-row__fill" style="width:7%;background:var(--muted-2)"></div></div>
+                <span class="sport-row__pct">7%</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__header"><h3>Rendimiento en torneos</h3></div>
+            <div class="card__body">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--space-4)">
+                <div style="text-align:center">
+                  <div style="font-family:var(--head);font-size:1.75rem;font-weight:800;color:var(--red-bright)">14</div>
+                  <div style="font-size:12px;color:var(--muted)">Victorias</div>
+                </div>
+                <div style="text-align:center">
+                  <div style="font-family:var(--head);font-size:1.75rem;font-weight:800;color:var(--ink)">6</div>
+                  <div style="font-size:12px;color:var(--muted)">Empates</div>
+                </div>
+                <div style="text-align:center">
+                  <div style="font-family:var(--head);font-size:1.75rem;font-weight:800;color:var(--muted-2)">4</div>
+                  <div style="font-size:12px;color:var(--muted)">Derrotas</div>
+                </div>
+                <div style="text-align:center">
+                  <div style="font-family:var(--head);font-size:1.75rem;font-weight:800;color:var(--red-bright)">58%</div>
+                  <div style="font-size:12px;color:var(--muted)">% victorias</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIS DATOS -->
+      <div class="tab-content" id="tab-datos" role="tabpanel">
+        <div class="card" style="max-width:640px">
+          <div class="card__header"><h3>Datos personales</h3></div>
+          <div class="card__body">
+            <form id="perfilForm" novalidate>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="pNombre">Nombre</label>
+                  <input class="form-control" type="text" id="pNombre" value="Carlos" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="pApellido">Apellido</label>
+                  <input class="form-control" type="text" id="pApellido" value="García" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="pEmail">Correo electrónico</label>
+                <input class="form-control" type="email" id="pEmail" value="cgarcia@email.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="pFecha">Fecha de nacimiento</label>
+                <input class="form-control" type="date" id="pFecha" value="2000-05-14" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="pUbicacion">Ubicación</label>
+                <input class="form-control" type="text" id="pUbicacion" value="Montevideo, Uruguay" />
+              </div>
+              <div style="display:flex;gap:var(--space-3);margin-top:var(--space-2)">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <button type="reset" class="btn btn-ghost">Restablecer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="card" style="max-width:640px;margin-top:var(--space-5)">
+          <div class="card__header"><h3>Cambiar contraseña</h3></div>
+          <div class="card__body">
+            <div class="form-group">
+              <label class="form-label">Contraseña actual</label>
+              <input class="form-control" type="password" placeholder="••••••••" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nueva contraseña</label>
+              <input class="form-control" type="password" placeholder="Mínimo 8 caracteres" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirmar nueva contraseña</label>
+              <input class="form-control" type="password" placeholder="Repite la contraseña" />
+            </div>
+            <button class="btn btn-primary">Actualizar contraseña</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer-wrap">
+    <div class="wrap">
+      <div class="foot-bottom" style="border:none;margin:0">
+        <span>© 2026 Tornalyx · Bachillerato Tecnológico en TI · Telyux Software Development</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../../js/main.js"></script>
+</body>
+</html>
+
+

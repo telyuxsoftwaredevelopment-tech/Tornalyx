@@ -1,0 +1,56 @@
+<!--
+  TORNALYX – components/navbar.html
+  Barra de navegación pública reutilizable.
+  En el backend PHP se incluye con: <?php include 'components/navbar.html'; ?>
+  Requiere: css/variables.css, css/main.css, js/main.js
+-->
+
+<!-- Menú mobile (overlay) -->
+<div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Navegación móvil" style="display:none">
+  <div class="mobile-nav__header">
+    <a class="brand" href="/pages/index.html">
+      <img class="badge" src="/assets/tornalyx-logo.svg" alt="Tornalyx" width="28" height="28" onerror="this.style.display='none'">
+      Tornalyx
+    </a>
+    <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
+  </div>
+  <nav class="mobile-nav__links">
+    <a href="/pages/index.html#audiencias">Soluciones</a>
+    <a href="/pages/index.html#modulos">Módulos</a>
+    <a href="/pages/index.html#como">Cómo funciona</a>
+    <a href="/pages/index.html#roles">Roles</a>
+    <a href="/pages/index.html#empresa">Empresa</a>
+    <a href="/pages/torneos.html">Ver torneos</a>
+  </nav>
+  <div class="mobile-nav__footer">
+    <a class="btn btn-ghost" href="/pages/login.html">Entrar</a>
+    <a class="btn btn-primary" href="/pages/registro.html">Crear cuenta</a>
+  </div>
+</div>
+
+<!-- Navbar principal -->
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="brand" href="/pages/index.html">
+      <img class="badge" src="/assets/tornalyx-logo.svg" alt="Tornalyx" width="32" height="32" onerror="this.style.display='none'">
+      Tornalyx
+    </a>
+
+    <nav class="nav-links" aria-label="Navegación principal">
+      <a href="/pages/index.html#audiencias">Soluciones</a>
+      <a href="/pages/index.html#modulos">Módulos</a>
+      <a href="/pages/index.html#como">Cómo funciona</a>
+      <a href="/pages/index.html#roles">Roles</a>
+      <a href="/pages/index.html#empresa">Empresa</a>
+    </nav>
+
+    <div class="nav-right">
+      <a class="ghost-link" href="/pages/login.html">Entrar</a>
+      <a class="btn btn-primary btn-sm" href="/pages/torneos.html">Ver torneos</a>
+    </div>
+
+    <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tornalyx | Panel de Administración</title>
+  
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="../assets/favicon.ico" />
+  <link rel="stylesheet" href="../../css/main.css" />
+  <link rel="stylesheet" href="../../css/components.css" />
+  <link rel="stylesheet" href="../../css/pages/dashboard.css" />
+  <style>
+    body { display:flex; min-height:100vh; overflow-x:hidden; }
+    .sidebar {
+      position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-width);
+      background:var(--bg-2); border-right:1px solid var(--line);
+      display:flex; flex-direction:column; z-index:200;
+      transition:transform .25s cubic-bezier(.4,0,.2,1);
+    }
+    .sidebar-brand {
+      display:flex; align-items:center; gap:var(--space-3);
+      padding:var(--space-5) var(--space-4);
+      border-bottom:1px solid var(--line);
+      font-family:var(--head); font-weight:800; font-size:var(--font-size-lg);
+      color:var(--ink); text-decoration:none;
+    }
+    .sidebar-brand .mark {
+      width:36px; height:36px; border-radius:8px;
+      object-fit:contain; flex:none; display:block;
+    }
+    .sidebar__nav { flex:1; padding:var(--space-4) 0; overflow-y:auto; }
+    .sidebar__section {
+      padding:0 var(--space-3) var(--space-2);
+      font-family:var(--mono); font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
+      color:var(--muted-2); margin-top:var(--space-4);
+    }
+    .sidebar__item {
+      display:flex; align-items:center; gap:var(--space-3);
+      padding:10px var(--space-4); margin:2px var(--space-2); border-radius:10px;
+      font-size:var(--font-size-sm); color:var(--muted);
+      cursor:pointer; transition:all var(--transition-fast);
+      border:1px solid transparent; font-weight:500; text-decoration:none;
+    }
+    .sidebar__item:hover { background:rgba(255,255,255,.04); color:var(--ink); }
+    .sidebar__item.active {
+      background:rgba(236,28,36,.08); color:var(--red-bright);
+      border-color:rgba(236,28,36,.18); box-shadow:inset 3px 0 0 var(--red);
+    }
+    .sidebar__item .icon { font-size:1.1rem; width:22px; text-align:center; flex:none; }
+    .sidebar__footer { padding:var(--space-4); border-top:1px solid var(--line); }
+    .user-row {
+      display:flex; align-items:center; gap:var(--space-3);
+      padding:var(--space-2) var(--space-3); border-radius:10px;
+      background:rgba(255,255,255,.03); border:1px solid var(--line);
+    }
+    .user-avatar {
+      width:34px; height:34px; border-radius:50%;
+      background:linear-gradient(135deg,var(--red),var(--red-deep));
+      display:flex; align-items:center; justify-content:center;
+      font-weight:700; font-size:12px; color:#fff; flex:none; font-family:var(--head);
+    }
+    .user-name  { font-size:var(--font-size-sm); color:var(--ink); font-weight:600; }
+    .user-role  { font-size:11px; color:var(--muted-2); font-family:var(--mono); }
+
+    .sidebar-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:150;
+      opacity:0; pointer-events:none; transition:opacity .25s;
+    }
+    .sidebar-overlay.show { opacity:1; pointer-events:all; }
+
+    .app-main { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; min-width:0; }
+
+    .topbar {
+      position:sticky; top:0; z-index:100;
+      background:rgba(11,7,8,.9); backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--line-soft);
+      padding:0 var(--space-6); height:64px;
+      display:flex; align-items:center; justify-content:space-between; gap:var(--space-4);
+    }
+    .topbar-left { display:flex; align-items:center; gap:var(--space-3); }
+    .menu-toggle {
+      display:none; background:none; border:none; cursor:pointer;
+      color:var(--muted); font-size:1.2rem; padding:6px; border-radius:8px;
+    }
+    @media(max-width:768px) {
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .app-main { margin-left:0; }
+      .menu-toggle { display:flex; }
+    }
+
+    .page-content { padding:var(--space-6); flex:1; }
+    .section-panel { display:none; }
+    .section-panel.active { display:block; }
+
+    .kpi-grid {
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:var(--space-4); margin-bottom:var(--space-6);
+    }
+    .kpi-card {
+      background:var(--bg-card); border:1px solid var(--line);
+      border-radius:16px; padding:var(--space-5); transition:border-color .2s;
+    }
+    .kpi-card:hover { border-color:var(--red-deep); }
+    .kpi-card__label { font-size:var(--font-size-sm); color:var(--muted); margin-bottom:var(--space-2); }
+    .kpi-card__value {
+      font-family:var(--head); font-size:2.25rem; font-weight:800; line-height:1;
+      color:var(--red-bright); margin-bottom:6px;
+    }
+    .kpi-card__delta { font-size:12px; color:var(--muted-2); font-family:var(--mono); }
+
+    .data-table { width:100%; border-collapse:collapse; }
+    .data-table th {
+      font-family:var(--mono); font-size:10px; letter-spacing:1px; text-transform:uppercase;
+      color:var(--muted-2); text-align:left; padding:var(--space-2) var(--space-4);
+      background:rgba(255,255,255,.02); border-bottom:1px solid var(--line);
+    }
+    .data-table td {
+      padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--line-soft);
+      font-size:var(--font-size-sm); color:var(--muted);
+    }
+    .data-table tr:last-child td { border-bottom:none; }
+    .data-table tr:hover td { background:rgba(255,255,255,.02); }
+    .data-table td:first-child { color:var(--ink); font-weight:500; }
+
+    .page-header {
+      margin-bottom:var(--space-6);
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:var(--space-4); flex-wrap:wrap;
+    }
+    .page-header h1 { font-size:var(--font-size-2xl); color:var(--ink); }
+    .page-header p  { color:var(--muted); font-size:var(--font-size-sm); margin-top:4px; }
+
+    .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+    .dot-green  { background:#22c55e; box-shadow:0 0 6px rgba(34,197,94,.6); }
+    .dot-yellow { background:#eab308; }
+    .dot-muted  { background:var(--muted-2); }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-brand" href="../index.html">
+      <img class="mark" src="../../assets/ICONO.png" alt="Tornalyx" onerror="this.outerHTML='<div class=\'mark-fallback\'>TX</div>'">
+      Tornalyx
+    </a>
+    <nav class="sidebar__nav">
+      <div class="sidebar__section">Principal</div>
+      <a class="sidebar__item active" data-section="inicio" data-title="Dashboard">
+        <span class="icon">?</span> Dashboard
+      </a>
+      <div class="sidebar__section">Gestión</div>
+      <a class="sidebar__item" data-section="usuarios" data-title="Usuarios">
+        <span class="icon">?</span> Usuarios
+      </a>
+      <a class="sidebar__item" data-section="torneos" data-title="Torneos">
+        <span class="icon">???</span> Torneos
+      </a>
+      <a class="sidebar__item" data-section="equipos" data-title="Equipos">
+        <span class="icon">?</span> Equipos
+      </a>
+      <a class="sidebar__item" data-section="resultados" data-title="Resultados">
+        <span class="icon">?</span> Resultados
+      </a>
+      <div class="sidebar__section">Sistema</div>
+      <a class="sidebar__item" data-section="reportes" data-title="Reportes">
+        <span class="icon">?</span> Reportes
+      </a>
+      <a class="sidebar__item" data-section="config" data-title="Configuración">
+        <span class="icon">???</span> Configuración
+      </a>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="user-row">
+        <div class="user-avatar">A</div>
+        <div>
+          <div class="user-name">Administrador</div>
+          <div class="user-role">admin</div>
+        </div>
+        <a href="../login.html" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">?</a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle" aria-label="Menú">?</button>
+        <span id="topbarTitle" style="font-family:var(--head);font-weight:700;color:var(--ink)">Dashboard</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:var(--space-4)">
+        <span style="font-size:12px;font-family:var(--mono);color:var(--muted-2)">
+          <span class="dot dot-green"></span>Sistema activo
+        </span>
+        <a href="../torneos.html" class="btn btn-ghost btn-sm">Ver sitio ?</a>
+      </div>
+    </header>
+
+    <main class="page-content">
+
+      <!-- INICIO -->
+      <div class="section-panel active" id="panel-inicio">
+        <div class="page-header">
+          <div>
+            <h1>Bienvenido, Administrador</h1>
+            <p>Resumen general del sistema Tornalyx · Actualizado ahora</p>
+          </div>
+        </div>
+        <div class="kpi-grid" data-reveal>
+          <div class="kpi-card">
+            <div class="kpi-card__label">Usuarios registrados</div>
+            <div class="kpi-card__value">248</div>
+            <div class="kpi-card__delta">? +12 esta semana</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__label">Torneos activos</div>
+            <div class="kpi-card__value">34</div>
+            <div class="kpi-card__delta">? +3 este mes</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__label">Equipos inscritos</div>
+            <div class="kpi-card__value">87</div>
+            <div class="kpi-card__delta">Sin cambios</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__label">Partidos registrados</div>
+            <div class="kpi-card__value">412</div>
+            <div class="kpi-card__delta">? +28 esta semana</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card__header"><h3>Actividad reciente</h3></div>
+          <div style="display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-4)">
+            <div style="display:flex;align-items:center;gap:var(--space-3);font-size:var(--font-size-sm)">
+              <span class="dot dot-green"></span>
+              <span style="color:var(--muted)">Nuevo torneo:</span>
+              <span style="color:var(--ink);font-weight:500">Copa Verano 2026</span>
+              <span style="margin-left:auto;color:var(--muted-2);font-family:var(--mono);font-size:11px">hace 2h</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:var(--space-3);font-size:var(--font-size-sm)">
+              <span class="dot dot-yellow"></span>
+              <span style="color:var(--muted)">Resultado:</span>
+              <span style="color:var(--ink);font-weight:500">Atlético Norte 3 · 1 Los Guerreros</span>
+              <span style="margin-left:auto;color:var(--muted-2);font-family:var(--mono);font-size:11px">hace 4h</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:var(--space-3);font-size:var(--font-size-sm)">
+              <span class="dot dot-muted"></span>
+              <span style="color:var(--muted)">Usuario registrado:</span>
+              <span style="color:var(--ink);font-weight:500">mariagomez@email.com</span>
+              <span style="margin-left:auto;color:var(--muted-2);font-family:var(--mono);font-size:11px">hace 6h</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USUARIOS -->
+      <div class="section-panel" id="panel-usuarios">
+        <div class="page-header">
+          <div><h1>Usuarios</h1><p>Gestión de usuarios del sistema</p></div>
+          <button class="btn btn-primary btn-sm">+ Nuevo usuario</button>
+        </div>
+        <div class="card">
+          <div class="card__header" style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Lista de usuarios</h3>
+            <input class="form-control" type="search" placeholder="Buscar..." style="max-width:240px;padding:8px 14px" />
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Registrado</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Carlos García</td>
+                  <td style="color:var(--muted-2)">cgarcia@email.com</td>
+                  <td><span class="badge badge-blue">Participante</span></td>
+                  <td><span class="dot dot-green"></span>Activo</td>
+                  <td style="font-family:var(--mono);font-size:12px">10/03/2026</td>
+                  <td><a href="#" style="color:var(--red-bright);font-size:12px">Editar</a></td>
+                </tr>
+                <tr>
+                  <td>María López</td>
+                  <td style="color:var(--muted-2)">mlopez@email.com</td>
+                  <td><span class="badge badge-yellow">Organizador</span></td>
+                  <td><span class="dot dot-green"></span>Activo</td>
+                  <td style="font-family:var(--mono);font-size:12px">22/01/2026</td>
+                  <td><a href="#" style="color:var(--red-bright);font-size:12px">Editar</a></td>
+                </tr>
+                <tr>
+                  <td>Juan Pérez</td>
+                  <td style="color:var(--muted-2)">jperez@email.com</td>
+                  <td><span class="badge badge-blue">Participante</span></td>
+                  <td><span class="dot dot-muted"></span>Inactivo</td>
+                  <td style="font-family:var(--mono);font-size:12px">05/12/2025</td>
+                  <td><a href="#" style="color:var(--red-bright);font-size:12px">Editar</a></td>
+                </tr>
+                <tr>
+                  <td>Ana Torres</td>
+                  <td style="color:var(--muted-2)">atorres@email.com</td>
+                  <td><span class="badge badge-red">Admin</span></td>
+                  <td><span class="dot dot-green"></span>Activo</td>
+                  <td style="font-family:var(--mono);font-size:12px">01/09/2025</td>
+                  <td><a href="#" style="color:var(--red-bright);font-size:12px">Editar</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card__footer" style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">
+            Mostrando 4 de 248 usuarios
+          </div>
+        </div>
+      </div>
+
+      <!-- TORNEOS -->
+      <div class="section-panel" id="panel-torneos">
+        <div class="page-header">
+          <div><h1>Torneos</h1><p>Todos los torneos del sistema</p></div>
+          <button class="btn btn-primary btn-sm">+ Nuevo torneo</button>
+        </div>
+        <div class="cards-grid">
+          <div class="card">
+            <div class="card__body">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-2)">
+                <h4 style="color:var(--ink)">Copa Regional Fútbol 2026</h4>
+                <span class="badge badge-green">Activo</span>
+              </div>
+              <p style="color:var(--muted);font-size:var(--font-size-sm)">Liga · 12 equipos · Jornada 8/22</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__body">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-2)">
+                <h4 style="color:var(--ink)">Torneo Basket Invierno</h4>
+                <span class="badge badge-yellow">Próximo</span>
+              </div>
+              <p style="color:var(--muted);font-size:var(--font-size-sm)">Eliminatoria · 8 equipos · Inicio 01/07</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card__body">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-2)">
+                <h4 style="color:var(--ink)">Liga Tenis Dobles 2025</h4>
+                <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Finalizado</span>
+              </div>
+              <p style="color:var(--muted);font-size:var(--font-size-sm)">Liga · 16 equipos · Completado</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EQUIPOS -->
+      <div class="section-panel" id="panel-equipos">
+        <div class="page-header">
+          <div><h1>Equipos</h1><p>Todos los equipos registrados</p></div>
+        </div>
+        <div class="card">
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr><th>Nombre</th><th>Deporte</th><th>Capitán</th><th>Jugadores</th><th>Torneos</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Atlético Norte</td><td>Fútbol</td><td>Carlos García</td><td>15</td><td>2</td></tr>
+                <tr><td>Deportivo Sur</td><td>Fútbol</td><td>Juan Méndez</td><td>14</td><td>1</td></tr>
+                <tr><td>Club Basket CE</td><td>Básquetbol</td><td>Laura Sosa</td><td>10</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div class="section-panel" id="panel-resultados">
+        <div class="page-header">
+          <div><h1>Resultados</h1><p>Gestión de resultados de partidos</p></div>
+          <button class="btn btn-primary btn-sm">+ Cargar resultado</button>
+        </div>
+        <div class="card">
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr><th>Torneo</th><th>Local</th><th>Marcador</th><th>Visitante</th><th>Fecha</th><th>Estado</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Copa Regional</td><td>Atlético Norte</td>
+                  <td style="text-align:center;font-family:var(--head);font-weight:700;color:var(--ink)">3 · 1</td>
+                  <td>Los Guerreros</td>
+                  <td style="font-family:var(--mono);font-size:12px">14/06/2026</td>
+                  <td><span class="badge badge-green">Confirmado</span></td>
+                </tr>
+                <tr>
+                  <td>Copa Regional</td><td>Deportivo Sur</td>
+                  <td style="text-align:center;font-family:var(--head);font-weight:700;color:var(--ink)">2 · 2</td>
+                  <td>Club Rivera FC</td>
+                  <td style="font-family:var(--mono);font-size:12px">14/06/2026</td>
+                  <td><span class="badge badge-green">Confirmado</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTES -->
+      <div class="section-panel" id="panel-reportes">
+        <div class="page-header">
+          <div><h1>Reportes</h1><p>Métricas y estadísticas del sistema</p></div>
+          <button class="btn btn-ghost btn-sm">Exportar CSV</button>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-card__label">Torneos este mes</div>
+            <div class="kpi-card__value">8</div>
+            <div class="kpi-card__delta">? +2 vs mes anterior</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__label">Partidos este mes</div>
+            <div class="kpi-card__value">96</div>
+            <div class="kpi-card__delta">? +14 vs mes anterior</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-card__label">Nuevos usuarios</div>
+            <div class="kpi-card__value">42</div>
+            <div class="kpi-card__delta">? -3 vs mes anterior</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="section-panel" id="panel-config">
+        <div class="page-header">
+          <div><h1>Configuración</h1><p>Ajustes generales del sistema</p></div>
+        </div>
+        <div class="card" style="max-width:560px">
+          <div class="card__body">
+            <div class="form-group">
+              <label class="form-label">Nombre de la plataforma</label>
+              <input class="form-control" type="text" value="Tornalyx" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Correo de contacto</label>
+              <input class="form-control" type="email" value="admin@tornalyx.uy" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Zona horaria</label>
+              <select class="form-control">
+                <option selected>America/Montevideo (UTC-3)</option>
+                <option>America/Buenos_Aires (UTC-3)</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../../js/main.js"></script>
+  <script src="../../js/dashboard.js"></script>
+</body>
+</html>
+
+
