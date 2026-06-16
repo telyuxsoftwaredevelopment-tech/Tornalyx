@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../models/Usuario.php';
-require_once __DIR__ . '/../helpers/Session.php';
+require_once __DIR__ . '/../shared/Session.php';
 
 /**
  * Controlador de autenticación.
@@ -21,7 +21,7 @@ class AuthController {
         if (Session::isLoggedIn()) {
             $this->redirectByRole();
         }
-        include __DIR__ . '/../../frontend/pages/login.html';
+        include __DIR__ . '/../views/publico/login.html';
     }
 
     /**

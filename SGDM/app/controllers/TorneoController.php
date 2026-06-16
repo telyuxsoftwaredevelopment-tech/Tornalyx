@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/Torneo.php';
 require_once __DIR__ . '/../models/Resultado.php';
-require_once __DIR__ . '/../helpers/Session.php';
+require_once __DIR__ . '/../shared/Session.php';
 
 /**
  * Controlador de torneos.
@@ -18,7 +18,7 @@ class TorneoController {
     }
 
     /**
-     * Lista torneos públicos con filtros (GET /torneos).
+     * Lista torneos públicos con filtros (GET /api/torneos).
      */
     public function index(): void {
         $filtros = [
@@ -31,7 +31,7 @@ class TorneoController {
     }
 
     /**
-     * Detalle de un torneo (GET /torneo/{id}).
+     * Detalle de un torneo (GET /api/torneo/{id}).
      *
      * @param int $id
      */
@@ -52,7 +52,7 @@ class TorneoController {
     }
 
     /**
-     * Crea un nuevo torneo (POST /torneo/crear).
+     * Crea un nuevo torneo (POST /api/torneo/crear).
      * Requiere rol organizador o administrador.
      */
     public function store(): void {
@@ -94,7 +94,7 @@ class TorneoController {
     }
 
     /**
-     * Carga el resultado de un partido (POST /torneo/resultado).
+     * Carga el resultado de un partido (POST /api/torneo/resultado).
      * Requiere rol organizador o administrador.
      */
     public function cargarResultado(): void {

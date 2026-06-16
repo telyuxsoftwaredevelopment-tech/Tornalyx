@@ -6,9 +6,9 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/helpers/Session.php';
-require_once __DIR__ . '/controllers/AuthController.php';
-require_once __DIR__ . '/controllers/TorneoController.php';
+require_once __DIR__ . '/../app/shared/Session.php';
+require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/controllers/TorneoController.php';
 
 Session::start();
 
