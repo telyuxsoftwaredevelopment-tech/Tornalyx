@@ -10,6 +10,43 @@
  */
 
 /**
+ * Carga variables desde un archivo .env (si existe) en la raíz del proyecto.
+ * No sobreescribe variables ya definidas en el entorno real del servidor,
+ * de modo que en producción el entorno tiene prioridad sobre el archivo.
+ *
+ * PHP plano no lee .env automáticamente; este cargador minimalista lo suple
+ * sin dependencias externas. El archivo .env está en .gitignore (no se versiona).
+ */
+function loadDotEnv(string $path): void {
+    if (!is_file($path) || !is_readable($path)) {
+        return;
+    }
+    foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') {
+            continue;
+        }
+        $pos = strpos($line, '=');
+        if ($pos === false) {
+            continue;
+        }
+        $key = trim(substr($line, 0, $pos));
+        $val = trim(substr($line, $pos + 1));
+        // Quitar comillas envolventes si las hubiera (el valor se toma literal).
+        if (strlen($val) >= 2
+            && (($val[0] === '"' && $val[-1] === '"') || ($val[0] === "'" && $val[-1] === "'"))) {
+            $val = substr($val, 1, -1);
+        }
+        if ($key !== '' && getenv($key) === false) {
+            putenv($key . '=' . $val);
+            $_ENV[$key] = $val;
+        }
+    }
+}
+
+loadDotEnv(__DIR__ . '/../../.env');
+
+/**
  * Lee una variable de entorno con valor por defecto para desarrollo local.
  */
 function envOrDefault(string $key, string $default): string {
