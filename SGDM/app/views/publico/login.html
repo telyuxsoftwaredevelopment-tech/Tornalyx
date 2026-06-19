@@ -73,13 +73,13 @@
 
   <header class="nav">
     <div class="wrap nav-in">
-      <a class="brand" href="index.html">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" onerror="this.style.display='none'">
+      <a class="brand" href="/">
+        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
         Tornalyx
       </a>
       <div class="nav-right">
-        <a class="ghost-link" href="registro.html">Crear cuenta</a>
-        <a class="btn btn-primary btn-sm" href="registro.html">Registrarse</a>
+        <a class="ghost-link" href="/registro">Crear cuenta</a>
+        <a class="btn btn-primary btn-sm" href="/registro">Registrarse</a>
       </div>
     </div>
   </header>
@@ -87,7 +87,7 @@
   <main class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">
-        <img class="logo-mark" src="../assets/ICONO.png" alt="Tornalyx" width="80" height="80" onerror="this.outerHTML='<div class=\'logo-mark-fallback\'>TX</div>'">
+        <img class="logo-mark" src="../assets/ICONO.png" alt="Tornalyx" width="80" height="80" data-fallback="logo">
         <h1>Iniciar sesión</h1>
         <p>Ingresa tus credenciales para acceder al sistema</p>
       </div>
@@ -99,9 +99,9 @@
             Correo electrónico o contraseña incorrectos. Intentos restantes: <strong id="attemptsLeft">3</strong>.
           </div>
 
+          <!-- El token CSRF se envía automáticamente como header X-CSRF-Token
+               (cookie XSRF-TOKEN) desde validations.js → postForm(). -->
           <form id="loginForm" action="/login" method="POST" novalidate>
-            <input type="hidden" name="csrf_token" value="[PHP_CSRF_TOKEN]" />
-
             <div class="form-group">
               <label class="form-label" for="email">Correo electrónico</label>
               <input class="form-control" type="email" id="email" name="email"
@@ -139,13 +139,13 @@
 
           <p class="text-center" style="font-size:var(--font-size-sm);color:var(--muted)">
             ¿No tienes cuenta?
-            <a href="registro.html" class="link-red" style="font-weight:600">Regístrate gratis</a>
+            <a href="/registro" class="link-red" style="font-weight:600">Regístrate gratis</a>
           </p>
         </div>
       </div>
 
       <p class="text-center" style="font-size:12px;color:var(--muted-2);margin-top:var(--space-4)">
-        Al iniciar sesión aceptás nuestros <a href="#" class="link-red">Términos de uso</a> y <a href="#" class="link-red">Política de privacidad</a>.
+        Al iniciar sesión aceptás nuestros <a href="/terminos" class="link-red">Términos de uso</a> y <a href="/terminos" class="link-red">Política de privacidad</a>.
       </p>
     </div>
   </main>

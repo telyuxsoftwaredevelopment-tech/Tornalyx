@@ -5,13 +5,33 @@
  */
 abstract class Model {
 
-    protected PDO $db;
     protected string $table;
     protected string $primaryKey = 'id';
 
-    public function __construct() {
-        require_once __DIR__ . '/../../config/database.php';
-        $this->db = getDB();
+    /** Conexión PDO; se crea de forma perezosa en el primer acceso a $this->db. */
+    private ?PDO $pdo = null;
+
+    /**
+     * Acceso perezoso a la conexión de base de datos.
+     *
+     * Como $db no es una propiedad real, leer $this->db dispara este getter,
+     * que abre la conexión solo la primera vez que realmente se necesita. Así,
+     * instanciar un modelo (p. ej. desde un controlador) no abre conexión: las
+     * rutas que no ejecutan consultas —como mostrar el formulario de login—
+     * funcionan aunque la base de datos esté caída.
+     *
+     * @param string $name
+     * @return PDO
+     */
+    public function __get(string $name): PDO {
+        if ($name === 'db') {
+            if ($this->pdo === null) {
+                require_once __DIR__ . '/../../config/database.php';
+                $this->pdo = getDB();
+            }
+            return $this->pdo;
+        }
+        throw new Error(sprintf('Propiedad indefinida: %s::$%s', static::class, $name));
     }
 
     /**

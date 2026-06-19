@@ -165,6 +165,29 @@ const Utils = {
   },
 
   /**
+   * Lee una cookie por nombre.
+   * @param {string} name
+   * @returns {string}
+   */
+  getCookie(name) {
+    const match = document.cookie.match(
+      new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
+    );
+    return match ? decodeURIComponent(match[1]) : '';
+  },
+
+  /**
+   * Headers con el token CSRF para peticiones que cambian estado.
+   * @returns {Object}
+   */
+  csrfHeaders() {
+    return {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-Token': this.getCookie('XSRF-TOKEN'),
+    };
+  },
+
+  /**
    * Debounce: retrasa ejecución hasta que pase wait ms.
    * @param {Function} fn
    * @param {number} wait
@@ -215,12 +238,47 @@ const Modal = {
   }
 };
 
+/* ─── Fallback de imágenes (reemplaza onerror inline) ──── */
+/* Se hace por JS externo para cumplir la CSP (script-src 'self'). */
+function initImageFallbacks() {
+  document.querySelectorAll('img[data-fallback]').forEach(img => {
+    const applyFallback = () => {
+      switch (img.dataset.fallback) {
+        case 'hide':
+          img.style.display = 'none';
+          break;
+        case 'mark':
+          img.outerHTML = '<div class="mark-fallback">TX</div>';
+          break;
+        case 'logo':
+          img.outerHTML = '<div class="logo-mark-fallback">TX</div>';
+          break;
+      }
+    };
+    img.addEventListener('error', applyFallback);
+    /* La imagen pudo fallar antes de registrar el listener. */
+    if (img.complete && img.naturalWidth === 0) applyFallback();
+  });
+}
+
+/* ─── Botones que activan un tab (reemplaza onclick inline) ─ */
+function initTabShortcuts() {
+  document.querySelectorAll('[data-goto-tab]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.querySelector(`[data-tab="${btn.dataset.gotoTab}"]`);
+      if (target) target.click();
+    });
+  });
+}
+
 /* ─── Init global ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initScrollReveal();
   initTabs();
   initAudTabs();
+  initImageFallbacks();
+  initTabShortcuts();
   Toast.init();
   Modal.init();
 });

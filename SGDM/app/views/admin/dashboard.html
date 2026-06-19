@@ -9,7 +9,7 @@
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../../css/main.css" />
   <link rel="stylesheet" href="../../css/components.css" />
-  <link rel="stylesheet" href="../../css/pages/dashboard.css" />
+  <link rel="stylesheet" href="../../css/dashboard.css" />
   <style>
     body { display:flex; min-height:100vh; overflow-x:hidden; }
     .sidebar {
@@ -143,8 +143,8 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <aside class="sidebar" id="sidebar">
-    <a class="sidebar-brand" href="../index.html">
-      <img class="mark" src="../../assets/ICONO.png" alt="Tornalyx" onerror="this.outerHTML='<div class=\'mark-fallback\'>TX</div>'">
+    <a class="sidebar-brand" href="/">
+      <img class="mark" src="../../assets/ICONO.png" alt="Tornalyx" data-fallback="mark">
       Tornalyx
     </a>
     <nav class="sidebar__nav">
@@ -180,7 +180,7 @@
           <div class="user-name">Administrador</div>
           <div class="user-role">admin</div>
         </div>
-        <a href="../login.html" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">?</a>
+        <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">?</a>
       </div>
     </div>
   </aside>
@@ -195,7 +195,7 @@
         <span style="font-size:12px;font-family:var(--mono);color:var(--muted-2)">
           <span class="dot dot-green"></span>Sistema activo
         </span>
-        <a href="../torneos.html" class="btn btn-ghost btn-sm">Ver sitio ?</a>
+        <a href="/torneos" class="btn btn-ghost btn-sm">Ver sitio</a>
       </div>
     </header>
 

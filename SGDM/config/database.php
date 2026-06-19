@@ -2,12 +2,25 @@
 /**
  * Configuración y conexión a la base de datos.
  * Usa PDO con prepared statements para prevenir inyección SQL.
+ *
+ * Las credenciales se leen de variables de entorno para no exponerlas
+ * en el código fuente ni en el control de versiones. Definí estas
+ * variables en el entorno del servidor (o en un archivo .env cargado
+ * por el SAPI). Los valores por defecto solo sirven para desarrollo local.
  */
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'tornalyx_db');
-define('DB_USER', 'root');        // Cambiar en producción
-define('DB_PASS', '');            // Cambiar en producción
+/**
+ * Lee una variable de entorno con valor por defecto para desarrollo local.
+ */
+function envOrDefault(string $key, string $default): string {
+    $value = getenv($key);
+    return ($value !== false && $value !== '') ? $value : $default;
+}
+
+define('DB_HOST',    envOrDefault('DB_HOST', 'localhost'));
+define('DB_NAME',    envOrDefault('DB_NAME', 'tornalyx_db'));
+define('DB_USER',    envOrDefault('DB_USER', 'root'));
+define('DB_PASS',    envOrDefault('DB_PASS', ''));
 define('DB_CHARSET', 'utf8mb4');
 
 /**

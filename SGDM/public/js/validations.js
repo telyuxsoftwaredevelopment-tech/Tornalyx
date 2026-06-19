@@ -6,6 +6,46 @@
 
 'use strict';
 
+/* ─── Helpers de autenticación (AJAX) ────────────────── */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/* Redirige al panel según el rol devuelto por el backend. */
+function redirectByRole(rol) {
+  const map = {
+    administrador: '/admin/dashboard',
+    organizador:   '/organizador/dashboard',
+    participante:  '/perfil',
+  };
+  window.location.href = map[rol] || '/';
+}
+
+/* Muestra un mensaje de error (toast si existe, alert como fallback). */
+function authError(msg) {
+  if (window.Tornalyx?.Toast) window.Tornalyx.Toast.error(msg);
+  else alert(msg);
+}
+
+/* Lee el valor de una cookie por nombre (devuelve '' si no existe). */
+function getCookie(name) {
+  const match = document.cookie.match(
+    new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)')
+  );
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+/* POST de un FormData con token CSRF y parseo de la respuesta JSON. */
+async function postForm(url, data) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-Token': getCookie('XSRF-TOKEN'),
+    },
+    body: data,
+  });
+  return res.json();
+}
+
 /* ─── Toggle visibilidad de contraseña ──────────────── */
 function initPasswordToggle() {
   document.querySelectorAll('[data-toggle-pass]').forEach(btn => {
@@ -49,7 +89,8 @@ function initLoginValidation() {
     });
   });
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
     let valid = true;
 
     const email    = document.getElementById('email');
@@ -72,7 +113,22 @@ function initLoginValidation() {
       if (valid) password?.focus();
       valid = false;
     }
-    if (!valid) e.preventDefault();
+    if (!valid) return;
+
+    try {
+      const json = await postForm('/login', new FormData(form));
+      if (json.success) {
+        redirectByRole(json.rol);
+      } else {
+        let msg = json.error || 'No se pudo iniciar sesión.';
+        if (typeof json.intentos_restantes === 'number') {
+          msg += ` Intentos restantes: ${json.intentos_restantes}.`;
+        }
+        authError(msg);
+      }
+    } catch {
+      authError('Error de conexión. Intentá de nuevo.');
+    }
   });
 
   function validateField(input) {
@@ -163,6 +219,55 @@ function initRegistroStepper() {
   }
 }
 
+/* ─── Envío del formulario de Registro (AJAX) ────────── */
+function initRegistroSubmit() {
+  const form = document.getElementById('registroForm');
+  if (!form) return;
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const pass        = document.getElementById('passReg');
+    const passConfirm = document.getElementById('passConfirm');
+    const rol         = document.getElementById('rolSelected');
+    const terminos    = document.getElementById('terminos');
+
+    /* Validaciones de cliente que el backend no puede inferir */
+    if ((pass?.value || '') !== (passConfirm?.value || '')) {
+      authError('Las contraseñas no coinciden.');
+      return;
+    }
+    if (!rol?.value) {
+      authError('Seleccioná un rol para continuar.');
+      return;
+    }
+    if (terminos && !terminos.checked) {
+      authError('Debés aceptar los términos de uso.');
+      return;
+    }
+
+    /* Los campos viven fuera del <form>; se recogen por name. */
+    const data = new FormData();
+    ['nombre', 'apellido', 'email', 'password', 'fecha_nacimiento', 'rol']
+      .forEach(name => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (el) data.append(name, el.value);
+      });
+
+    try {
+      const json = await postForm('/registro', data);
+      if (json.success) {
+        if (window.Tornalyx?.Toast) window.Tornalyx.Toast.success('¡Cuenta creada!');
+        redirectByRole(json.rol);
+      } else {
+        authError(json.error || 'No se pudo crear la cuenta.');
+      }
+    } catch {
+      authError('Error de conexión. Intentá de nuevo.');
+    }
+  });
+}
+
 /* ─── Selección de rol en registro ──────────────────── */
 function initRoleSelection() {
   const roleCards = document.querySelectorAll('.role-card');
@@ -210,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLoginValidation();
   initPasswordStrength();
   initRegistroStepper();
+  initRegistroSubmit();
   initRoleSelection();
   initRealtimeValidation();
 });

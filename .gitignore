@@ -1,0 +1,21 @@
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+*.local.php
+
+# Throttle / archivos temporales de la app
+SGDM/storage/
+
+# Dependencias
+/vendor/
+node_modules/
+
+# Logs
+*.log
+
+# SO / editor
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/

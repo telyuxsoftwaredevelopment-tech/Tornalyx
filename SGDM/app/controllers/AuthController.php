@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../shared/Session.php';
+require_once __DIR__ . '/../shared/LoginThrottle.php';
 
 /**
  * Controlador de autenticación.
@@ -38,14 +39,25 @@ class AuthController {
             return;
         }
 
-        $usuario = $this->usuarioModel->verificarCredenciales($email, $password);
-
-        if (!$usuario) {
-            http_response_code(401);
-            $this->jsonError('Correo o contraseña incorrectos.');
+        // Protección contra fuerza bruta: bloquear tras varios fallos.
+        if (LoginThrottle::isBlocked($email)) {
+            http_response_code(429);
+            $this->jsonError('Demasiados intentos fallidos. Esperá unos minutos e intentá de nuevo.');
             return;
         }
 
+        $usuario = $this->usuarioModel->verificarCredenciales($email, $password);
+
+        if (!$usuario) {
+            LoginThrottle::registerFailure($email);
+            http_response_code(401);
+            $this->jsonError('Correo o contraseña incorrectos.', [
+                'intentos_restantes' => LoginThrottle::remaining($email),
+            ]);
+            return;
+        }
+
+        LoginThrottle::clear($email);
         Session::login($usuario);
         $this->jsonSuccess(['rol' => $usuario['rol']]);
     }
@@ -55,6 +67,16 @@ class AuthController {
      */
     public function processRegistro(): void {
         Session::start();
+
+        // Anti-enumeración: limitar la cantidad de altas por IP. No cambia el
+        // mensaje informativo de "correo ya registrado" (buena UX), pero frena
+        // los barridos automatizados que prueban muchos correos.
+        if (LoginThrottle::isRegistrationBlocked()) {
+            http_response_code(429);
+            $this->jsonError('Demasiados intentos de registro. Esperá unos minutos e intentá de nuevo.');
+            return;
+        }
+        LoginThrottle::registerSignupAttempt();
 
         $nombre    = trim(filter_input(INPUT_POST, 'nombre',   FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
         $apellido  = trim(filter_input(INPUT_POST, 'apellido', FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
@@ -72,8 +94,8 @@ class AuthController {
             $this->jsonError('Correo electrónico inválido.');
             return;
         }
-        if (strlen($password) < 8) {
-            $this->jsonError('La contraseña debe tener al menos 8 caracteres.');
+        if (!$this->passwordEsFuerte($password)) {
+            $this->jsonError('La contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas y números.');
             return;
         }
         if (!in_array($rol, ['participante', 'organizador'], true)) {
@@ -107,6 +129,17 @@ class AuthController {
     // Helpers privados
     // ──────────────────────────────────────────────────────
 
+    /**
+     * Valida la robustez de la contraseña en el servidor (no confiar en el
+     * medidor del cliente, que es solo visual y se puede evadir).
+     */
+    private function passwordEsFuerte(string $password): bool {
+        return strlen($password) >= 8
+            && preg_match('/[A-Z]/', $password)
+            && preg_match('/[a-z]/', $password)
+            && preg_match('/[0-9]/', $password);
+    }
+
     private function redirectByRole(): void {
         $rol = Session::getUserRole();
         match($rol) {
@@ -119,11 +152,11 @@ class AuthController {
 
     private function jsonSuccess(array $data = []): void {
         header('Content-Type: application/json');
-        echo json_encode(['success' => true, ...$data]);
+        echo json_encode(array_merge(['success' => true], $data));
     }
 
-    private function jsonError(string $mensaje): void {
+    private function jsonError(string $mensaje, array $extra = []): void {
         header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => $mensaje]);
+        echo json_encode(array_merge(['success' => false, 'error' => $mensaje], $extra));
     }
 }

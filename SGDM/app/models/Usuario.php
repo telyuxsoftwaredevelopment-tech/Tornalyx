@@ -62,8 +62,20 @@ class Usuario extends Model {
      */
     public function verificarCredenciales(string $email, string $password): ?array {
         $usuario = $this->findByEmail($email);
-        if (!$usuario) return null;
-        if (!password_verify($password, $usuario['password'])) return null;
+
+        // Tiempo constante: si el usuario no existe, igual ejecutamos un
+        // password_verify contra un hash dummy para no revelar (por diferencia
+        // de tiempo de respuesta) qué correos están registrados.
+        // Hash con formato bcrypt válido (60 chars) para que password_verify
+        // realice el trabajo completo aun cuando el usuario no exista.
+        $hash = $usuario['password']
+            ?? '$2y$12$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQ';
+
+        $passwordOk = password_verify($password, $hash);
+
+        if (!$usuario || !$passwordOk) {
+            return null;
+        }
         return $usuario;
     }
 

@@ -37,10 +37,23 @@ class TorneoController {
      */
     public function show(int $id): void {
         $torneo = $this->torneoModel->findById($id);
-        if (!$torneo || (!$torneo['publico'] && !Session::isLoggedIn())) {
+        if (!$torneo) {
             http_response_code(404);
             $this->jsonError('Torneo no encontrado.');
             return;
+        }
+
+        // Los torneos no públicos (borradores) solo son visibles para su
+        // organizador dueño y para administradores. Para cualquier otro se
+        // responde 404 (no 403) para no revelar siquiera su existencia.
+        if (!$torneo['publico']) {
+            $esDueno = Session::getUserId() === (int) $torneo['organizador_id'];
+            $esAdmin = Session::getUserRole() === 'administrador';
+            if (!$esDueno && !$esAdmin) {
+                http_response_code(404);
+                $this->jsonError('Torneo no encontrado.');
+                return;
+            }
         }
         $posiciones = $this->torneoModel->getPosiciones($id);
         $resultados = $this->resultadoModel->listarPorTorneo($id);
@@ -109,6 +122,21 @@ class TorneoController {
             return;
         }
 
+        // Control de propiedad: un organizador solo puede cargar resultados de
+        // partidos de SUS torneos. El administrador puede cargar cualquiera.
+        $organizadorDelPartido = $this->torneoModel->getOrganizadorDePartido($partidoId);
+        if ($organizadorDelPartido === null) {
+            http_response_code(404);
+            $this->jsonError('Partido no encontrado.');
+            return;
+        }
+        if (Session::getUserRole() !== 'administrador'
+            && $organizadorDelPartido !== Session::getUserId()) {
+            http_response_code(403);
+            $this->jsonError('No tenés permiso para cargar resultados de este torneo.');
+            return;
+        }
+
         $ganadorId = null;
         if ($golesLocal > $golesVisitante) {
             $ganadorId = filter_input(INPUT_POST, 'local_id', FILTER_VALIDATE_INT);
@@ -128,7 +156,7 @@ class TorneoController {
 
     private function jsonSuccess(array $data = []): void {
         header('Content-Type: application/json');
-        echo json_encode(['success' => true, ...$data]);
+        echo json_encode(array_merge(['success' => true], $data));
     }
 
     private function jsonError(string $mensaje): void {

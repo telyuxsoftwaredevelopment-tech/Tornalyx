@@ -9,7 +9,7 @@
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../../css/main.css" />
   <link rel="stylesheet" href="../../css/components.css" />
-  <link rel="stylesheet" href="../../css/pages/dashboard.css" />
+  <link rel="stylesheet" href="../../css/dashboard.css" />
   <style>
     body { display:flex; min-height:100vh; overflow-x:hidden; }
     .sidebar {
@@ -171,27 +171,27 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <aside class="sidebar" id="sidebar">
-    <a class="sidebar-brand" href="../index.html">
-      <img class="mark" src="../../assets/ICONO.png" alt="Tornalyx" onerror="this.outerHTML='<div class=\'mark-fallback\'>TX</div>'">
+    <a class="sidebar-brand" href="/">
+      <img class="mark" src="../../assets/ICONO.png" alt="Tornalyx" data-fallback="mark">
       Tornalyx
     </a>
     <nav class="sidebar__nav">
       <div class="sidebar__section">Panel</div>
       <a class="sidebar__item active" data-section="inicio" data-title="Mis torneos">
-        <span class="icon">???</span> Inicio
+        <span class="icon"><img src="../../assets/icon-inicio.svg" width="22" height="22" alt=""></span> Inicio
       </a>
       <a class="sidebar__item" data-section="crear" data-title="Crear torneo">
-        <span class="icon">?</span> Crear torneo
+        <span class="icon"><img src="../../assets/icon-crear-torneo.svg" width="22" height="22" alt=""></span> Crear torneo
       </a>
       <div class="sidebar__section">Gestión</div>
       <a class="sidebar__item" data-section="participantes" data-title="Participantes">
-        <span class="icon">?</span> Participantes
+        <span class="icon"><img src="../../assets/icon-participantes.svg" width="22" height="22" alt=""></span> Participantes
       </a>
       <a class="sidebar__item" data-section="resultados" data-title="Resultados">
-        <span class="icon">?</span> Resultados
+        <span class="icon"><img src="../../assets/icon-resultados.svg" width="22" height="22" alt=""></span> Resultados
       </a>
       <a class="sidebar__item" data-section="posiciones" data-title="Posiciones">
-        <span class="icon">?</span> Posiciones
+        <span class="icon"><img src="../../assets/icon-posiciones.svg" width="22" height="22" alt=""></span> Posiciones
       </a>
     </nav>
     <div class="sidebar__footer">
@@ -201,7 +201,7 @@
           <div class="user-name">María López</div>
           <div class="user-role">organizador</div>
         </div>
-        <a href="../login.html" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">?</a>
+        <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">?</a>
       </div>
     </div>
   </aside>
@@ -213,7 +213,7 @@
         <span id="topbarTitle" style="font-family:var(--head);font-weight:700;color:var(--ink)">Mis torneos</span>
       </div>
       <div style="display:flex;align-items:center;gap:var(--space-3)">
-        <a href="../torneos.html" class="btn btn-ghost btn-sm">Ver sitio ?</a>
+        <a href="/torneos" class="btn btn-ghost btn-sm">Ver sitio</a>
         <a class="btn btn-primary btn-sm" data-goto="crear" id="createBtn">+ Crear torneo</a>
       </div>
     </header>
