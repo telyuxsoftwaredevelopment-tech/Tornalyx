@@ -63,9 +63,11 @@ match(true) {
     $uri === '/terminos'       && $method === 'GET' => $view('publico/terminos.html'),
 
     // ─── AUTH ──────────────────────────────────────────────────
-    $uri === '/login'    && $method === 'GET'  => (new AuthController())->showLogin(),
-    $uri === '/login'    && $method === 'POST' => (new AuthController())->processLogin(),
-    $uri === '/registro' && $method === 'POST' => (new AuthController())->processRegistro(),
+    $uri === '/login'           && $method === 'GET'  => (new AuthController())->showLogin(),
+    $uri === '/login'           && $method === 'POST' => (new AuthController())->processLogin(),
+    $uri === '/login/verificar' && $method === 'POST' => (new AuthController())->verify2fa(),
+    $uri === '/login/reenviar'  && $method === 'POST' => (new AuthController())->resend2fa(),
+    $uri === '/registro'        && $method === 'POST' => (new AuthController())->processRegistro(),
     $uri === '/logout'   && in_array($method, ['GET', 'POST'], true) => (new AuthController())->logout(),
 
     // ─── Paneles privados (HTML, requieren sesión) ─────────────

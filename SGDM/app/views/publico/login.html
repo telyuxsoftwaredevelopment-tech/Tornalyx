@@ -92,7 +92,7 @@
         <p>Ingresa tus credenciales para acceder al sistema</p>
       </div>
 
-      <div class="card">
+      <div class="card" id="credCard">
         <div class="card__body" style="padding:28px">
 
           <div class="alert alert-error hidden" id="loginError" role="alert">
@@ -140,6 +140,46 @@
           <p class="text-center" style="font-size:var(--font-size-sm);color:var(--muted)">
             ¿No tienes cuenta?
             <a href="/registro" class="link-red" style="font-weight:600">Regístrate gratis</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Paso 2: verificación en dos pasos (código por email). Oculto hasta
+           que el backend confirme las credenciales y envíe el código. -->
+      <div class="card hidden" id="otpCard">
+        <div class="card__body" style="padding:28px">
+
+          <div class="alert alert-error hidden" id="otpError" role="alert"></div>
+
+          <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-4)">
+            Te enviamos un código de verificación de 6 dígitos a
+            <strong id="otpEmail" style="color:var(--ink)">tu correo</strong>.
+            Ingrésalo para continuar.
+          </p>
+
+          <form id="otpForm" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="codigo">Código de verificación</label>
+              <input class="form-control" type="text" id="codigo" name="codigo"
+                     inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+                     pattern="[0-9]{6}" placeholder="000000" required aria-required="true"
+                     style="letter-spacing:.4em;text-align:center;font-size:1.25rem" />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="otpBtn">
+              Verificar
+            </button>
+          </form>
+
+          <div class="divider">o</div>
+
+          <p class="text-center" style="font-size:var(--font-size-sm);color:var(--muted)">
+            ¿No recibiste el código?
+            <a href="#" class="link-red" id="resendBtn" style="font-weight:600">Reenviar</a>
+            <span id="resendCooldown" style="color:var(--muted-2)"></span>
+          </p>
+          <p class="text-center" style="margin-top:var(--space-3)">
+            <a href="#" class="link-red" id="backToLogin" style="font-size:12px">Volver al inicio de sesión</a>
           </p>
         </div>
       </div>

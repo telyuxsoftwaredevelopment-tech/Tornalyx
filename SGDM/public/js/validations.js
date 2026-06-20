@@ -117,7 +117,9 @@ function initLoginValidation() {
 
     try {
       const json = await postForm('/login', new FormData(form));
-      if (json.success) {
+      if (json.success && json.twofa) {
+        showOtpStep(json.email_masked);
+      } else if (json.success) {
         redirectByRole(json.rol);
       } else {
         let msg = json.error || 'No se pudo iniciar sesión.';
@@ -141,6 +143,102 @@ function initLoginValidation() {
     errEl.classList.toggle('hidden', !invalid);
     input.classList.toggle('input-error', invalid);
   }
+}
+
+/* ─── Verificación en dos pasos (2FA por email) ──────── */
+
+/* Muestra el paso del código y oculta el de credenciales. */
+function showOtpStep(emailMasked) {
+  const otp = document.getElementById('otpCard');
+  if (!otp) return;
+  document.getElementById('credCard')?.classList.add('hidden');
+  otp.classList.remove('hidden');
+  const emailEl = document.getElementById('otpEmail');
+  if (emailEl && emailMasked) emailEl.textContent = emailMasked;
+  document.getElementById('codigo')?.focus();
+}
+
+function initOtpFlow() {
+  const form = document.getElementById('otpForm');
+  if (!form) return;
+
+  const errEl   = document.getElementById('otpError');
+  const showErr = (m) => {
+    if (errEl) { errEl.textContent = m; errEl.classList.remove('hidden'); }
+    else authError(m);
+  };
+  const hideErr = () => errEl?.classList.add('hidden');
+
+  /* Si el servidor dejó un desafío pendiente (p. ej. tras registrarse o
+     recargar), mostramos directamente el paso del código. */
+  if (window.__2FA_PENDING__) {
+    showOtpStep(window.__2FA_EMAIL__ || '');
+  }
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    hideErr();
+    const codigo = (document.getElementById('codigo')?.value || '').trim();
+    if (!/^[0-9]{6}$/.test(codigo)) {
+      showErr('Ingresá el código de 6 dígitos.');
+      return;
+    }
+    const data = new FormData();
+    data.append('codigo', codigo);
+    try {
+      const json = await postForm('/login/verificar', data);
+      if (json.success) redirectByRole(json.rol);
+      else showErr(json.error || 'Código incorrecto.');
+    } catch {
+      showErr('Error de conexión. Intentá de nuevo.');
+    }
+  });
+
+  document.getElementById('resendBtn')?.addEventListener('click', async function (e) {
+    e.preventDefault();
+    if (this.style.pointerEvents === 'none') return;   // en enfriamiento
+    hideErr();
+    try {
+      const json = await postForm('/login/reenviar', new FormData());
+      if (json.success) {
+        if (window.Tornalyx?.Toast) window.Tornalyx.Toast.success('Código reenviado.');
+        startResendCooldown(60);
+      } else {
+        showErr(json.error || 'No se pudo reenviar el código.');
+      }
+    } catch {
+      showErr('Error de conexión. Intentá de nuevo.');
+    }
+  });
+
+  document.getElementById('backToLogin')?.addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('otpCard')?.classList.add('hidden');
+    document.getElementById('credCard')?.classList.remove('hidden');
+    const codigo = document.getElementById('codigo');
+    if (codigo) codigo.value = '';
+    hideErr();
+  });
+}
+
+/* Deshabilita el enlace "Reenviar" durante unos segundos. */
+function startResendCooldown(seconds) {
+  const link = document.getElementById('resendBtn');
+  const span = document.getElementById('resendCooldown');
+  if (!link) return;
+  let s = seconds;
+  link.style.pointerEvents = 'none';
+  link.style.opacity = '.5';
+  (function tick() {
+    if (span) span.textContent = s > 0 ? ` (${s}s)` : '';
+    if (s <= 0) {
+      link.style.pointerEvents = '';
+      link.style.opacity = '';
+      return;
+    }
+    s--;
+    setTimeout(tick, 1000);
+  })();
 }
 
 /* ─── Medidor de fortaleza de contraseña ─────────────── */
@@ -256,7 +354,12 @@ function initRegistroSubmit() {
 
     try {
       const json = await postForm('/registro', data);
-      if (json.success) {
+      if (json.success && json.twofa) {
+        // 2FA obligatorio: la cuenta se creó pero falta verificar el código.
+        // Vamos al login, que mostrará el paso del código (desafío en sesión).
+        if (window.Tornalyx?.Toast) window.Tornalyx.Toast.success('¡Cuenta creada! Te enviamos un código.');
+        window.location.href = '/login';
+      } else if (json.success) {
         if (window.Tornalyx?.Toast) window.Tornalyx.Toast.success('¡Cuenta creada!');
         redirectByRole(json.rol);
       } else {
@@ -313,6 +416,7 @@ function initRealtimeValidation() {
 document.addEventListener('DOMContentLoaded', () => {
   initPasswordToggle();
   initLoginValidation();
+  initOtpFlow();
   initPasswordStrength();
   initRegistroStepper();
   initRegistroSubmit();
