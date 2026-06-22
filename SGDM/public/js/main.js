@@ -271,6 +271,46 @@ function initTabShortcuts() {
   });
 }
 
+/* ─── Usuario actual en paneles privados ─────────────── */
+/* Rellena los datos del usuario logueado en los elementos marcados con
+   data-user-*. Solo hace la petición si la página tiene esos hooks (así las
+   páginas públicas no llaman a /api/me). */
+async function initCurrentUser() {
+  const hooks = '[data-user-name],[data-user-role],[data-user-avatar],' +
+                '[data-user-welcome],[data-user-email],[data-user-nombre],[data-user-apellido]';
+  if (!document.querySelector(hooks)) return;
+
+  let me;
+  try {
+    const res = await fetch('/api/me', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    me = await res.json();
+  } catch {
+    return;
+  }
+  if (!me || !me.success) return;
+
+  const nombre   = me.nombre   || '';
+  const apellido = me.apellido || '';
+  const full     = (nombre + ' ' + apellido).trim();
+  const initials = ((nombre[0] || '') + (apellido[0] || '')).toUpperCase();
+
+  /* textContent / value según el tipo de elemento (evita XSS). */
+  const fill = (sel, val) => document.querySelectorAll(sel).forEach(el => {
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = val;
+    else el.textContent = val;
+  });
+
+  fill('[data-user-name]',     full || nombre);
+  fill('[data-user-nombre]',   nombre);
+  fill('[data-user-apellido]', apellido);
+  fill('[data-user-role]',     me.rol || '');
+  fill('[data-user-avatar]',   initials || (nombre[0] || '').toUpperCase());
+  fill('[data-user-email]',    me.email || '');
+  document.querySelectorAll('[data-user-welcome]').forEach(el => {
+    el.textContent = 'Bienvenido/a, ' + (nombre || full);
+  });
+}
+
 /* ─── Init global ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
@@ -281,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTabShortcuts();
   Toast.init();
   Modal.init();
+  initCurrentUser();
 });
 
 window.Tornalyx = { Toast, Utils, Modal };

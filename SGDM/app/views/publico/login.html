@@ -144,8 +144,30 @@
         </div>
       </div>
 
-      <!-- Paso 2: verificación en dos pasos (código por email). Oculto hasta
-           que el backend confirme las credenciales y envíe el código. -->
+      <!-- Paso intermedio: el usuario elige por qué canal recibir el código. -->
+      <div class="card hidden" id="mfaChooseCard">
+        <div class="card__body" style="padding:28px">
+
+          <div class="alert alert-error hidden" id="mfaChooseError" role="alert"></div>
+
+          <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-4)">
+            ¿Cómo querés recibir tu código de verificación?
+          </p>
+
+          <button type="button" class="btn btn-ghost btn-full" data-canal="email" style="margin-bottom:var(--space-3)">
+            Por email <span id="chEmail" style="color:var(--muted-2)"></span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-full hidden" data-canal="whatsapp" id="chWhatsappBtn" style="margin-bottom:var(--space-3)">
+            Por WhatsApp <span id="chWhatsapp" style="color:var(--muted-2)"></span>
+          </button>
+
+          <p class="text-center" style="margin-top:var(--space-2)">
+            <a href="#" class="link-red" id="backToLoginFromChoose" style="font-size:12px">Volver al inicio de sesión</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Paso 2: ingresar el código recibido. Oculto hasta que se envíe. -->
       <div class="card hidden" id="otpCard">
         <div class="card__body" style="padding:28px">
 
@@ -153,7 +175,7 @@
 
           <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-4)">
             Te enviamos un código de verificación de 6 dígitos a
-            <strong id="otpEmail" style="color:var(--ink)">tu correo</strong>.
+            <strong id="otpTarget" style="color:var(--ink)">tu destino</strong>.
             Ingrésalo para continuar.
           </p>
 

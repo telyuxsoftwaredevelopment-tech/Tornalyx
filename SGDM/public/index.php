@@ -65,10 +65,13 @@ match(true) {
     // ─── AUTH ──────────────────────────────────────────────────
     $uri === '/login'           && $method === 'GET'  => (new AuthController())->showLogin(),
     $uri === '/login'           && $method === 'POST' => (new AuthController())->processLogin(),
+    $uri === '/login/codigo'    && $method === 'POST' => (new AuthController())->enviarCodigo2fa(),
     $uri === '/login/verificar' && $method === 'POST' => (new AuthController())->verify2fa(),
     $uri === '/login/reenviar'  && $method === 'POST' => (new AuthController())->resend2fa(),
+    $uri === '/api/2fa/estado'  && $method === 'GET'  => (new AuthController())->estado2fa(),
     $uri === '/registro'        && $method === 'POST' => (new AuthController())->processRegistro(),
     $uri === '/logout'   && in_array($method, ['GET', 'POST'], true) => (new AuthController())->logout(),
+    $uri === '/api/me'   && $method === 'GET' => (new AuthController())->me(),
 
     // ─── Paneles privados (HTML, requieren sesión) ─────────────
     $uri === '/perfil' && $method === 'GET'

@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models/OtpCode.php';
 require_once __DIR__ . '/../shared/Session.php';
 require_once __DIR__ . '/../shared/LoginThrottle.php';
 require_once __DIR__ . '/../shared/Mailer.php';
+require_once __DIR__ . '/../shared/WhatsAppSender.php';
 
 /**
  * Controlador de autenticación.
@@ -26,13 +27,9 @@ class AuthController {
             $this->redirectByRole();
             return;
         }
-        // Si hay un desafío 2FA pendiente (p. ej. tras registrarse o recargar),
-        // avisamos al frontend para que muestre directamente el paso del código.
-        $pending = $_SESSION['pending_2fa'] ?? null;
-        if (is_array($pending) && time() <= ($pending['expires'] ?? 0)) {
-            $masked = json_encode($pending['email_masked'] ?? '', JSON_UNESCAPED_UNICODE);
-            echo "<script>window.__2FA_PENDING__=true;window.__2FA_EMAIL__={$masked};</script>\n";
-        }
+        // Si hay un desafío MFA pendiente (p. ej. tras registrarse o recargar),
+        // el frontend lo detecta consultando GET /api/2fa/estado y muestra el
+        // paso correcto. No inyectamos scripts inline (la CSP los bloquea).
         include __DIR__ . '/../views/publico/login.html';
     }
 
@@ -70,10 +67,10 @@ class AuthController {
 
         LoginThrottle::clear($email);
 
-        // Credenciales correctas: en vez de iniciar sesión, lanzamos el segundo
-        // factor (código por email). La sesión NO queda autenticada hasta que
-        // se verifique el código en verify2fa().
-        $this->iniciarDesafio2FA($usuario);
+        // Credenciales correctas: en vez de iniciar sesión, abrimos el segundo
+        // factor. La sesión NO queda autenticada hasta verificar el código.
+        // Todavía no enviamos nada: el usuario elige el canal (email/WhatsApp).
+        $this->iniciarMfa($usuario);
     }
 
     /**
@@ -153,18 +150,31 @@ class AuthController {
             return;
         }
 
+        // Reenviar por el mismo canal que se eligió al enviar el primer código.
+        $canal = $pending['canal'] ?? 'email';
+        if ($canal === 'whatsapp' && !$this->whatsappDisponible($usuario)) {
+            $canal = 'email';
+        }
+
         $codigo = $otp->generar($userId);
         try {
-            $this->enviarCodigo($usuario, $codigo);
+            if ($canal === 'whatsapp') {
+                (new WhatsAppSender())->send((string) $usuario['telefono'], $codigo);
+                $target = $this->maskPhone((string) $usuario['telefono']);
+            } else {
+                $this->enviarCodigo($usuario, $codigo);
+                $target = $this->maskEmail((string) $usuario['email']);
+            }
         } catch (Throwable $e) {
-            error_log('Fallo al reenviar OTP: ' . $e->getMessage());
+            error_log('Fallo al reenviar código MFA (' . $canal . '): ' . $e->getMessage());
             http_response_code(500);
             $this->jsonError('No pudimos reenviar el código. Intentá más tarde.');
             return;
         }
 
+        $_SESSION['pending_2fa']['canal']   = $canal;
         $_SESSION['pending_2fa']['expires'] = time() + 600;
-        $this->jsonSuccess(['email_masked' => $this->maskEmail($usuario['email'])]);
+        $this->jsonSuccess(['canal' => $canal, 'target_masked' => $target]);
     }
 
     /**
@@ -186,17 +196,24 @@ class AuthController {
         $nombre    = trim(filter_input(INPUT_POST, 'nombre',   FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
         $apellido  = trim(filter_input(INPUT_POST, 'apellido', FILTER_SANITIZE_SPECIAL_CHARS) ?? '');
         $email     = filter_input(INPUT_POST, 'email',         FILTER_SANITIZE_EMAIL)         ?? '';
+        $telefono  = trim(filter_input(INPUT_POST, 'telefono', FILTER_DEFAULT)                ?? '');
         $password  = filter_input(INPUT_POST, 'password',      FILTER_DEFAULT)                ?? '';
         $fechaNac  = filter_input(INPUT_POST, 'fecha_nacimiento', FILTER_DEFAULT)             ?? '';
         $rol       = filter_input(INPUT_POST, 'rol', FILTER_DEFAULT)                          ?? 'participante';
 
         // Validaciones básicas en backend
-        if (empty($nombre) || empty($email) || empty($password) || empty($fechaNac)) {
+        if (empty($nombre) || empty($email) || empty($password) || empty($fechaNac) || empty($telefono)) {
             $this->jsonError('Todos los campos son obligatorios.');
             return;
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->jsonError('Correo electrónico inválido.');
+            return;
+        }
+        // Teléfono en formato internacional E.164: "+" y 8 a 15 dígitos.
+        $telefono = $this->normalizarTelefono($telefono);
+        if (!$this->telefonoEsValido($telefono)) {
+            $this->jsonError('Ingresá un teléfono válido en formato internacional, p. ej. +59899123456.');
             return;
         }
         if (!$this->passwordEsFuerte($password)) {
@@ -213,12 +230,12 @@ class AuthController {
             return;
         }
 
-        $id = $this->usuarioModel->registrar($nombre, $apellido, $email, $password, $fechaNac, $rol);
+        $id = $this->usuarioModel->registrar($nombre, $apellido, $email, $password, $fechaNac, $rol, $telefono);
         $usuario = $this->usuarioModel->findById($id);
 
-        // 2FA obligatorio para todos: tras crear la cuenta también exigimos el
-        // código por email antes de dejar la sesión iniciada.
-        $this->iniciarDesafio2FA($usuario);
+        // 2FA obligatorio para todos: tras crear la cuenta también abrimos el
+        // desafío MFA (elegir canal) antes de dejar la sesión iniciada.
+        $this->iniciarMfa($usuario);
     }
 
     /**
@@ -231,45 +248,181 @@ class AuthController {
         exit;
     }
 
+    /**
+     * Devuelve los datos del usuario autenticado (GET /api/me) para que el
+     * frontend rellene nombre, rol, etc. Nunca expone la contraseña.
+     */
+    public function me(): void {
+        Session::start();
+        if (!Session::isLoggedIn()) {
+            http_response_code(401);
+            $this->jsonError('No autenticado.');
+            return;
+        }
+        $u = $this->usuarioModel->findById((int) Session::getUserId());
+        if (!$u) {
+            http_response_code(401);
+            $this->jsonError('No autenticado.');
+            return;
+        }
+        $this->jsonSuccess([
+            'id'       => (int) $u['id'],
+            'nombre'   => $u['nombre'],
+            'apellido' => $u['apellido'],
+            'email'    => $u['email'],
+            'rol'      => $u['rol'],
+        ]);
+    }
+
     // ──────────────────────────────────────────────────────
     // Helpers privados
     // ──────────────────────────────────────────────────────
 
     /**
-     * Genera y envía un código 2FA, deja el desafío "pendiente" en la sesión
-     * (que NO queda autenticada) y responde al cliente indicando que debe
-     * pedir el código. Si el envío del correo falla, aborta sin dejar estado.
+     * Abre el desafío MFA: deja un estado "pendiente" en la sesión (que NO
+     * queda autenticada) y responde con los canales disponibles para que el
+     * usuario elija. Todavía NO se genera ni envía el código.
      */
-    private function iniciarDesafio2FA(array $usuario): void {
+    private function iniciarMfa(array $usuario): void {
         $userId = (int) $usuario['id'];
-        $otp    = new OtpCode();
-        $codigo = $otp->generar($userId);
-
-        try {
-            $this->enviarCodigo($usuario, $codigo);
-        } catch (Throwable $e) {
-            error_log('Fallo al enviar OTP: ' . $e->getMessage());
-            $otp->invalidar($userId);
-            http_response_code(500);
-            $this->jsonError('No pudimos enviar el código de verificación. Intentá más tarde.');
-            return;
-        }
 
         // Renovamos el id de sesión al establecer el desafío para cerrar la
         // ventana de fijación de sesión. Los datos de $_SESSION se conservan.
         session_regenerate_id(true);
 
-        $masked = $this->maskEmail($usuario['email']);
         $_SESSION['pending_2fa'] = [
             'user_id'      => $userId,
             'expires'      => time() + 600,
-            'email_masked' => $masked,
+            'step'         => 'choose',
+            'email_masked' => $this->maskEmail($usuario['email']),
+            'phone_masked' => !empty($usuario['telefono']) ? $this->maskPhone($usuario['telefono']) : null,
         ];
 
+        $this->jsonSuccess(array_merge(
+            ['mfa_choose' => true],
+            $this->canalesDisponibles($usuario)
+        ));
+    }
+
+    /**
+     * Genera y envía el código por el canal elegido (POST /login/codigo).
+     */
+    public function enviarCodigo2fa(): void {
+        Session::start();
+
+        $pending = $_SESSION['pending_2fa'] ?? null;
+        if (!is_array($pending) || empty($pending['user_id'])) {
+            http_response_code(440);
+            $this->jsonError('Tu sesión de verificación expiró. Iniciá sesión de nuevo.');
+            return;
+        }
+        if (time() > ($pending['expires'] ?? 0)) {
+            unset($_SESSION['pending_2fa']);
+            (new OtpCode())->invalidar((int) $pending['user_id']);
+            http_response_code(440);
+            $this->jsonError('Tu sesión de verificación expiró. Iniciá sesión de nuevo.');
+            return;
+        }
+
+        $canal = (string) (filter_input(INPUT_POST, 'canal', FILTER_DEFAULT) ?? 'email');
+        if (!in_array($canal, ['email', 'whatsapp'], true)) {
+            $canal = 'email';
+        }
+
+        $usuario = $this->usuarioModel->findById((int) $pending['user_id']);
+        if (!$usuario) {
+            unset($_SESSION['pending_2fa']);
+            http_response_code(440);
+            $this->jsonError('Tu sesión de verificación expiró. Iniciá sesión de nuevo.');
+            return;
+        }
+
+        // WhatsApp solo si está configurado y el usuario tiene teléfono; si no,
+        // se rechaza el canal (no caemos silenciosamente a otro).
+        if ($canal === 'whatsapp' && !$this->whatsappDisponible($usuario)) {
+            $this->jsonError('WhatsApp no está disponible para tu cuenta. Usá el correo.');
+            return;
+        }
+
+        $otp    = new OtpCode();
+        $codigo = $otp->generar((int) $usuario['id']);
+        try {
+            if ($canal === 'whatsapp') {
+                (new WhatsAppSender())->send((string) $usuario['telefono'], $codigo);
+                $target = $this->maskPhone((string) $usuario['telefono']);
+            } else {
+                $this->enviarCodigo($usuario, $codigo);
+                $target = $this->maskEmail((string) $usuario['email']);
+            }
+        } catch (Throwable $e) {
+            error_log('Fallo al enviar código MFA (' . $canal . '): ' . $e->getMessage());
+            $otp->invalidar((int) $usuario['id']);
+            http_response_code(500);
+            $this->jsonError('No pudimos enviar el código. Probá con otro canal.');
+            return;
+        }
+
+        $_SESSION['pending_2fa']['step']    = 'sent';
+        $_SESSION['pending_2fa']['canal']   = $canal;
+        $_SESSION['pending_2fa']['expires'] = time() + 600;
+
         $this->jsonSuccess([
-            'twofa'        => true,
-            'email_masked' => $masked,
+            'twofa'         => true,
+            'canal'         => $canal,
+            'target_masked' => $target,
         ]);
+    }
+
+    /**
+     * Devuelve el estado del desafío MFA pendiente (GET /api/2fa/estado) para
+     * que el frontend muestre el paso correcto sin depender de scripts inline.
+     */
+    public function estado2fa(): void {
+        Session::start();
+
+        $pending = $_SESSION['pending_2fa'] ?? null;
+        if (!is_array($pending) || empty($pending['user_id']) || time() > ($pending['expires'] ?? 0)) {
+            $this->jsonSuccess(['pending' => false]);
+            return;
+        }
+
+        $channels = ['email' => $pending['email_masked'] ?? ''];
+        if (!empty($pending['phone_masked']) && (new WhatsAppSender())->isConfigured()) {
+            $channels['whatsapp'] = $pending['phone_masked'];
+        }
+
+        $resp = [
+            'pending'  => true,
+            'step'     => $pending['step'] ?? 'choose',
+            'channels' => $channels,
+        ];
+        if (($pending['step'] ?? '') === 'sent') {
+            $resp['canal']         = $pending['canal'] ?? 'email';
+            $resp['target_masked'] = ($pending['canal'] ?? '') === 'whatsapp'
+                ? ($pending['phone_masked'] ?? '')
+                : ($pending['email_masked'] ?? '');
+        }
+        $this->jsonSuccess($resp);
+    }
+
+    /**
+     * Indica si el canal WhatsApp está disponible para un usuario (tiene
+     * teléfono cargado y el proveedor está configurado).
+     */
+    private function whatsappDisponible(array $usuario): bool {
+        return !empty($usuario['telefono']) && (new WhatsAppSender())->isConfigured();
+    }
+
+    /**
+     * Canales por los que se puede mandar el código (email siempre; WhatsApp
+     * solo si está disponible), con el destino enmascarado.
+     */
+    private function canalesDisponibles(array $usuario): array {
+        $channels = ['email' => $this->maskEmail((string) $usuario['email'])];
+        if ($this->whatsappDisponible($usuario)) {
+            $channels['whatsapp'] = $this->maskPhone((string) $usuario['telefono']);
+        }
+        return ['channels' => $channels];
     }
 
     /**
@@ -321,6 +474,37 @@ HTML;
         return substr($name, 0, 1)
              . str_repeat('*', max(1, strlen($name) - 1))
              . '@' . $parts[1];
+    }
+
+    /**
+     * Enmascara un teléfono dejando visibles los últimos 4 dígitos.
+     * Ej.: "+59899123456" → "+598•••••3456".
+     */
+    private function maskPhone(string $telefono): string {
+        $digits = preg_replace('/\D/', '', $telefono);
+        if (strlen($digits) <= 4) {
+            return '+' . $digits;
+        }
+        $last = substr($digits, -4);
+        return '+' . str_repeat('•', strlen($digits) - 4) . $last;
+    }
+
+    /**
+     * Normaliza un teléfono a formato E.164: deja solo "+" inicial y dígitos.
+     */
+    private function normalizarTelefono(string $telefono): string {
+        $telefono = trim($telefono);
+        $tienePlus = str_starts_with($telefono, '+');
+        $digits = preg_replace('/\D/', '', $telefono);
+        return ($tienePlus ? '+' : '') . $digits;
+    }
+
+    /**
+     * Valida formato internacional E.164: "+" seguido de 8 a 15 dígitos, sin
+     * empezar en 0.
+     */
+    private function telefonoEsValido(string $telefono): bool {
+        return (bool) preg_match('/^\+[1-9]\d{7,14}$/', $telefono);
     }
 
     /**
