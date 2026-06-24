@@ -13,6 +13,10 @@ RUN docker-php-ext-install pdo_mysql
 # El .htaccess usa reescritura de URLs y cabeceras de seguridad.
 RUN a2enmod rewrite headers
 
+# Define un ServerName global para evitar el warning AH00558 al arrancar
+# (Apache no puede determinar el FQDN dentro del contenedor).
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 # php.ini de producción (oculta errores al cliente, etc.).
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
