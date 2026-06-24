@@ -55,6 +55,7 @@ function envOrDefault(string $key, string $default): string {
 }
 
 define('DB_HOST',    envOrDefault('DB_HOST', 'localhost'));
+define('DB_PORT',    envOrDefault('DB_PORT', '3306'));
 define('DB_NAME',    envOrDefault('DB_NAME', 'tornalyx_db'));
 define('DB_USER',    envOrDefault('DB_USER', 'root'));
 define('DB_PASS',    envOrDefault('DB_PASS', ''));
@@ -71,14 +72,41 @@ function getDB(): PDO {
 
     if ($pdo === null) {
         $dsn = sprintf(
-            'mysql:host=%s;dbname=%s;charset=%s',
-            DB_HOST, DB_NAME, DB_CHARSET
+            'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+            DB_HOST, DB_PORT, DB_NAME, DB_CHARSET
         );
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
+
+        // ── TLS opcional para MySQL gestionado (Aiven, TiDB, etc.) ──
+        // Los proveedores cloud suelen exigir conexión cifrada. Se activa
+        // con DB_SSL=1; en desarrollo local queda desactivado por defecto.
+        if (filter_var(getenv('DB_SSL') ?: '0', FILTER_VALIDATE_BOOLEAN)) {
+            $ca = getenv('DB_SSL_CA') ?: '';
+            // El CA puede pasarse como CONTENIDO PEM (no como ruta), práctico
+            // para configurarlo via variable de entorno sin versionar archivos.
+            if (strncmp($ca, '-----BEGIN', 10) === 0) {
+                $tmp = tempnam(sys_get_temp_dir(), 'dbca');
+                file_put_contents($tmp, $ca);
+                $ca = $tmp;
+            }
+            // Sin CA explícito, usar el bundle del sistema: sirve para
+            // proveedores con CA pública (p. ej. TiDB Serverless).
+            if ($ca === '') {
+                $ca = '/etc/ssl/certs/ca-certificates.crt';
+            }
+            $options[PDO::MYSQL_ATTR_SSL_CA] = $ca;
+            // DB_SSL_VERIFY=0 desactiva la verificación del cert del servidor
+            // (último recurso, no recomendado en producción).
+            if (defined('PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')) {
+                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] =
+                    filter_var(getenv('DB_SSL_VERIFY') ?: '1', FILTER_VALIDATE_BOOLEAN);
+            }
+        }
+
         try {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
