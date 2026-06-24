@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="../css/variables.css" />
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="../css/components.css" />
-  <link rel="stylesheet" href="../css/pages/torneos.css" />
+  <link rel="stylesheet" href="../css/torneos.css" />
   <style>
     /* Page header */
     .page-hero {
@@ -97,25 +97,25 @@
   <!-- Mobile nav -->
   <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
     <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">?</button>
-    <a href="index.html">Inicio</a>
-    <a href="torneos.html">Torneos</a>
-    <a href="login.html">Iniciar sesión</a>
-    <a class="btn btn-primary mobile-cta" href="registro.html">Crear cuenta</a>
+    <a href="/">Inicio</a>
+    <a href="/torneos">Torneos</a>
+    <a href="/login">Iniciar sesión</a>
+    <a class="btn btn-primary mobile-cta" href="/registro">Crear cuenta</a>
   </div>
 
   <header class="nav">
     <div class="wrap nav-in">
-      <a class="brand" href="index.html">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" onerror="this.style.display='none'">
+      <a class="brand" href="/">
+        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
         Tornalyx
       </a>
       <nav class="nav-links" aria-label="Navegación principal">
-        <a href="index.html">Inicio</a>
-        <a href="torneos.html" style="color:var(--ink)">Torneos</a>
+        <a href="/">Inicio</a>
+        <a href="/torneos" style="color:var(--ink)">Torneos</a>
       </nav>
       <div class="nav-right">
-        <a class="ghost-link" href="login.html">Entrar</a>
-        <a class="btn btn-primary btn-sm" href="registro.html">Crear cuenta</a>
+        <a class="ghost-link" href="/login">Entrar</a>
+        <a class="btn btn-primary btn-sm" href="/registro">Crear cuenta</a>
       </div>
       <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
         <span></span><span></span><span></span>
@@ -207,7 +207,7 @@
           </div>
           <div class="torneo-card__footer">
             <span class="status-live">?? En curso</span>
-            <a href="torneo-detalle.html" class="btn btn-primary btn-sm">Ver ?</a>
+            <a href="/torneo-detalle" class="btn btn-primary btn-sm">Ver ?</a>
           </div>
         </article>
 
@@ -227,7 +227,7 @@
           </div>
           <div class="torneo-card__footer">
             <span class="status-live">?? Ronda 3/7</span>
-            <a href="torneo-detalle.html" class="btn btn-primary btn-sm">Ver ?</a>
+            <a href="/torneo-detalle" class="btn btn-primary btn-sm">Ver ?</a>
           </div>
         </article>
 
@@ -247,7 +247,7 @@
           </div>
           <div class="torneo-card__footer">
             <span class="status-next">??? Inscripciones abiertas</span>
-            <a href="torneo-detalle.html" class="btn btn-ghost btn-sm">Inscribirse</a>
+            <a href="/torneo-detalle" class="btn btn-ghost btn-sm">Inscribirse</a>
           </div>
         </article>
 
@@ -267,7 +267,7 @@
           </div>
           <div class="torneo-card__footer">
             <span class="status-live">?? Cuartos de final</span>
-            <a href="torneo-detalle.html" class="btn btn-primary btn-sm">Ver ?</a>
+            <a href="/torneo-detalle" class="btn btn-primary btn-sm">Ver ?</a>
           </div>
         </article>
 
@@ -287,7 +287,7 @@
           </div>
           <div class="torneo-card__footer">
             <span class="status-done">? Finalizado</span>
-            <a href="torneo-detalle.html" class="btn btn-ghost btn-sm">Resultados</a>
+            <a href="/torneo-detalle" class="btn btn-ghost btn-sm">Resultados</a>
           </div>
         </article>
 
@@ -307,7 +307,7 @@
           </div>
           <div class="torneo-card__footer">
             <span class="status-next">??? Inscripciones abiertas</span>
-            <a href="torneo-detalle.html" class="btn btn-ghost btn-sm">Inscribirse</a>
+            <a href="/torneo-detalle" class="btn btn-ghost btn-sm">Inscribirse</a>
           </div>
         </article>
 

@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="../css/variables.css" />
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="../css/components.css" />
-  <link rel="stylesheet" href="../css/pages/home.css" />
+  <link rel="stylesheet" href="../css/home.css" />
 </head>
 <body>
 
@@ -23,15 +23,15 @@
   <a href="#como">Cómo funciona</a>
   <a href="#roles">Roles</a>
   <a href="#empresa">Empresa</a>
-  <a href="login.html" class="ghost-link" style="font-size:1rem">Entrar</a>
-  <a class="btn btn-primary mobile-cta" href="torneos.html">Ver torneos</a>
+  <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
+  <a class="btn btn-primary mobile-cta" href="/torneos">Ver torneos</a>
 </div>
 
 <!-- ?? NAV ??????????????????????????????????????????????? -->
 <header class="nav">
   <div class="wrap nav-in">
-    <a class="brand" href="index.html">
-      <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="36" height="36" onerror="this.style.display='none'">
+    <a class="brand" href="/">
+      <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="36" height="36" data-fallback="hide">
       Tornalyx
     </a>
     <nav class="nav-links" aria-label="Navegación principal">
@@ -42,8 +42,8 @@
       <a href="#empresa">Empresa</a>
     </nav>
     <div class="nav-right">
-      <a class="ghost-link" href="login.html">Entrar</a>
-      <a class="btn btn-primary btn-sm" href="torneos.html">Ver torneos</a>
+      <a class="ghost-link" href="/login">Entrar</a>
+      <a class="btn btn-primary btn-sm" href="/torneos">Ver torneos</a>
     </div>
     <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
       <span></span><span></span><span></span>
@@ -59,13 +59,13 @@
     <div class="grid-lines"></div>
     <div class="wrap hero-in">
       <img class="badge-xl" src="../assets/ICONO.png" alt="Tornalyx"
-           onerror="this.style.display='none'">
+           data-fallback="hide">
       <p class="eyebrow eyebrow-center">Torneos · deporte · mente · esports</p>
       <h1>Un sistema.<br><span class="accent">Cualquier competencia.</span></h1>
       <p class="lead">Liga, eliminación directa o sistema suizo. Del club de barrio a la liga online · participantes, calendarios, llaves y resultados en una sola plataforma modular.</p>
       <div class="btn-row">
-        <a class="btn btn-primary" href="torneos.html">Ver torneos</a>
-        <a class="btn btn-ghost" href="registro.html">Crear cuenta ?</a>
+        <a class="btn btn-primary" href="/torneos">Ver torneos</a>
+        <a class="btn btn-ghost" href="/registro">Crear cuenta</a>
       </div>
       <div class="chips">
         <span class="chip chip-solid"><span class="dot"></span>Liga</span>
@@ -406,7 +406,7 @@
           <h2 data-reveal>Hecho por Telyux Software Development</h2>
           <p class="lead" data-reveal>Tornalyx nace para resolver un problema concreto: organizar competencias sin perder horas en planillas y herramientas sueltas. Construimos una plataforma modular, clara y pensada para durar toda la temporada.</p>
           <div class="btn-row" data-reveal style="margin-top:24px">
-            <a class="btn btn-ghost" href="registro.html">Crear cuenta gratis ?</a>
+            <a class="btn btn-ghost" href="/registro">Crear cuenta gratis ?</a>
           </div>
         </div>
         <div class="card" data-reveal style="border-radius:20px">
@@ -443,8 +443,8 @@
         <h2>Llevá tu torneo al siguiente nivel</h2>
         <p class="lead">Creá tu primera competencia o explorá los torneos ya publicados. Sin planillas, sin complicaciones.</p>
         <div class="btn-row btn-row-center" style="margin-top:28px">
-          <a class="btn btn-primary" href="registro.html">Crear cuenta gratis</a>
-          <a class="btn btn-ghost" href="torneos.html">Explorar torneos</a>
+          <a class="btn btn-primary" href="/registro">Crear cuenta gratis</a>
+          <a class="btn btn-ghost" href="/torneos">Explorar torneos</a>
         </div>
       </div>
     </div>
@@ -457,8 +457,8 @@
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        <a class="brand" href="index.html">
-          <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" onerror="this.style.display='none'">
+        <a class="brand" href="/">
+          <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
           Tornalyx
         </a>
         <p>La plataforma que organiza todo. Torneos de deporte, mente y esports.</p>
@@ -472,15 +472,16 @@
       </div>
       <div class="foot-col">
         <h5>Formatos</h5>
-        <a href="torneos.html">Liga</a>
-        <a href="torneos.html">Eliminación directa</a>
-        <a href="torneos.html">Sistema suizo</a>
+        <a href="/torneos">Liga</a>
+        <a href="/torneos">Eliminación directa</a>
+        <a href="/torneos">Sistema suizo</a>
       </div>
       <div class="foot-col">
         <h5>Empresa</h5>
         <a href="#empresa">Sobre Telyux</a>
-        <a href="login.html">Entrar</a>
-        <a href="registro.html">Registrarse</a>
+        <a href="/login">Entrar</a>
+        <a href="/registro">Registrarse</a>
+        <a href="/terminos">Términos y condiciones</a>
       </div>
     </div>
     <div class="foot-bottom">

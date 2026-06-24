@@ -17,22 +17,6 @@
       padding:var(--space-8) var(--space-4);
     }
     .auth-card { width:100%; max-width:520px; }
-    /* Stepper */
-    .stepper { display:flex; align-items:center; margin-bottom:var(--space-6); }
-    .step-ind { display:flex; align-items:center; gap:var(--space-2); }
-    .step-circle {
-      min-width:32px; height:32px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center;
-      font-size:13px; font-weight:700; font-family:var(--head);
-      border:1.5px solid var(--line); color:var(--muted-2);
-      transition:all var(--transition-fast);
-    }
-    .step-ind.active .step-circle { background:var(--red); border-color:var(--red); color:#fff; box-shadow:0 0 14px -4px var(--red-glow); }
-    .step-ind.done  .step-circle  { background:var(--red-deep); border-color:var(--red-deep); color:#fff; }
-    .step-label { font-size:12px; color:var(--muted-2); }
-    .step-ind.active .step-label { color:var(--red-bright); font-weight:600; }
-    .step-line { flex:1; height:1.5px; background:var(--line); margin:0 var(--space-2); transition:background .3s; }
-    .step-line.done { background:var(--red-deep); }
     /* Role cards */
     .role-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); }
     .role-card {
@@ -50,6 +34,24 @@
     .strength-bar { height:4px; border-radius:2px; background:var(--line); margin-top:8px; overflow:hidden; }
     .strength-fill { height:100%; border-radius:2px; transition:all var(--transition-base); width:0; }
     .strength-label { font-size:12px; margin-top:4px; color:var(--muted-2); }
+    /* Password requirements checklist */
+    .pass-reqs { list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px; }
+    .pass-reqs li {
+      display:flex; align-items:center; gap:8px;
+      font-size:12px; color:var(--muted-2); transition:color var(--transition-fast);
+    }
+    .pass-reqs .req-ico {
+      width:18px; height:18px; border-radius:50%; flex:none;
+      border:1.5px solid var(--line); color:transparent;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:700; line-height:1;
+      transition:all var(--transition-fast);
+    }
+    /* La marca ✓ siempre está presente pero transparente; al cumplirse el
+       requisito el círculo se vuelve verde y el tick se hace visible. */
+    .pass-reqs .req-ico::after { content:'\2713'; } /* ✓ */
+    .pass-reqs li.met { color:#22c55e; }
+    .pass-reqs li.met .req-ico { background:#22c55e; border-color:#22c55e; color:#fff; }
     .link-red { color:var(--red-bright); }
     .link-red:hover { color:var(--red); }
     .check-label { display:flex; gap:var(--space-2); align-items:flex-start; cursor:pointer; font-size:var(--font-size-sm); color:var(--muted); }
@@ -60,13 +62,13 @@
 
   <header class="nav">
     <div class="wrap nav-in">
-      <a class="brand" href="index.html">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" onerror="this.style.display='none'">
+      <a class="brand" href="/">
+        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
         Tornalyx
       </a>
       <div class="nav-right">
-        <a class="ghost-link" href="login.html">Iniciar sesión</a>
-        <a class="btn btn-ghost btn-sm" href="login.html">Entrar</a>
+        <a class="ghost-link" href="/login">Iniciar sesión</a>
+        <a class="btn btn-ghost btn-sm" href="/login">Entrar</a>
       </div>
     </div>
   </header>
@@ -75,97 +77,89 @@
     <div class="auth-card">
       <div class="text-center" style="margin-bottom:var(--space-6)">
         <h1 style="font-size:var(--font-size-2xl);color:var(--ink)">Crear cuenta</h1>
-        <p style="color:var(--muted);font-size:var(--font-size-sm);margin-top:4px">Únete a Tornalyx en 2 pasos</p>
-      </div>
-
-      <!-- Stepper -->
-      <div class="stepper" role="list" aria-label="Pasos de registro">
-        <div class="step-ind active" id="step1Ind" role="listitem">
-          <div class="step-circle" id="step1Circle">1</div>
-          <div class="step-label">Datos personales</div>
-        </div>
-        <div class="step-line" id="line1"></div>
-        <div class="step-ind" id="step2Ind" role="listitem">
-          <div class="step-circle" id="step2Circle">2</div>
-          <div class="step-label">Tu rol</div>
-        </div>
+        <p style="color:var(--muted);font-size:var(--font-size-sm);margin-top:4px">Completá tus datos para unirte a Tornalyx</p>
       </div>
 
       <div class="card">
         <div class="card__body" style="padding:28px">
 
-          <!-- PASO 1 -->
-          <div id="formStep1">
-            <h2 style="font-size:var(--font-size-xl);margin-bottom:var(--space-5);color:var(--ink)">Datos personales</h2>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)">
-              <div class="form-group">
-                <label class="form-label" for="nombre">Nombre</label>
-                <input class="form-control" type="text" id="nombre" name="nombre" placeholder="Carlos" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="apellido">Apellido</label>
-                <input class="form-control" type="text" id="apellido" name="apellido" placeholder="García" required />
-              </div>
+          <!-- Datos personales -->
+          <h2 style="font-size:var(--font-size-xl);margin-bottom:var(--space-5);color:var(--ink)">Datos personales</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)">
+            <div class="form-group">
+              <label class="form-label" for="nombre">Nombre</label>
+              <input class="form-control" type="text" id="nombre" name="nombre" placeholder="Carlos" required />
             </div>
             <div class="form-group">
-              <label class="form-label" for="emailReg">Correo electrónico</label>
-              <input class="form-control" type="email" id="emailReg" name="email" placeholder="tu@correo.com" required />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="passReg">Contraseña</label>
-              <input class="form-control" type="password" id="passReg" name="password" placeholder="Mínimo 8 caracteres" required />
-              <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-              <span class="strength-label" id="strengthLabel">Ingresa una contraseña</span>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="passConfirm">Confirmar contraseña</label>
-              <input class="form-control" type="password" id="passConfirm" placeholder="Repite la contraseña" required />
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="fechaNac">Fecha de nacimiento</label>
-              <input class="form-control" type="date" id="fechaNac" name="fecha_nacimiento" required />
-            </div>
-            <button type="button" class="btn btn-primary btn-full" id="btnNext">Continuar ?</button>
-          </div>
-
-          <!-- PASO 2 -->
-          <div id="formStep2" class="hidden">
-            <h2 style="font-size:var(--font-size-xl);margin-bottom:6px;color:var(--ink)">¿Cuál es tu rol?</h2>
-            <p style="color:var(--muted);font-size:var(--font-size-sm);margin-bottom:var(--space-5)">Podrás cambiarlo más adelante desde tu perfil.</p>
-
-            <div class="role-grid" role="radiogroup" aria-label="Seleccionar rol">
-              <div class="role-card" data-role="participante" tabindex="0" role="radio" aria-checked="false">
-                <div class="role-card__icon">???</div>
-                <div class="role-card__title">Participante</div>
-                <div class="role-card__desc">Inscríbete a torneos y compite</div>
-              </div>
-              <div class="role-card" data-role="organizador" tabindex="0" role="radio" aria-checked="false">
-                <div class="role-card__icon">?</div>
-                <div class="role-card__title">Organizador</div>
-                <div class="role-card__desc">Crea y gestiona torneos</div>
-              </div>
-            </div>
-            <input type="hidden" id="rolSelected" name="rol" value="" />
-
-            <div class="form-group" style="margin-top:var(--space-5)">
-              <label class="check-label">
-                <input type="checkbox" id="terminos" name="terminos" required />
-                <span>Acepto los <a href="#" class="link-red">Términos de uso</a> y la <a href="#" class="link-red">Política de privacidad</a> de Tornalyx.</span>
-              </label>
-            </div>
-
-            <div style="display:flex;gap:var(--space-3)">
-              <button type="button" class="btn btn-ghost" id="btnBack" style="flex:0 0 auto">?? Volver</button>
-              <button type="submit" class="btn btn-primary btn-full" form="registroForm">Crear cuenta</button>
+              <label class="form-label" for="apellido">Apellido</label>
+              <input class="form-control" type="text" id="apellido" name="apellido" placeholder="García" required />
             </div>
           </div>
+          <div class="form-group">
+            <label class="form-label" for="emailReg">Correo electrónico</label>
+            <input class="form-control" type="email" id="emailReg" name="email" placeholder="tu@correo.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="telefono">Teléfono (WhatsApp)</label>
+            <input class="form-control" type="tel" id="telefono" name="telefono" placeholder="+59899123456" required />
+            <span class="strength-label">Formato internacional con código de país. Lo usamos para enviarte códigos de verificación.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="passReg">Contraseña</label>
+            <input class="form-control" type="password" id="passReg" name="password" placeholder="Mínimo 8 caracteres" required />
+            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+            <span class="strength-label" id="strengthLabel">Ingresa una contraseña</span>
+            <ul class="pass-reqs" id="passReqs" aria-label="Requisitos de la contraseña">
+              <li data-req="length"><span class="req-ico" aria-hidden="true"></span>Al menos 8 caracteres</li>
+              <li data-req="upper"><span class="req-ico" aria-hidden="true"></span>Una letra mayúscula (A-Z)</li>
+              <li data-req="lower"><span class="req-ico" aria-hidden="true"></span>Una letra minúscula (a-z)</li>
+              <li data-req="number"><span class="req-ico" aria-hidden="true"></span>Un número (0-9)</li>
+            </ul>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="passConfirm">Confirmar contraseña</label>
+            <input class="form-control" type="password" id="passConfirm" placeholder="Repite la contraseña" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fechaNac">Fecha de nacimiento</label>
+            <input class="form-control" type="date" id="fechaNac" name="fecha_nacimiento" required />
+          </div>
+
+          <hr style="border:none;border-top:1px solid var(--line);margin:var(--space-6) 0" />
+
+          <!-- Rol -->
+          <h2 style="font-size:var(--font-size-xl);margin-bottom:6px;color:var(--ink)">¿Cuál es tu rol?</h2>
+          <p style="color:var(--muted);font-size:var(--font-size-sm);margin-bottom:var(--space-5)">Podrás cambiarlo más adelante desde tu perfil.</p>
+
+          <div class="role-grid" role="radiogroup" aria-label="Seleccionar rol">
+            <div class="role-card" data-role="participante" tabindex="0" role="radio" aria-checked="false">
+              <div class="role-card__icon"><img src="../assets/icon-participante.svg" width="28" height="28" alt=""></div>
+              <div class="role-card__title">Participante</div>
+              <div class="role-card__desc">Inscríbete a torneos y compite</div>
+            </div>
+            <div class="role-card" data-role="organizador" tabindex="0" role="radio" aria-checked="false">
+              <div class="role-card__icon"><img src="../assets/icon-organizador.svg" width="28" height="28" alt=""></div>
+              <div class="role-card__title">Organizador</div>
+              <div class="role-card__desc">Crea y gestiona torneos</div>
+            </div>
+          </div>
+          <input type="hidden" id="rolSelected" name="rol" value="" />
+
+          <div class="form-group" style="margin-top:var(--space-5)">
+            <label class="check-label">
+              <input type="checkbox" id="terminos" name="terminos" required />
+              <span>Acepto los <a href="/terminos" target="_blank" rel="noopener" class="link-red">Términos de uso</a> y la <a href="/terminos" target="_blank" rel="noopener" class="link-red">Política de privacidad</a> de Tornalyx.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" form="registroForm">Crear cuenta</button>
 
           <form id="registroForm" action="/registro" method="POST" style="display:none"></form>
         </div>
       </div>
 
       <p class="text-center" style="font-size:12px;color:var(--muted-2);margin-top:var(--space-4)">
-        ¡Ya tienes cuenta? <a href="login.html" class="link-red">Inicia sesión</a>
+        ¡Ya tienes cuenta? <a href="/login" class="link-red">Inicia sesión</a>
       </p>
     </div>
   </main>

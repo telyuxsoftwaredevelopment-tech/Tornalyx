@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nombre       VARCHAR(60)  NOT NULL,
     apellido     VARCHAR(60)  NOT NULL,
     email        VARCHAR(120) NOT NULL UNIQUE,
+    telefono     VARCHAR(20)  DEFAULT NULL,       -- E.164, p. ej. +59899123456 (para MFA por WhatsApp)
     password     VARCHAR(255) NOT NULL,          -- bcrypt hash
     fecha_nac    DATE         NOT NULL,
     rol          ENUM('participante','organizador','administrador') NOT NULL DEFAULT 'participante',
@@ -183,5 +184,20 @@ CREATE TABLE IF NOT EXISTS sesiones (
     CONSTRAINT fk_sesion_usuario
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     INDEX idx_usuario (usuario_id),
+    INDEX idx_expires (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ──────────────────────────────────────────────────────────────
+-- TABLA: login_otps  (códigos de verificación 2FA por email)
+-- Un código activo por usuario; se reemplaza en cada solicitud.
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS login_otps (
+    usuario_id   INT UNSIGNED PRIMARY KEY,
+    code_hash    VARCHAR(255) NOT NULL,            -- bcrypt del código de 6 dígitos
+    expires_at   TIMESTAMP    NOT NULL,
+    attempts     TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    last_sent_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_otp_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     INDEX idx_expires (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -40,13 +40,15 @@ class Usuario extends Model {
         string $email,
         string $password,
         string $fechaNac,
-        string $rol = 'participante'
+        string $rol = 'participante',
+        ?string $telefono = null
     ): int {
         $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
         return $this->insert([
             'nombre'    => $nombre,
             'apellido'  => $apellido,
             'email'     => $email,
+            'telefono'  => $telefono,
             'password'  => $hash,
             'fecha_nac' => $fechaNac,
             'rol'       => $rol,
@@ -62,8 +64,20 @@ class Usuario extends Model {
      */
     public function verificarCredenciales(string $email, string $password): ?array {
         $usuario = $this->findByEmail($email);
-        if (!$usuario) return null;
-        if (!password_verify($password, $usuario['password'])) return null;
+
+        // Tiempo constante: si el usuario no existe, igual ejecutamos un
+        // password_verify contra un hash dummy para no revelar (por diferencia
+        // de tiempo de respuesta) qué correos están registrados.
+        // Hash con formato bcrypt válido (60 chars) para que password_verify
+        // realice el trabajo completo aun cuando el usuario no exista.
+        $hash = $usuario['password']
+            ?? '$2y$12$abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQ';
+
+        $passwordOk = password_verify($password, $hash);
+
+        if (!$usuario || !$passwordOk) {
+            return null;
+        }
         return $usuario;
     }
 

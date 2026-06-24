@@ -73,13 +73,13 @@
 
   <header class="nav">
     <div class="wrap nav-in">
-      <a class="brand" href="index.html">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" onerror="this.style.display='none'">
+      <a class="brand" href="/">
+        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
         Tornalyx
       </a>
       <div class="nav-right">
-        <a class="ghost-link" href="registro.html">Crear cuenta</a>
-        <a class="btn btn-primary btn-sm" href="registro.html">Registrarse</a>
+        <a class="ghost-link" href="/registro">Crear cuenta</a>
+        <a class="btn btn-primary btn-sm" href="/registro">Registrarse</a>
       </div>
     </div>
   </header>
@@ -87,21 +87,21 @@
   <main class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">
-        <img class="logo-mark" src="../assets/ICONO.png" alt="Tornalyx" width="80" height="80" onerror="this.outerHTML='<div class=\'logo-mark-fallback\'>TX</div>'">
+        <img class="logo-mark" src="../assets/ICONO.png" alt="Tornalyx" width="80" height="80" data-fallback="logo">
         <h1>Iniciar sesión</h1>
         <p>Ingresa tus credenciales para acceder al sistema</p>
       </div>
 
-      <div class="card">
+      <div class="card" id="credCard">
         <div class="card__body" style="padding:28px">
 
           <div class="alert alert-error hidden" id="loginError" role="alert">
             Correo electrónico o contraseña incorrectos. Intentos restantes: <strong id="attemptsLeft">3</strong>.
           </div>
 
+          <!-- El token CSRF se envía automáticamente como header X-CSRF-Token
+               (cookie XSRF-TOKEN) desde validations.js → postForm(). -->
           <form id="loginForm" action="/login" method="POST" novalidate>
-            <input type="hidden" name="csrf_token" value="[PHP_CSRF_TOKEN]" />
-
             <div class="form-group">
               <label class="form-label" for="email">Correo electrónico</label>
               <input class="form-control" type="email" id="email" name="email"
@@ -139,13 +139,75 @@
 
           <p class="text-center" style="font-size:var(--font-size-sm);color:var(--muted)">
             ¿No tienes cuenta?
-            <a href="registro.html" class="link-red" style="font-weight:600">Regístrate gratis</a>
+            <a href="/registro" class="link-red" style="font-weight:600">Regístrate gratis</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Paso intermedio: el usuario elige por qué canal recibir el código. -->
+      <div class="card hidden" id="mfaChooseCard">
+        <div class="card__body" style="padding:28px">
+
+          <div class="alert alert-error hidden" id="mfaChooseError" role="alert"></div>
+
+          <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-4)">
+            ¿Cómo querés recibir tu código de verificación?
+          </p>
+
+          <button type="button" class="btn btn-ghost btn-full" data-canal="email" style="margin-bottom:var(--space-3)">
+            Por email <span id="chEmail" style="color:var(--muted-2)"></span>
+          </button>
+          <button type="button" class="btn btn-ghost btn-full hidden" data-canal="whatsapp" id="chWhatsappBtn" style="margin-bottom:var(--space-3)">
+            Por WhatsApp <span id="chWhatsapp" style="color:var(--muted-2)"></span>
+          </button>
+
+          <p class="text-center" style="margin-top:var(--space-2)">
+            <a href="#" class="link-red" id="backToLoginFromChoose" style="font-size:12px">Volver al inicio de sesión</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- Paso 2: ingresar el código recibido. Oculto hasta que se envíe. -->
+      <div class="card hidden" id="otpCard">
+        <div class="card__body" style="padding:28px">
+
+          <div class="alert alert-error hidden" id="otpError" role="alert"></div>
+
+          <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-4)">
+            Te enviamos un código de verificación de 6 dígitos a
+            <strong id="otpTarget" style="color:var(--ink)">tu destino</strong>.
+            Ingrésalo para continuar.
+          </p>
+
+          <form id="otpForm" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="codigo">Código de verificación</label>
+              <input class="form-control" type="text" id="codigo" name="codigo"
+                     inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+                     pattern="[0-9]{6}" placeholder="000000" required aria-required="true"
+                     style="letter-spacing:.4em;text-align:center;font-size:1.25rem" />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="otpBtn">
+              Verificar
+            </button>
+          </form>
+
+          <div class="divider">o</div>
+
+          <p class="text-center" style="font-size:var(--font-size-sm);color:var(--muted)">
+            ¿No recibiste el código?
+            <a href="#" class="link-red" id="resendBtn" style="font-weight:600">Reenviar</a>
+            <span id="resendCooldown" style="color:var(--muted-2)"></span>
+          </p>
+          <p class="text-center" style="margin-top:var(--space-3)">
+            <a href="#" class="link-red" id="backToLogin" style="font-size:12px">Volver al inicio de sesión</a>
           </p>
         </div>
       </div>
 
       <p class="text-center" style="font-size:12px;color:var(--muted-2);margin-top:var(--space-4)">
-        Al iniciar sesión aceptás nuestros <a href="#" class="link-red">Términos de uso</a> y <a href="#" class="link-red">Política de privacidad</a>.
+        Al iniciar sesión aceptás nuestros <a href="/terminos" class="link-red">Términos de uso</a> y <a href="/terminos" class="link-red">Política de privacidad</a>.
       </p>
     </div>
   </main>

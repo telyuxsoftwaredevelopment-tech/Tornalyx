@@ -7,6 +7,7 @@
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
+  <link rel="stylesheet" href="../../css/variables.css" />
   <link rel="stylesheet" href="../../css/main.css" />
   <link rel="stylesheet" href="../../css/components.css" />
   <style>
@@ -100,24 +101,24 @@
   <!-- Mobile nav -->
   <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
     <button class="mobile-close" id="mobileClose" aria-label="Cerrar">?</button>
-    <a href="../index.html">Inicio</a>
-    <a href="../torneos.html">Torneos</a>
-    <a class="btn btn-ghost mobile-cta" href="../login.html">Cerrar sesión</a>
+    <a href="/">Inicio</a>
+    <a href="/torneos">Torneos</a>
+    <a class="btn btn-ghost mobile-cta" href="/logout">Cerrar sesión</a>
   </div>
 
   <header class="nav">
     <div class="wrap nav-in">
-      <a class="brand" href="../index.html">
+      <a class="brand" href="/">
         <img class="badge" src="../../assets/ICONO.png" alt="Tornalyx" width="32" height="32"
-             onerror="this.style.display='none'">
+             data-fallback="hide">
         Tornalyx
       </a>
       <nav class="nav-links">
-        <a href="../torneos.html">Torneos</a>
+        <a href="/torneos">Torneos</a>
         <a href="#" style="color:var(--ink)">Mi perfil</a>
       </nav>
       <div class="nav-right">
-        <a class="ghost-link" href="../login.html">Cerrar sesión</a>
+        <a class="ghost-link" href="/logout">Cerrar sesión</a>
       </div>
       <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -129,9 +130,9 @@
   <div class="profile-hero">
     <div class="wrap profile-hero-in">
       <div class="profile-grid">
-        <div class="avatar">CG</div>
+        <div class="avatar" data-user-avatar>CG</div>
         <div class="profile-info">
-          <div class="profile-name">Carlos García</div>
+          <div class="profile-name" data-user-name>Carlos García</div>
           <div style="margin-bottom:var(--space-2)">
             <span class="badge badge-blue">Participante</span>
           </div>
@@ -142,7 +143,7 @@
           </div>
         </div>
         <div style="align-self:flex-end">
-          <button class="btn btn-ghost btn-sm" onclick="document.querySelector('[data-tab=datos]').click()">Editar perfil</button>
+          <button class="btn btn-ghost btn-sm" data-goto-tab="datos">Editar perfil</button>
         </div>
       </div>
     </div>
@@ -311,16 +312,16 @@
               <div class="form-grid-2">
                 <div class="form-group">
                   <label class="form-label" for="pNombre">Nombre</label>
-                  <input class="form-control" type="text" id="pNombre" value="Carlos" />
+                  <input class="form-control" type="text" id="pNombre" value="Carlos" data-user-nombre />
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="pApellido">Apellido</label>
-                  <input class="form-control" type="text" id="pApellido" value="García" />
+                  <input class="form-control" type="text" id="pApellido" value="García" data-user-apellido />
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="pEmail">Correo electrónico</label>
-                <input class="form-control" type="email" id="pEmail" value="cgarcia@email.com" />
+                <input class="form-control" type="email" id="pEmail" value="cgarcia@email.com" data-user-email />
               </div>
               <div class="form-group">
                 <label class="form-label" for="pFecha">Fecha de nacimiento</label>
