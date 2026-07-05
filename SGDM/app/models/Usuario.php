@@ -40,15 +40,13 @@ class Usuario extends Model {
         string $email,
         string $password,
         string $fechaNac,
-        string $rol = 'participante',
-        ?string $telefono = null
+        string $rol = 'participante'
     ): int {
         $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
         return $this->insert([
             'nombre'    => $nombre,
             'apellido'  => $apellido,
             'email'     => $email,
-            'telefono'  => $telefono,
             'password'  => $hash,
             'fecha_nac' => $fechaNac,
             'rol'       => $rol,

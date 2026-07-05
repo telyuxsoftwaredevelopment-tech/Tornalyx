@@ -55,18 +55,3 @@ services:
         sync: false
       - key: SMTP_FROM_NAME
         value: Tornalyx
-
-      # ── WhatsApp Cloud API (MFA opcional) ────────────────────
-      # Dejalas vacías para usar solo el canal email.
-      - key: WHATSAPP_TOKEN
-        sync: false
-      - key: WHATSAPP_PHONE_ID
-        sync: false
-      - key: WHATSAPP_TEMPLATE_NAME
-        sync: false
-      - key: WHATSAPP_TEMPLATE_LANG
-        value: es
-      - key: WHATSAPP_TEMPLATE_BUTTON
-        value: copy
-      - key: WHATSAPP_API_VERSION
-        value: v21.0

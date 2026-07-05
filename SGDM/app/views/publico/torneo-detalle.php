@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tornalyx | Copa Regional Fútbol 2026</title>
+  <title><?= e($title ?? 'Tornalyx | Copa Regional Fútbol 2026') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
@@ -93,33 +93,7 @@
 </head>
 <body>
 
-  <!-- Mobile nav -->
-  <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
-    <button class="mobile-close" id="mobileClose" aria-label="Cerrar">?</button>
-    <a href="/">Inicio</a>
-    <a href="/torneos">Torneos</a>
-    <a class="btn btn-primary mobile-cta" href="/login">Entrar</a>
-  </div>
-
-  <header class="nav">
-    <div class="wrap nav-in">
-      <a class="brand" href="/">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
-        Tornalyx
-      </a>
-      <nav class="nav-links">
-        <a href="/">Inicio</a>
-        <a href="/torneos" style="color:var(--ink)">Torneos</a>
-      </nav>
-      <div class="nav-right">
-        <a class="ghost-link" href="/login">Entrar</a>
-        <a class="btn btn-primary btn-sm" href="/registro">Crear cuenta</a>
-      </div>
-      <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+  <?= $partial('partials/nav-publico') ?>
 
   <!-- Breadcrumb -->
   <nav class="breadcrumb" aria-label="Ubicación">
@@ -308,13 +282,7 @@
     </div>
   </main>
 
-  <footer class="footer-wrap">
-    <div class="wrap">
-      <div class="foot-bottom" style="border:none;margin:0">
-        <span>© 2026 Tornalyx · Bachillerato Tecnológico en TI · Telyux Software Development</span>
-      </div>
-    </div>
-  </footer>
+  <?= $partial('partials/footer') ?>
 
   <script src="../js/main.js"></script>
 </body>

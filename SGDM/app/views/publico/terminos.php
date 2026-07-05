@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tornalyx | Términos y Condiciones</title>
+  <title><?= e($title ?? 'Tornalyx | Términos y Condiciones') ?></title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
@@ -30,18 +30,10 @@
 </head>
 <body>
 
-  <header class="nav">
-    <div class="wrap nav-in">
-      <a class="brand" href="/">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
-        Tornalyx
-      </a>
-      <div class="nav-right">
-        <a class="ghost-link" href="/login">Iniciar sesión</a>
-        <a class="btn btn-primary btn-sm" href="/registro">Registrarse</a>
-      </div>
-    </div>
-  </header>
+  <?= $partial('partials/nav-auth', ['links' => [
+      ['class' => 'ghost-link',           'href' => '/login',    'text' => 'Iniciar sesión'],
+      ['class' => 'btn btn-primary btn-sm', 'href' => '/registro', 'text' => 'Registrarse'],
+  ]]) ?>
 
   <main class="tc-page">
     <div class="tc-doc">

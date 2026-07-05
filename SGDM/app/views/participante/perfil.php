@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tornalyx | Mi Perfil</title>
+  <title><?= e($title ?? 'Tornalyx | Mi Perfil') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
@@ -361,13 +361,7 @@
     </div>
   </main>
 
-  <footer class="footer-wrap">
-    <div class="wrap">
-      <div class="foot-bottom" style="border:none;margin:0">
-        <span>© 2026 Tornalyx · Bachillerato Tecnológico en TI · Telyux Software Development</span>
-      </div>
-    </div>
-  </footer>
+  <?= $partial('partials/footer') ?>
 
   <script src="../../js/main.js"></script>
 </body>

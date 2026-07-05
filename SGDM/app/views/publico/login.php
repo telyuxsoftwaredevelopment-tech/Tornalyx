@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tornalyx | Iniciar sesión</title>
+  <title><?= e($title ?? 'Tornalyx | Iniciar sesión') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
@@ -71,18 +71,10 @@
 </head>
 <body>
 
-  <header class="nav">
-    <div class="wrap nav-in">
-      <a class="brand" href="/">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
-        Tornalyx
-      </a>
-      <div class="nav-right">
-        <a class="ghost-link" href="/registro">Crear cuenta</a>
-        <a class="btn btn-primary btn-sm" href="/registro">Registrarse</a>
-      </div>
-    </div>
-  </header>
+  <?= $partial('partials/nav-auth', ['links' => [
+      ['class' => 'ghost-link',           'href' => '/registro', 'text' => 'Crear cuenta'],
+      ['class' => 'btn btn-primary btn-sm', 'href' => '/registro', 'text' => 'Registrarse'],
+  ]]) ?>
 
   <main class="auth-page">
     <div class="auth-card">
@@ -99,9 +91,12 @@
             Correo electrónico o contraseña incorrectos. Intentos restantes: <strong id="attemptsLeft">3</strong>.
           </div>
 
-          <!-- El token CSRF se envía automáticamente como header X-CSRF-Token
-               (cookie XSRF-TOKEN) desde validations.js → postForm(). -->
+          <!-- El token CSRF se envía como header X-CSRF-Token (cookie XSRF-TOKEN)
+               desde validations.js → postForm(). Este campo oculto es defensa en
+               profundidad: si el JS no corre y el form se envía nativamente,
+               Session::verifyCsrf() también acepta el token por POST. -->
           <form id="loginForm" action="/login" method="POST" novalidate>
+            <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>" />
             <div class="form-group">
               <label class="form-label" for="email">Correo electrónico</label>
               <input class="form-control" type="email" id="email" name="email"
@@ -140,29 +135,6 @@
           <p class="text-center" style="font-size:var(--font-size-sm);color:var(--muted)">
             ¿No tienes cuenta?
             <a href="/registro" class="link-red" style="font-weight:600">Regístrate gratis</a>
-          </p>
-        </div>
-      </div>
-
-      <!-- Paso intermedio: el usuario elige por qué canal recibir el código. -->
-      <div class="card hidden" id="mfaChooseCard">
-        <div class="card__body" style="padding:28px">
-
-          <div class="alert alert-error hidden" id="mfaChooseError" role="alert"></div>
-
-          <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-4)">
-            ¿Cómo querés recibir tu código de verificación?
-          </p>
-
-          <button type="button" class="btn btn-ghost btn-full" data-canal="email" style="margin-bottom:var(--space-3)">
-            Por email <span id="chEmail" style="color:var(--muted-2)"></span>
-          </button>
-          <button type="button" class="btn btn-ghost btn-full hidden" data-canal="whatsapp" id="chWhatsappBtn" style="margin-bottom:var(--space-3)">
-            Por WhatsApp <span id="chWhatsapp" style="color:var(--muted-2)"></span>
-          </button>
-
-          <p class="text-center" style="margin-top:var(--space-2)">
-            <a href="#" class="link-red" id="backToLoginFromChoose" style="font-size:12px">Volver al inicio de sesión</a>
           </p>
         </div>
       </div>

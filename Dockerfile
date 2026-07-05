@@ -6,8 +6,8 @@ FROM php:8.2-apache
 # Extensiones PHP:
 #   - pdo_mysql: conexión a la base de datos (config/database.php).
 #   curl, openssl y json ya vienen compilados y habilitados en la imagen
-#   oficial (los usan WhatsAppSender, el Mailer SMTP por TLS y las respuestas
-#   JSON respectivamente), por eso no hace falta instalarlos.
+#   oficial (los usa el Mailer —envío de correo por SMTP/TLS o API HTTP— y
+#   las respuestas JSON), por eso no hace falta instalarlos.
 RUN docker-php-ext-install pdo_mysql
 
 # El .htaccess usa reescritura de URLs y cabeceras de seguridad.

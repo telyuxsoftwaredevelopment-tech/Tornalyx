@@ -1,7 +1,8 @@
 <?php
 /**
- * Punto de entrada del backend Tornalyx (Front Controller).
- * Todas las peticiones llegan aquí via .htaccess y se enrutan.
+ * Punto de entrada del backend Tornalyx (Front Controller del patrón MVC).
+ * Todas las peticiones llegan aquí via .htaccess, se enrutan con Router y se
+ * resuelven contra un Controlador (capa C) o una Vista (capa V).
  */
 
 declare(strict_types=1);
@@ -20,6 +21,8 @@ set_exception_handler(static function (Throwable $e): void {
     echo json_encode(['success' => false, 'error' => 'Ocurrió un error en el servidor. Intentá más tarde.']);
 });
 
+require_once __DIR__ . '/../app/core/Router.php';
+require_once __DIR__ . '/../app/core/View.php';
 require_once __DIR__ . '/../app/shared/Session.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/TorneoController.php';
@@ -43,67 +46,59 @@ if ($method === 'POST' && $uri !== '/logout') {
 }
 
 // ──────────────────────────────────────────────────────────────
-// Router simple
+// Tabla de rutas (Front Controller → Router)
 // ──────────────────────────────────────────────────────────────
-// Helper: renderiza una vista estática (sin necesidad de BD).
-$view = static function (string $path): void {
-    include __DIR__ . '/../app/views/' . $path;
-};
+// Los controladores se instancian dentro de los closures (de forma perezosa):
+// solo las rutas que realmente acceden a datos abren conexión a la BD. Así las
+// páginas públicas (home, registro, listado) se sirven aunque la BD esté caída.
+$router = new Router();
+$view   = new View();
 
-// Los controladores se instancian de forma perezosa: solo las rutas
-// que realmente acceden a datos abren conexión a la BD. Así las páginas
-// públicas (home, registro, listado) se sirven aunque la BD esté caída.
-match(true) {
+// ─── Páginas públicas (vistas renderizadas en servidor) ────────
+$router->get('/',               static fn() => $view->render('publico/index',          ['title' => 'Tornalyx · La plataforma que organiza todo']));
+$router->get('/registro',       static fn() => $view->render('publico/registro',       ['title' => 'Tornalyx | Crear cuenta']));
+$router->get('/torneos',        static fn() => $view->render('publico/torneos',        ['title' => 'Tornalyx | Buscar Torneos']));
+$router->get('/torneo-detalle', static fn() => $view->render('publico/torneo-detalle', ['title' => 'Tornalyx | Copa Regional Fútbol 2026']));
+$router->get('/terminos',       static fn() => $view->render('publico/terminos',       ['title' => 'Tornalyx | Términos y Condiciones']));
 
-    // ─── Páginas públicas (HTML) ───────────────────────────────
-    $uri === '/'               && $method === 'GET' => $view('publico/index.html'),
-    $uri === '/registro'       && $method === 'GET' => $view('publico/registro.html'),
-    $uri === '/torneos'        && $method === 'GET' => $view('publico/torneos.html'),
-    $uri === '/torneo-detalle' && $method === 'GET' => $view('publico/torneo-detalle.html'),
-    $uri === '/terminos'       && $method === 'GET' => $view('publico/terminos.html'),
+// ─── AUTH ──────────────────────────────────────────────────────
+$router->get('/login',            static fn() => (new AuthController())->showLogin());
+$router->post('/login',           static fn() => (new AuthController())->processLogin());
+$router->post('/login/verificar', static fn() => (new AuthController())->verify2fa());
+$router->post('/login/reenviar',  static fn() => (new AuthController())->resend2fa());
+$router->get('/api/2fa/estado',   static fn() => (new AuthController())->estado2fa());
+$router->post('/registro',        static fn() => (new AuthController())->processRegistro());
+$router->map(['GET', 'POST'], '/logout', static fn() => (new AuthController())->logout());
+$router->get('/api/me',           static fn() => (new AuthController())->me());
 
-    // ─── AUTH ──────────────────────────────────────────────────
-    $uri === '/login'           && $method === 'GET'  => (new AuthController())->showLogin(),
-    $uri === '/login'           && $method === 'POST' => (new AuthController())->processLogin(),
-    $uri === '/login/codigo'    && $method === 'POST' => (new AuthController())->enviarCodigo2fa(),
-    $uri === '/login/verificar' && $method === 'POST' => (new AuthController())->verify2fa(),
-    $uri === '/login/reenviar'  && $method === 'POST' => (new AuthController())->resend2fa(),
-    $uri === '/api/2fa/estado'  && $method === 'GET'  => (new AuthController())->estado2fa(),
-    $uri === '/registro'        && $method === 'POST' => (new AuthController())->processRegistro(),
-    $uri === '/logout'   && in_array($method, ['GET', 'POST'], true) => (new AuthController())->logout(),
-    $uri === '/api/me'   && $method === 'GET' => (new AuthController())->me(),
+// ─── Paneles privados (vistas que requieren sesión) ────────────
+$router->get('/perfil', static function () use ($view) {
+    // Cualquier usuario autenticado puede ver su perfil.
+    Session::requireRole(['participante', 'organizador', 'administrador']);
+    $view->render('participante/perfil', ['title' => 'Tornalyx | Mi Perfil']);
+});
+$router->get('/organizador/dashboard', static function () use ($view) {
+    Session::requireRole(['organizador', 'administrador']);
+    $view->render('organizador/dashboard', ['title' => 'Tornalyx | Panel Organizador']);
+});
+$router->get('/admin/dashboard', static function () use ($view) {
+    Session::requireRole('administrador');
+    $view->render('admin/dashboard', ['title' => 'Tornalyx | Panel de Administración']);
+});
 
-    // ─── Paneles privados (HTML, requieren sesión) ─────────────
-    $uri === '/perfil' && $method === 'GET'
-        => (static function () use ($view) {
-            // Cualquier usuario autenticado puede ver su perfil.
-            Session::requireRole(['participante', 'organizador', 'administrador']);
-            $view('participante/perfil.html');
-        })(),
-    $uri === '/organizador/dashboard' && $method === 'GET'
-        => (static function () use ($view) {
-            Session::requireRole(['organizador', 'administrador']);
-            $view('organizador/dashboard.html');
-        })(),
-    $uri === '/admin/dashboard' && $method === 'GET'
-        => (static function () use ($view) {
-            Session::requireRole('administrador');
-            $view('admin/dashboard.html');
-        })(),
+// ─── TORNEOS (API JSON) ────────────────────────────────────────
+$router->get('/api/torneos',           static fn() => (new TorneoController())->index());
+$router->post('/api/torneo/crear',     static fn() => (new TorneoController())->store());
+$router->post('/api/torneo/resultado', static fn() => (new TorneoController())->cargarResultado());
 
-    // ─── TORNEOS (API JSON) ────────────────────────────────────
-    $uri === '/api/torneos'          && $method === 'GET'  => (new TorneoController())->index(),
-    $uri === '/api/torneo/crear'     && $method === 'POST' => (new TorneoController())->store(),
-    $uri === '/api/torneo/resultado' && $method === 'POST' => (new TorneoController())->cargarResultado(),
+// Torneo por ID: /api/torneo/42 (la restricción \d+ evita que "abc" matchee).
+$router->get('#^/api/torneo/(\d+)$#', static fn($id) => (new TorneoController())->show((int) $id));
 
-    // Torneo por ID: /api/torneo/42
-    preg_match('#^/api/torneo/(\d+)$#', $uri, $m) && $method === 'GET'
-        => (new TorneoController())->show((int) $m[1]),
+// ─── 404 por defecto ───────────────────────────────────────────
+$router->fallback(static function (): void {
+    http_response_code(404);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Ruta no encontrada.']);
+});
 
-    // ─── 404 por defecto ───────────────────────────────────────
-    default => (function() {
-        http_response_code(404);
-        header('Content-Type: application/json');
-        echo json_encode(['error' => 'Ruta no encontrada.']);
-    })(),
-};
+$router->dispatch($uri, $method);
