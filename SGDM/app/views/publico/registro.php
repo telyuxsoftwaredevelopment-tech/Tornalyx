@@ -146,7 +146,7 @@
       </div>
 
       <p class="text-center" style="font-size:12px;color:var(--muted-2);margin-top:var(--space-4)">
-        ¡Ya tienes cuenta? <a href="/login" class="link-red">Inicia sesión</a>
+        ¿Ya tienes cuenta? <a href="/login" class="link-red">Inicia sesión</a>
       </p>
     </div>
   </main>
