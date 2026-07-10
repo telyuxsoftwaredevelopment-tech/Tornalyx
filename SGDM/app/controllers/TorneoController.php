@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../models/Torneo.php';
 require_once __DIR__ . '/../models/Resultado.php';
 require_once __DIR__ . '/../shared/Session.php';
@@ -7,12 +8,13 @@ require_once __DIR__ . '/../shared/Session.php';
  * Controlador de torneos.
  * Maneja listado, creación, edición, resultados y posiciones.
  */
-class TorneoController {
+class TorneoController extends Controller {
 
     private Torneo    $torneoModel;
     private Resultado $resultadoModel;
 
     public function __construct() {
+        parent::__construct();
         $this->torneoModel    = new Torneo();
         $this->resultadoModel = new Resultado();
     }
@@ -148,19 +150,5 @@ class TorneoController {
             $partidoId, $golesLocal, $golesVisitante, $ganadorId, Session::getUserId()
         );
         $this->jsonSuccess(['resultado_id' => $id]);
-    }
-
-    // ──────────────────────────────────────────────────────
-    // Helpers privados
-    // ──────────────────────────────────────────────────────
-
-    private function jsonSuccess(array $data = []): void {
-        header('Content-Type: application/json');
-        echo json_encode(array_merge(['success' => true], $data));
-    }
-
-    private function jsonError(string $mensaje): void {
-        header('Content-Type: application/json');
-        echo json_encode(['success' => false, 'error' => $mensaje]);
     }
 }

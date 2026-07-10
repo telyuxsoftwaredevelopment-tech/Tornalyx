@@ -5,14 +5,24 @@
 require_once __DIR__ . '/../../config/database.php';
 
 /**
- * Cliente SMTP mínimo en PHP puro (sin dependencias externas) para enviar
- * correos transaccionales, p. ej. el código de verificación de doble factor.
+ * Cliente de correo para mensajes transaccionales (p. ej. el código de
+ * verificación de doble factor). Soporta dos transportes:
  *
- * Soporta STARTTLS (puerto 587) y TLS implícito (puerto 465) con AUTH LOGIN,
- * que cubre Gmail y la mayoría de proveedores. Toda la configuración se lee de
- * variables de entorno (.env):
+ *   1. API HTTP de Brevo (si BREVO_API_KEY está definida): envía por HTTPS,
+ *      necesario en plataformas que bloquean el SMTP saliente (Render free
+ *      bloquea los puertos 25/465/587). Es el transporte preferido si está.
+ *   2. SMTP puro con STARTTLS (587) o TLS implícito (465) y AUTH LOGIN, que
+ *      cubre Gmail y la mayoría de proveedores. Sirve en desarrollo local.
  *
- *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_FROM_NAME
+ * Configuración por variables de entorno (.env):
+ *   BREVO_API_KEY                                    (activa el transporte HTTP)
+ *   SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS       (transporte SMTP)
+ *   SMTP_FROM, SMTP_FROM_NAME                         (remitente, ambos transportes)
+ *
+ * Nota de entregabilidad: si el remitente (SMTP_FROM) es un dominio que no
+ * controlás (p. ej. @gmail.com), el correo se entrega igual pero puede caer en
+ * spam por falta de alineación SPF/DKIM. Para inbox confiable, verificá en
+ * Brevo un dominio propio y usalo como SMTP_FROM.
  *
  * Diseño deliberado: ante cualquier fallo se lanza una excepción. El llamador
  * NUNCA debe asumir que el código llegó si no hubo envío exitoso (en 2FA
@@ -20,6 +30,7 @@ require_once __DIR__ . '/../../config/database.php';
  */
 class Mailer {
 
+    private string $apiKey;
     private string $host;
     private int    $port;
     private string $user;
@@ -29,6 +40,7 @@ class Mailer {
     private int    $timeout = 15;
 
     public function __construct() {
+        $this->apiKey   = (string) (getenv('BREVO_API_KEY') ?: '');
         $this->host     = (string) (getenv('SMTP_HOST') ?: '');
         $this->port     = (int)    (getenv('SMTP_PORT') ?: 587);
         $this->user     = (string) (getenv('SMTP_USER') ?: '');
@@ -38,19 +50,88 @@ class Mailer {
     }
 
     /**
-     * Indica si hay configuración SMTP suficiente para intentar un envío.
+     * Indica si hay configuración suficiente para intentar un envío, por
+     * cualquiera de los dos transportes (API HTTP o SMTP).
      */
     public function isConfigured(): bool {
-        return $this->host !== '' && $this->user !== '' && $this->pass !== '';
+        $apiOk  = $this->apiKey !== '' && $this->from !== '';
+        $smtpOk = $this->host !== '' && $this->user !== '' && $this->pass !== '';
+        return $apiOk || $smtpOk;
     }
 
     /**
-     * Envía un correo multipart (texto + HTML).
+     * Envía un correo multipart (texto + HTML) por el transporte disponible:
+     * prioriza la API HTTP de Brevo y cae a SMTP si no hay API key.
+     *
+     * @throws RuntimeException si el envío falla.
+     */
+    public function send(string $toEmail, string $toName, string $subject, string $html, string $text): void {
+        if ($this->apiKey !== '') {
+            $this->sendViaBrevo($toEmail, $toName, $subject, $html, $text);
+            return;
+        }
+        $this->sendViaSmtp($toEmail, $toName, $subject, $html, $text);
+    }
+
+    /**
+     * Envía por la API HTTP de Brevo (POST /v3/smtp/email). Va por HTTPS, así
+     * que funciona donde el SMTP saliente está bloqueado.
+     *
+     * @throws RuntimeException si la API responde un código != 2xx o curl falla.
+     */
+    private function sendViaBrevo(string $toEmail, string $toName, string $subject, string $html, string $text): void {
+        if ($this->from === '') {
+            throw new RuntimeException('Falta SMTP_FROM (remitente) para enviar por la API de Brevo.');
+        }
+
+        $to = ['email' => $toEmail];
+        if ($toName !== '') {
+            $to['name'] = $toName;
+        }
+        $payload = [
+            'sender'      => ['name' => $this->fromName, 'email' => $this->from],
+            'to'          => [$to],
+            'subject'     => $subject,
+            'htmlContent' => $html,
+            'textContent' => $text,
+        ];
+
+        $ch = curl_init('https://api.brevo.com/v3/smtp/email');
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => $this->timeout,
+            CURLOPT_CONNECTTIMEOUT => $this->timeout,
+            CURLOPT_HTTPHEADER     => [
+                'accept: application/json',
+                'content-type: application/json',
+                'api-key: ' . $this->apiKey,
+            ],
+            CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_UNICODE),
+        ]);
+
+        $response = curl_exec($ch);
+        if ($response === false) {
+            $err = curl_error($ch);
+            curl_close($ch);
+            throw new RuntimeException('No se pudo contactar la API de Brevo: ' . $err);
+        }
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        // Brevo devuelve 201 (Created) en el envío exitoso.
+        if ($code < 200 || $code >= 300) {
+            throw new RuntimeException("La API de Brevo respondió HTTP {$code}: " . trim((string) $response));
+        }
+    }
+
+    /**
+     * Envía por SMTP puro (STARTTLS/TLS implícito + AUTH LOGIN).
      *
      * @throws RuntimeException si la conexión, autenticación o entrega fallan.
      */
-    public function send(string $toEmail, string $toName, string $subject, string $html, string $text): void {
-        if (!$this->isConfigured()) {
+    private function sendViaSmtp(string $toEmail, string $toName, string $subject, string $html, string $text): void {
+        if (!($this->host !== '' && $this->user !== '' && $this->pass !== '')) {
             throw new RuntimeException('SMTP no configurado (faltan SMTP_HOST/SMTP_USER/SMTP_PASS).');
         }
 

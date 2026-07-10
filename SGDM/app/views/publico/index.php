@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Tornalyx · La plataforma que organiza todo. Torneos deportivos, mentales y esports." />
-  <title>Tornalyx · La plataforma que organiza todo</title>
+  <title><?= e($title ?? 'Tornalyx · La plataforma que organiza todo') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />

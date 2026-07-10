@@ -117,9 +117,7 @@ function initLoginValidation() {
 
     try {
       const json = await postForm('/login', new FormData(form));
-      if (json.success && json.mfa_choose) {
-        showChannelChooser(json.channels);
-      } else if (json.success && json.twofa) {
+      if (json.success && json.twofa) {
         showOtpStep(json.target_masked);
       } else if (json.success) {
         redirectByRole(json.rol);
@@ -147,38 +145,13 @@ function initLoginValidation() {
   }
 }
 
-/* ─── MFA: elegir canal (email/WhatsApp) + verificar código ─── */
-
-/* Oculta credenciales y muestra el paso de elegir canal. */
-function showChannelChooser(channels) {
-  const card = document.getElementById('mfaChooseCard');
-  if (!card) return;
-  document.getElementById('credCard')?.classList.add('hidden');
-  document.getElementById('otpCard')?.classList.add('hidden');
-  card.classList.remove('hidden');
-
-  channels = channels || {};
-  const emailSpan = document.getElementById('chEmail');
-  if (emailSpan) emailSpan.textContent = channels.email ? `(${channels.email})` : '';
-
-  const waBtn  = document.getElementById('chWhatsappBtn');
-  const waSpan = document.getElementById('chWhatsapp');
-  if (waBtn) {
-    if (channels.whatsapp) {
-      waBtn.classList.remove('hidden');
-      if (waSpan) waSpan.textContent = `(${channels.whatsapp})`;
-    } else {
-      waBtn.classList.add('hidden');
-    }
-  }
-}
+/* ─── MFA: verificar código (2FA por email) ─── */
 
 /* Oculta los pasos previos y muestra el paso del código. */
 function showOtpStep(targetMasked) {
   const otp = document.getElementById('otpCard');
   if (!otp) return;
   document.getElementById('credCard')?.classList.add('hidden');
-  document.getElementById('mfaChooseCard')?.classList.add('hidden');
   otp.classList.remove('hidden');
   const t = document.getElementById('otpTarget');
   if (t && targetMasked) t.textContent = targetMasked;
@@ -186,8 +159,8 @@ function showOtpStep(targetMasked) {
 }
 
 function initOtpFlow() {
-  /* Solo en la página de login (donde existen estas tarjetas). */
-  if (!document.getElementById('otpForm') && !document.getElementById('mfaChooseCard')) return;
+  /* Solo en la página de login (donde existe la tarjeta del código). */
+  if (!document.getElementById('otpForm')) return;
 
   const errEl   = document.getElementById('otpError');
   const showErr = (m) => {
@@ -195,33 +168,6 @@ function initOtpFlow() {
     else authError(m);
   };
   const hideErr = () => errEl?.classList.add('hidden');
-
-  const chooseErrEl  = document.getElementById('mfaChooseError');
-  const showChooseErr = (m) => {
-    if (chooseErrEl) { chooseErrEl.textContent = m; chooseErrEl.classList.remove('hidden'); }
-    else authError(m);
-  };
-
-  /* Pide el código por el canal elegido y pasa al paso del código. */
-  async function pedirCodigo(canal) {
-    chooseErrEl?.classList.add('hidden');
-    const data = new FormData();
-    data.append('canal', canal);
-    try {
-      const json = await postForm('/login/codigo', data);
-      if (json.success && json.twofa) {
-        showOtpStep(json.target_masked);
-      } else {
-        showChooseErr(json.error || 'No se pudo enviar el código.');
-      }
-    } catch {
-      showChooseErr('Error de conexión. Intentá de nuevo.');
-    }
-  }
-
-  document.querySelectorAll('#mfaChooseCard [data-canal]').forEach(btn => {
-    btn.addEventListener('click', () => pedirCodigo(btn.dataset.canal));
-  });
 
   /* Al cargar, consultar si hay un desafío MFA pendiente (p. ej. tras
      registrarse y ser redirigido). Reemplaza al script inline que la CSP
@@ -231,8 +177,7 @@ function initOtpFlow() {
       const res  = await fetch('/api/2fa/estado', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
       const json = await res.json();
       if (!json || !json.pending) return;
-      if (json.step === 'sent') showOtpStep(json.target_masked);
-      else showChannelChooser(json.channels);
+      showOtpStep(json.target_masked);
     } catch { /* sin pendiente o error: queda el login normal */ }
   })();
 
@@ -256,7 +201,7 @@ function initOtpFlow() {
     }
   });
 
-  /* Reenviar por el mismo canal. */
+  /* Reenviar el código por email. */
   document.getElementById('resendBtn')?.addEventListener('click', async function (e) {
     e.preventDefault();
     if (this.style.pointerEvents === 'none') return;   // en enfriamiento
@@ -279,18 +224,10 @@ function initOtpFlow() {
   document.getElementById('backToLogin')?.addEventListener('click', function (e) {
     e.preventDefault();
     document.getElementById('otpCard')?.classList.add('hidden');
-    document.getElementById('mfaChooseCard')?.classList.add('hidden');
     document.getElementById('credCard')?.classList.remove('hidden');
     const codigo = document.getElementById('codigo');
     if (codigo) codigo.value = '';
     hideErr();
-  });
-
-  /* Volver al login desde el paso de elegir canal. */
-  document.getElementById('backToLoginFromChoose')?.addEventListener('click', function (e) {
-    e.preventDefault();
-    document.getElementById('mfaChooseCard')?.classList.add('hidden');
-    document.getElementById('credCard')?.classList.remove('hidden');
   });
 }
 
@@ -412,15 +349,6 @@ function initRegistroSubmit() {
       fecha?.focus();
       return;
     }
-    const telefono = document.getElementById('telefono');
-    const telRaw   = (telefono?.value || '').trim();
-    const telNorm  = (telRaw.startsWith('+') ? '+' : '') + telRaw.replace(/\D/g, '');
-    if (!/^\+[1-9]\d{7,14}$/.test(telNorm)) {
-      authError('Ingresá un teléfono válido en formato internacional, p. ej. +59899123456.');
-      telefono?.focus();
-      return;
-    }
-
     /* Validaciones de cliente que el backend no puede inferir */
     if ((pass?.value || '') !== (passConfirm?.value || '')) {
       authError('Las contraseñas no coinciden.');
@@ -437,7 +365,7 @@ function initRegistroSubmit() {
 
     /* Los campos viven fuera del <form>; se recogen por name. */
     const data = new FormData();
-    ['nombre', 'apellido', 'email', 'telefono', 'password', 'fecha_nacimiento', 'rol']
+    ['nombre', 'apellido', 'email', 'password', 'fecha_nacimiento', 'rol']
       .forEach(name => {
         const el = document.querySelector(`[name="${name}"]`);
         if (el) data.append(name, el.value);

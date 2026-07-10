@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nombre       VARCHAR(60)  NOT NULL,
     apellido     VARCHAR(60)  NOT NULL,
     email        VARCHAR(120) NOT NULL UNIQUE,
-    telefono     VARCHAR(20)  DEFAULT NULL,       -- E.164, p. ej. +59899123456 (para MFA por WhatsApp)
     password     VARCHAR(255) NOT NULL,          -- bcrypt hash
     fecha_nac    DATE         NOT NULL,
     rol          ENUM('participante','organizador','administrador') NOT NULL DEFAULT 'participante',

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tornalyx | Buscar Torneos</title>
+  <title><?= e($title ?? 'Tornalyx | Buscar Torneos') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
@@ -94,34 +94,7 @@
 </head>
 <body>
 
-  <!-- Mobile nav -->
-  <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
-    <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">?</button>
-    <a href="/">Inicio</a>
-    <a href="/torneos">Torneos</a>
-    <a href="/login">Iniciar sesión</a>
-    <a class="btn btn-primary mobile-cta" href="/registro">Crear cuenta</a>
-  </div>
-
-  <header class="nav">
-    <div class="wrap nav-in">
-      <a class="brand" href="/">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
-        Tornalyx
-      </a>
-      <nav class="nav-links" aria-label="Navegación principal">
-        <a href="/">Inicio</a>
-        <a href="/torneos" style="color:var(--ink)">Torneos</a>
-      </nav>
-      <div class="nav-right">
-        <a class="ghost-link" href="/login">Entrar</a>
-        <a class="btn btn-primary btn-sm" href="/registro">Crear cuenta</a>
-      </div>
-      <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
+  <?= $partial('partials/nav-publico') ?>
 
   <!-- Page hero -->
   <div class="page-hero">
@@ -322,13 +295,7 @@
     </div>
   </main>
 
-  <footer class="footer-wrap">
-    <div class="wrap">
-      <div class="foot-bottom" style="border:none;margin:0">
-        <span>© 2026 Tornalyx · Bachillerato Tecnológico en TI · Telyux Software Development</span>
-      </div>
-    </div>
-  </footer>
+  <?= $partial('partials/footer') ?>
 
   <script src="../js/main.js"></script>
   <script src="../js/torneos.js"></script>

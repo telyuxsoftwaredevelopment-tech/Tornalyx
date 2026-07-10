@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tornalyx | Crear cuenta</title>
+  <title><?= e($title ?? 'Tornalyx | Crear cuenta') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
@@ -60,18 +60,10 @@
 </head>
 <body>
 
-  <header class="nav">
-    <div class="wrap nav-in">
-      <a class="brand" href="/">
-        <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
-        Tornalyx
-      </a>
-      <div class="nav-right">
-        <a class="ghost-link" href="/login">Iniciar sesión</a>
-        <a class="btn btn-ghost btn-sm" href="/login">Entrar</a>
-      </div>
-    </div>
-  </header>
+  <?= $partial('partials/nav-auth', ['links' => [
+      ['class' => 'ghost-link',          'href' => '/login', 'text' => 'Iniciar sesión'],
+      ['class' => 'btn btn-ghost btn-sm', 'href' => '/login', 'text' => 'Entrar'],
+  ]]) ?>
 
   <main class="auth-page">
     <div class="auth-card">
@@ -98,11 +90,6 @@
           <div class="form-group">
             <label class="form-label" for="emailReg">Correo electrónico</label>
             <input class="form-control" type="email" id="emailReg" name="email" placeholder="tu@correo.com" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="telefono">Teléfono (WhatsApp)</label>
-            <input class="form-control" type="tel" id="telefono" name="telefono" placeholder="+59899123456" required />
-            <span class="strength-label">Formato internacional con código de país. Lo usamos para enviarte códigos de verificación.</span>
           </div>
           <div class="form-group">
             <label class="form-label" for="passReg">Contraseña</label>
@@ -159,7 +146,7 @@
       </div>
 
       <p class="text-center" style="font-size:12px;color:var(--muted-2);margin-top:var(--space-4)">
-        ¡Ya tienes cuenta? <a href="/login" class="link-red">Inicia sesión</a>
+        ¿Ya tienes cuenta? <a href="/login" class="link-red">Inicia sesión</a>
       </p>
     </div>
   </main>
