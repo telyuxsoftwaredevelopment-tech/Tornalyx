@@ -9,10 +9,11 @@
 #
 # respaldo.sh bd necesita DB_BACKUP_PASS (usuario DML/DDL/backup separados,
 # ver SGDM/database/dcl.sql). Cron no hereda variables de entorno, así que
-# se cargan desde /etc/tornalyx/backup.env — crear ese archivo a mano con:
-#   DB_BACKUP_PASS=...
-# y protegerlo con:
-#   install -m 600 -o backup_tornalyx -g backup_tornalyx /dev/null /etc/tornalyx/backup.env
+# se cargan desde /etc/tornalyx/backup.env. Se instala (modo 0600, con la
+# plantilla de credentials.d/backup_tornalyx) al correr:
+#   sudo ./gestion_usuarios.sh crear backup_tornalyx
+# Después hay que reemplazar el placeholder DB_BACKUP_PASS con el password
+# real asignado a 'tornalyx_backup'@'localhost' en MySQL.
 SHELL=/bin/bash
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 

@@ -29,6 +29,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 SUDOERS_SRC_DIR="$SCRIPT_DIR/sudoers.d"
+CREDENTIALS_SRC_DIR="$SCRIPT_DIR/credentials.d"
 LOG_FILE="/var/log/tornalyx/gestion_usuarios.log"
 
 # ── Definición declarativa de usuarios ──────────────────────────────────
@@ -115,6 +116,7 @@ crear_usuario() {
   fi
 
   configurar_home "$nombre" "$home"
+  instalar_credenciales "$nombre" "$home"
   configurar_password "$nombre" "$shell" "$dias_exp"
 
   if [[ "$con_sudoers" == "si" ]]; then
@@ -162,6 +164,43 @@ configurar_password() {
   chage -d 0 "$nombre"          # obliga a cambiar la contraseña en el próximo login
   [[ "$dias_exp" != "-" ]] && chage -M "$dias_exp" "$nombre"
   log "  Expiración de contraseña configurada (máx. $dias_exp días)."
+}
+
+# ── Instalación de plantillas de credenciales de MySQL ──────────────────
+# Solo backup_tornalyx (cuenta de servicio, necesita el password guardado
+# para que cron pueda correr respaldo.sh sin interacción) y dev_tornalyx
+# (comodidad de ~/.my.cnf) tienen plantilla en credentials.d/. Nunca
+# sobrescribe un archivo que ya exista, para no pisar un password real ya
+# configurado por el admin.
+instalar_credenciales() {
+  local nombre="$1" home="$2"
+  local src="$CREDENTIALS_SRC_DIR/$nombre"
+  [[ -f "$src" ]] || return 0
+
+  case "$nombre" in
+    backup_tornalyx)
+      local dest="/etc/tornalyx/backup.env"
+      install -d -m 700 -o backup_tornalyx -g backup_tornalyx /etc/tornalyx
+      if [[ -f "$dest" ]]; then
+        log "  $dest ya existe, no se sobrescribe."
+      else
+        install -m 600 -o backup_tornalyx -g backup_tornalyx "$src" "$dest"
+        log "  Plantilla de credenciales instalada en $dest (editar DB_BACKUP_PASS)."
+      fi
+      ;;
+    dev_tornalyx)
+      local dest="$home/.my.cnf"
+      if [[ -f "$dest" ]]; then
+        log "  $dest ya existe, no se sobrescribe."
+      else
+        install -m 600 -o "$nombre" -g "$(id -gn "$nombre")" "$src" "$dest"
+        log "  Plantilla de credenciales instalada en $dest (editar password)."
+      fi
+      ;;
+    *)
+      log "  Sin manejo de credenciales para '$nombre', se omite."
+      ;;
+  esac
 }
 
 # ── Instalación de reglas sudoers específicas ───────────────────────────
@@ -238,6 +277,7 @@ cmd_eliminar() {
 
   userdel -r "$nombre" 2>/dev/null || userdel "$nombre"
   rm -f "/etc/sudoers.d/$nombre"
+  [[ "$nombre" == "backup_tornalyx" ]] && rm -f /etc/tornalyx/backup.env
   log "Usuario '$nombre' eliminado."
 }
 
@@ -247,7 +287,9 @@ Uso: $0 <comando> [usuario]
 
 Comandos:
   crear [usuario]     Crea o actualiza uno de los usuarios definidos, o todos
-                       si no se especifica ninguno.
+                       si no se especifica ninguno. Instala sudoers.d/ y
+                       credentials.d/ (plantillas) para el usuario que
+                       corresponda; nunca pisa un password real existente.
   listar               Muestra el estado (UID, shell, grupos) de los 4 usuarios.
   estado <usuario>     Detalle completo de un usuario (grupos, expiración, sudoers).
   eliminar <usuario>   Borra el usuario y su home (pide confirmación).

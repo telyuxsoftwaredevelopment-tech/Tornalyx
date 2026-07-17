@@ -1,0 +1,13 @@
+# Plantilla de credenciales para backup_tornalyx — Tornalyx
+# Instalada por gestion_usuarios.sh en /etc/tornalyx/backup.env (modo 0600,
+# propietario backup_tornalyx). Cargada por SGDM/scripts/cron/tornalyx-backup
+# antes de invocar 'respaldo.sh bd', porque cron no hereda variables de
+# entorno y backup_tornalyx es una cuenta nologin (no hay sesión interactiva
+# donde exportar el password a mano).
+#
+# DB_BACKUP_PASS debe coincidir con la contraseña real asignada a
+# 'tornalyx_backup'@'localhost' en MySQL (ver SGDM/database/dcl.sql).
+# gestion_usuarios.sh NO sobrescribe este archivo si ya existe en el
+# servidor, para no pisar un password real ya configurado: reemplazar el
+# placeholder de abajo a mano después de la instalación.
+DB_BACKUP_PASS=CAMBIAR_PASSWORD_BACKUP

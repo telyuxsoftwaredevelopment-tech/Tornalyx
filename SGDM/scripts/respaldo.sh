@@ -115,7 +115,8 @@ instalar_cron() {
 
   if [[ ! -f /etc/tornalyx/backup.env ]]; then
     log "AVISO: falta /etc/tornalyx/backup.env con DB_BACKUP_PASS. El backup de BD"
-    log "  fallará hasta crearlo (ver comentario en scripts/cron/tornalyx-backup)."
+    log "  fallará hasta instalarlo: sudo ./gestion_usuarios.sh crear backup_tornalyx"
+    log "  (y despues editar el placeholder DB_BACKUP_PASS con el password real)."
   fi
 }
 
