@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 *.local.php
+SGDM/database/.secrets/
 
 # Throttle / archivos temporales de la app
 SGDM/storage/
