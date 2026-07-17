@@ -1,0 +1,5 @@
+# Sudoers para backup_tornalyx — Tornalyx
+# Instalado por gestion_usuarios.sh en /etc/sudoers.d/backup_tornalyx (modo 0440).
+# Cuenta de servicio (shell nologin): únicamente puede invocar mysqldump desde
+# los scripts de respaldo programados por cron. Sin acceso interactivo posible.
+backup_tornalyx ALL=(ALL) NOPASSWD: /usr/bin/mysqldump

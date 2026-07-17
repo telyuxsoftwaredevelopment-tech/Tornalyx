@@ -1,0 +1,6 @@
+# Sudoers para dev_tornalyx — Tornalyx
+# Instalado por gestion_usuarios.sh en /etc/sudoers.d/dev_tornalyx (modo 0440).
+# Válido SOLO en el servidor de desarrollo/staging: puede reiniciar Apache y
+# MySQL locales para depurar. Este archivo NO debe instalarse en producción.
+dev_tornalyx ALL=(ALL) NOPASSWD: /bin/systemctl restart apache2
+dev_tornalyx ALL=(ALL) NOPASSWD: /bin/systemctl restart mysql
