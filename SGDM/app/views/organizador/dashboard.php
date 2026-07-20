@@ -232,67 +232,25 @@
         <div class="kpi-grid" data-reveal>
           <div class="kpi-card">
             <div class="kpi-card__label">Torneos activos</div>
-            <div class="kpi-card__value">3</div>
-            <div class="kpi-card__delta">1 finalizado este mes</div>
+            <div class="kpi-card__value" id="kpiActivos">—</div>
+            <div class="kpi-card__delta" id="kpiActivosDelta"></div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-card__label">Equipos totales</div>
-            <div class="kpi-card__value">52</div>
-            <div class="kpi-card__delta">? +4 esta semana</div>
+            <div class="kpi-card__label">Participantes confirmados</div>
+            <div class="kpi-card__value" id="kpiParticipantes">—</div>
+            <div class="kpi-card__delta" id="kpiParticipantesDelta"></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-card__label">Partidos jugados</div>
-            <div class="kpi-card__value">24</div>
-            <div class="kpi-card__delta">de 66 programados</div>
+            <div class="kpi-card__value" id="kpiPartidos">—</div>
+            <div class="kpi-card__delta" id="kpiPartidosDelta"></div>
           </div>
         </div>
 
         <h2 style="font-size:var(--font-size-lg);color:var(--ink);margin-bottom:var(--space-4)">Mis torneos</h2>
 
-        <div class="torneo-item">
-          <div class="torneo-item__head">
-            <div>
-              <div class="torneo-item__title">? Copa Regional Fútbol 2026</div>
-              <div class="torneo-item__meta">Liga · 12 equipos · Jornada 8 de 22</div>
-            </div>
-            <span class="badge badge-green">Activo</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:12px;color:var(--muted)">Progreso</span>
-            <span style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">36%</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:36%"></div></div>
-        </div>
-
-        <div class="torneo-item">
-          <div class="torneo-item__head">
-            <div>
-              <div class="torneo-item__title">??? Torneo Basket Invierno 2026</div>
-              <div class="torneo-item__meta">Eliminatoria · 8 equipos · Inicio 01/07/2026</div>
-            </div>
-            <span class="badge badge-yellow">Próximo</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:12px;color:var(--muted)">Inscripciones</span>
-            <span style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">6/8 equipos</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:75%;background:var(--red-bright)"></div></div>
-        </div>
-
-        <div class="torneo-item">
-          <div class="torneo-item__head">
-            <div>
-              <div class="torneo-item__title">🎾 Copa Tenis Rápido</div>
-              <div class="torneo-item__meta">Swiss · 16 jugadores · Ronda 4 de 5</div>
-            </div>
-            <span class="badge badge-green">Activo</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-            <span style="font-size:12px;color:var(--muted)">Progreso</span>
-            <span style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">80%</span>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
-        </div>
+        <!-- Lo completa organizador.js con GET /api/torneos/mios -->
+        <div id="misTorneos"></div>
       </div>
 
       <!-- CREAR -->
@@ -309,49 +267,60 @@
               <h3 style="color:var(--ink);margin-bottom:var(--space-4)">Información básica</h3>
               <div class="form-group">
                 <label class="form-label" for="torneoNombre">Nombre del torneo</label>
-                <input class="form-control" type="text" id="torneoNombre" placeholder="ej. Copa Verano 2026" required />
+                <input class="form-control" type="text" id="torneoNombre" name="nombre"
+                       placeholder="ej. Copa Verano 2026" maxlength="120" required />
               </div>
               <div class="form-grid-2">
                 <div class="form-group">
                   <label class="form-label" for="deporte">Deporte</label>
-                  <select class="form-control" id="deporte">
+                  <select class="form-control" id="deporte" name="disciplina" required>
                     <option value="">Seleccionar...</option>
-                    <option>Fútbol</option>
-                    <option>Básquetbol</option>
-                    <option>Tenis</option>
-                    <option>Vóley</option>
-                    <option>Ajedrez</option>
+                    <option value="Fútbol">Fútbol</option>
+                    <option value="Básquetbol">Básquetbol</option>
+                    <option value="Tenis">Tenis</option>
+                    <option value="Vóley">Vóley</option>
+                    <option value="Ajedrez">Ajedrez</option>
+                    <option value="eSports">eSports</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="sistema">Sistema de torneo</label>
-                  <select class="form-control" id="sistema">
+                  <!-- Los value coinciden con el ENUM `formato` de la tabla torneos -->
+                  <select class="form-control" id="sistema" name="formato" required>
                     <option value="">Seleccionar...</option>
-                    <option>Liga (todos contra todos)</option>
-                    <option>Eliminación directa</option>
-                    <option>Sistema suizo</option>
-                    <option>Grupos + playoffs</option>
+                    <option value="liga">Liga (todos contra todos)</option>
+                    <option value="eliminacion_directa">Eliminación directa</option>
+                    <option value="suizo">Sistema suizo</option>
+                    <option value="grupos_playoff">Grupos + playoffs</option>
                   </select>
                 </div>
               </div>
               <div class="form-grid-3">
                 <div class="form-group">
-                  <label class="form-label" for="maxEquipos">Máx. equipos</label>
-                  <input class="form-control" type="number" id="maxEquipos" placeholder="16" min="2" />
+                  <label class="form-label" for="maxEquipos">Máx. participantes</label>
+                  <input class="form-control" type="number" id="maxEquipos" name="max_participantes"
+                         placeholder="16" min="2" max="512" />
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="fechaInicio">Fecha inicio</label>
-                  <input class="form-control" type="date" id="fechaInicio" />
+                  <input class="form-control" type="date" id="fechaInicio" name="fecha_inicio" />
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="fechaFin">Fecha estimada fin</label>
-                  <input class="form-control" type="date" id="fechaFin" />
+                  <input class="form-control" type="date" id="fechaFin" name="fecha_fin" />
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="descripcion">Descripción del torneo</label>
-                <textarea class="form-control" id="descripcion" rows="3"
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" maxlength="2000"
                   placeholder="Describe el torneo, reglas especiales, premios, etc." style="resize:vertical"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="publicar">Al crearlo</label>
+                <select class="form-control" id="publicar" name="publicar">
+                  <option value="1">Publicar y abrir inscripciones</option>
+                  <option value="0">Guardar como borrador (no visible al público)</option>
+                </select>
               </div>
               <div style="display:flex;gap:var(--space-3)">
                 <button type="submit" class="btn btn-primary">Crear torneo</button>
@@ -373,11 +342,8 @@
         </div>
         <div class="card">
           <div class="card__header" style="display:flex;justify-content:space-between;align-items:center">
-            <h3>Copa Regional Fútbol 2026</h3>
-            <select class="form-control" style="max-width:220px;padding:7px 12px">
-              <option>Copa Regional Fútbol 2026</option>
-              <option>Copa Tenis Rápido</option>
-            </select>
+            <h3>Inscripciones</h3>
+            <select class="form-control" style="max-width:220px;padding:7px 12px" data-torneos-select></select>
           </div>
           <div style="overflow-x:auto">
             <table class="data-table">
@@ -409,10 +375,7 @@
             <form id="resultadoForm" novalidate>
               <div class="form-group">
                 <label class="form-label">Torneo</label>
-                <select class="form-control">
-                  <option>Copa Regional Fútbol 2026</option>
-                  <option>Copa Tenis Rápido</option>
-                </select>
+                <select class="form-control" data-torneos-select></select>
               </div>
               <div class="form-grid-2">
                 <div class="form-group">
@@ -461,10 +424,7 @@
             <h1>Tabla de posiciones</h1>
             <p>Clasificación actualizada por torneo</p>
           </div>
-          <select class="form-control" style="max-width:240px;padding:8px 14px">
-            <option>Copa Regional Fútbol 2026</option>
-            <option>Copa Tenis Rápido</option>
-          </select>
+          <select class="form-control" style="max-width:240px;padding:8px 14px" data-torneos-select></select>
         </div>
         <div class="card">
           <div style="overflow-x:auto">
@@ -503,6 +463,8 @@
 
   <script src="../../js/main.js"></script>
   <script src="../../js/dashboard.js"></script>
+  <script src="../../js/torneo-ui.js"></script>
+  <script src="../../js/organizador.js"></script>
 </body>
 </html>
 

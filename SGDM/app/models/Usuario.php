@@ -80,6 +80,76 @@ class Usuario extends Model {
     }
 
     /**
+     * Indica si un email ya está en uso, opcionalmente ignorando un usuario
+     * (para permitir que en una edición el usuario conserve su propio email).
+     * A diferencia de findByEmail(), considera también cuentas suspendidas.
+     *
+     * @param string   $email
+     * @param int|null $exceptoId Usuario a excluir de la comprobación.
+     * @return bool
+     */
+    public function emailExiste(string $email, ?int $exceptoId = null): bool {
+        $sql    = 'SELECT 1 FROM usuarios WHERE email = ?';
+        $params = [$email];
+        if ($exceptoId !== null) {
+            $sql     .= ' AND id <> ?';
+            $params[] = $exceptoId;
+        }
+        $sql .= ' LIMIT 1';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return (bool) $stmt->fetchColumn();
+    }
+
+    /**
+     * Crea un usuario desde el panel de administración, permitiendo fijar rol
+     * y estado (a diferencia de registrar(), pensado para el alta pública).
+     *
+     * @param array $d nombre, apellido, email, password, fecha_nac, rol, estado
+     * @return int ID del nuevo usuario.
+     */
+    public function crearComoAdmin(array $d): int {
+        $hash = password_hash($d['password'], PASSWORD_BCRYPT, ['cost' => 12]);
+        return $this->insert([
+            'nombre'    => $d['nombre'],
+            'apellido'  => $d['apellido'],
+            'email'     => $d['email'],
+            'password'  => $hash,
+            'fecha_nac' => $d['fecha_nac'],
+            'rol'       => $d['rol'],
+            'estado'    => $d['estado'],
+        ]);
+    }
+
+    /**
+     * Actualiza los campos indicados de un usuario. Si viene 'password', se
+     * hashea antes de guardar; si no viene, la contraseña queda intacta.
+     *
+     * @param int   $id
+     * @param array $campos Subconjunto de columnas a actualizar.
+     * @return bool
+     */
+    public function actualizar(int $id, array $campos): bool {
+        if (isset($campos['password'])) {
+            $campos['password'] = password_hash($campos['password'], PASSWORD_BCRYPT, ['cost' => 12]);
+        }
+        return $this->update($id, $campos);
+    }
+
+    /**
+     * Cantidad de administradores activos. Sirve para impedir que se quede el
+     * sistema sin ningún administrador operativo.
+     *
+     * @return int
+     */
+    public function contarAdministradoresActivos(): int {
+        $stmt = $this->db->query(
+            "SELECT COUNT(*) FROM usuarios WHERE rol = 'administrador' AND estado = 'activo'"
+        );
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
      * Retorna lista de usuarios filtrada por rol (sin exponer passwords).
      *
      * @param string|null $rol
@@ -88,13 +158,13 @@ class Usuario extends Model {
     public function listar(?string $rol = null): array {
         if ($rol) {
             $stmt = $this->db->prepare(
-                'SELECT id, nombre, apellido, email, rol, estado, created_at
+                'SELECT id, nombre, apellido, email, rol, estado, fecha_nac, created_at
                    FROM usuarios WHERE rol = ?'
             );
             $stmt->execute([$rol]);
         } else {
             $stmt = $this->db->query(
-                'SELECT id, nombre, apellido, email, rol, estado, created_at
+                'SELECT id, nombre, apellido, email, rol, estado, fecha_nac, created_at
                    FROM usuarios'
             );
         }
