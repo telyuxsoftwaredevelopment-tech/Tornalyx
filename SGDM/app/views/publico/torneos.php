@@ -118,24 +118,20 @@
             <input class="form-control" type="search" id="searchQ" placeholder="ej: Copa Fútbol..." />
           </div>
           <div class="form-group" style="margin:0">
+            <!-- Las opciones las carga torneos.js con las disciplinas que existen -->
             <label class="form-label" for="filterDeporte">Disciplina</label>
             <select class="form-control" id="filterDeporte">
               <option value="">Todas</option>
-              <option>Fútbol</option>
-              <option>Ajedrez</option>
-              <option>eSports</option>
-              <option>Baloncesto</option>
-              <option>Tenis de mesa</option>
-              <option>Voleibol</option>
             </select>
           </div>
           <div class="form-group" style="margin:0">
             <label class="form-label" for="filterEstado">Estado</label>
             <select class="form-control" id="filterEstado">
               <option value="">Todos</option>
-              <option value="activo">Activo</option>
-              <option value="proximo">Próximo</option>
+              <option value="inscripcion">Inscripciones abiertas</option>
+              <option value="en_curso">En curso</option>
               <option value="finalizado">Finalizado</option>
+              <option value="cancelado">Cancelado</option>
             </select>
           </div>
           <div class="form-group" style="margin:0">
@@ -143,8 +139,9 @@
             <select class="form-control" id="filterSistema">
               <option value="">Todos</option>
               <option value="liga">Liga</option>
-              <option value="eliminacion">Eliminación directa</option>
+              <option value="eliminacion_directa">Eliminación directa</option>
               <option value="suizo">Sistema suizo</option>
+              <option value="grupos_playoff">Grupos + playoffs</option>
             </select>
           </div>
           <button class="btn btn-primary" id="btnFiltrar" style="align-self:flex-end;white-space:nowrap">Filtrar</button>
@@ -153,136 +150,18 @@
 
       <!-- Resultados -->
       <div class="results-bar">
-        <span id="resultsCount">Mostrando <strong style="color:var(--ink)">6</strong> torneos</span>
+        <span id="resultsCount">Mostrando <strong style="color:var(--ink)">0</strong> torneos</span>
         <select class="form-control" style="width:auto;font-size:var(--font-size-sm)" id="sortBy" aria-label="Ordenar por">
-          <option>Más recientes</option>
-          <option>Nombre A-Z</option>
-          <option>Fecha de inicio</option>
+          <option value="recientes">Más recientes</option>
+          <option value="nombre">Nombre A-Z</option>
+          <option value="fecha">Fecha de inicio</option>
         </select>
       </div>
 
       <!-- Grid de torneos -->
       <div class="cards-grid" id="torneosGrid">
 
-        <article class="torneo-card" data-deporte="futbol" data-estado="activo" data-sistema="liga">
-          <div class="torneo-card__sport" style="background:linear-gradient(135deg,#1e3a8a,#2563eb)">?</div>
-          <div class="torneo-card__body">
-            <div class="torneo-card__meta">
-              <span class="badge badge-green">Activo</span>
-              <span class="badge badge-blue">Liga</span>
-            </div>
-            <h3 class="torneo-card__title">Copa Regional Fútbol 2026</h3>
-            <div class="torneo-card__info">
-              <span>? Inicio: 10 mar 2026</span>
-              <span>? 12 equipos inscritos</span>
-              <span>?? Montevideo, Uruguay</span>
-            </div>
-          </div>
-          <div class="torneo-card__footer">
-            <span class="status-live">?? En curso</span>
-            <a href="/torneo-detalle" class="btn btn-primary btn-sm">Ver ?</a>
-          </div>
-        </article>
-
-        <article class="torneo-card" data-deporte="ajedrez" data-estado="activo" data-sistema="suizo">
-          <div class="torneo-card__sport" style="background:linear-gradient(135deg,#1f2937,#374151)">???</div>
-          <div class="torneo-card__body">
-            <div class="torneo-card__meta">
-              <span class="badge badge-green">Activo</span>
-              <span class="badge badge-gray">Sistema Suizo</span>
-            </div>
-            <h3 class="torneo-card__title">Campeonato Ajedrez UTULAB</h3>
-            <div class="torneo-card__info">
-              <span>? Inicio: 5 jun 2026</span>
-              <span>? 24 participantes</span>
-              <span>?? Presencial / Online</span>
-            </div>
-          </div>
-          <div class="torneo-card__footer">
-            <span class="status-live">?? Ronda 3/7</span>
-            <a href="/torneo-detalle" class="btn btn-primary btn-sm">Ver ?</a>
-          </div>
-        </article>
-
-        <article class="torneo-card" data-deporte="esports" data-estado="proximo" data-sistema="eliminacion">
-          <div class="torneo-card__sport" style="background:linear-gradient(135deg,#4c1d95,#7c3aed)">?</div>
-          <div class="torneo-card__body">
-            <div class="torneo-card__meta">
-              <span class="badge badge-yellow">Próximo</span>
-              <span class="badge badge-blue">Eliminación directa</span>
-            </div>
-            <h3 class="torneo-card__title">Liga eSports 2026</h3>
-            <div class="torneo-card__info">
-              <span>? Inicio: 1 jul 2026</span>
-              <span>? 16 cupos disponibles</span>
-              <span>?? Online</span>
-            </div>
-          </div>
-          <div class="torneo-card__footer">
-            <span class="status-next">??? Inscripciones abiertas</span>
-            <a href="/torneo-detalle" class="btn btn-ghost btn-sm">Inscribirse</a>
-          </div>
-        </article>
-
-        <article class="torneo-card" data-deporte="baloncesto" data-estado="activo" data-sistema="eliminacion">
-          <div class="torneo-card__sport" style="background:linear-gradient(135deg,#92400e,#d97706)">???</div>
-          <div class="torneo-card__body">
-            <div class="torneo-card__meta">
-              <span class="badge badge-green">Activo</span>
-              <span class="badge badge-blue">Eliminación directa</span>
-            </div>
-            <h3 class="torneo-card__title">Torneo Intercentros Basketball</h3>
-            <div class="torneo-card__info">
-              <span>? Inicio: 2 may 2026</span>
-              <span>? 8 equipos</span>
-              <span>?? Gimnasio Municipal</span>
-            </div>
-          </div>
-          <div class="torneo-card__footer">
-            <span class="status-live">?? Cuartos de final</span>
-            <a href="/torneo-detalle" class="btn btn-primary btn-sm">Ver ?</a>
-          </div>
-        </article>
-
-        <article class="torneo-card" data-deporte="tenis" data-estado="finalizado" data-sistema="liga">
-          <div class="torneo-card__sport" style="background:linear-gradient(135deg,#065f46,#059669)">???</div>
-          <div class="torneo-card__body">
-            <div class="torneo-card__meta">
-              <span class="badge badge-gray">Finalizado</span>
-              <span class="badge badge-blue">Liga</span>
-            </div>
-            <h3 class="torneo-card__title">Copa Tenis de Mesa Primavera</h3>
-            <div class="torneo-card__info">
-              <span>? Finalizó: 30 abr 2026</span>
-              <span>? 16 participantes</span>
-              <span>??? Ganador: Carlos G.</span>
-            </div>
-          </div>
-          <div class="torneo-card__footer">
-            <span class="status-done">? Finalizado</span>
-            <a href="/torneo-detalle" class="btn btn-ghost btn-sm">Resultados</a>
-          </div>
-        </article>
-
-        <article class="torneo-card" data-deporte="voleibol" data-estado="proximo" data-sistema="liga">
-          <div class="torneo-card__sport" style="background:linear-gradient(135deg,#0c4a6e,#0284c7)">???</div>
-          <div class="torneo-card__body">
-            <div class="torneo-card__meta">
-              <span class="badge badge-yellow">Próximo</span>
-              <span class="badge badge-blue">Liga</span>
-            </div>
-            <h3 class="torneo-card__title">Liga Voleibol Mixta 2026</h3>
-            <div class="torneo-card__info">
-              <span>? Inicio: 15 ago 2026</span>
-              <span>? 10 cupos · 4 inscritos</span>
-              <span>?? Polideportivo Norte</span>
-            </div>
-          </div>
-          <div class="torneo-card__footer">
-            <span class="status-next">??? Inscripciones abiertas</span>
-            <a href="/torneo-detalle" class="btn btn-ghost btn-sm">Inscribirse</a>
-          </div>
-        </article>
+        <!-- Las cards las inserta torneos.js con GET /api/torneos -->
 
       </div><!-- /torneosGrid -->
 
@@ -298,6 +177,7 @@
   <?= $partial('partials/footer') ?>
 
   <script src="../js/main.js"></script>
+  <script src="../js/torneo-ui.js"></script>
   <script src="../js/torneos.js"></script>
 </body>
 </html>

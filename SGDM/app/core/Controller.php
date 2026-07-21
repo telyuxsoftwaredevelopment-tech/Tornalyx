@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/View.php';
+require_once __DIR__ . '/../shared/Session.php';
 
 /**
  * Controlador base — capa C (Controlador) del patrón MVC.
@@ -65,5 +66,28 @@ abstract class Controller {
      */
     protected function jsonError(string $mensaje, array $extra = [], ?int $status = null): void {
         $this->json(array_merge(['success' => false, 'error' => $mensaje], $extra), $status);
+    }
+
+    /**
+     * Autorización para endpoints JSON.
+     *
+     * Session::requireRole() redirige a /login, lo que sirve para vistas pero
+     * rompe a un cliente fetch (recibiría el HTML del login y fallaría al
+     * parsear JSON). Acá se responde con 401/403 y un cuerpo JSON, para que el
+     * front pueda avisar al usuario y mandarlo al login él mismo.
+     *
+     * @param string[] $roles
+     * @return bool true si la petición puede continuar.
+     */
+    protected function requireApiRole(array $roles): bool {
+        if (!Session::isLoggedIn()) {
+            $this->jsonError('Tu sesión expiró. Iniciá sesión de nuevo.', ['login' => true], 401);
+            return false;
+        }
+        if (!in_array(Session::getUserRole(), $roles, true)) {
+            $this->jsonError('No tenés permisos para realizar esta acción.', [], 403);
+            return false;
+        }
+        return true;
     }
 }

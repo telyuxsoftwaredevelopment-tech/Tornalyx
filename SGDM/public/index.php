@@ -26,6 +26,7 @@ require_once __DIR__ . '/../app/core/View.php';
 require_once __DIR__ . '/../app/shared/Session.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/TorneoController.php';
+require_once __DIR__ . '/../app/controllers/AdminController.php';
 
 Session::start();
 
@@ -88,11 +89,18 @@ $router->get('/admin/dashboard', static function () use ($view) {
 
 // ─── TORNEOS (API JSON) ────────────────────────────────────────
 $router->get('/api/torneos',           static fn() => (new TorneoController())->index());
+$router->get('/api/torneos/mios',      static fn() => (new TorneoController())->mios());
 $router->post('/api/torneo/crear',     static fn() => (new TorneoController())->store());
 $router->post('/api/torneo/resultado', static fn() => (new TorneoController())->cargarResultado());
 
 // Torneo por ID: /api/torneo/42 (la restricción \d+ evita que "abc" matchee).
 $router->get('#^/api/torneo/(\d+)$#', static fn($id) => (new TorneoController())->show((int) $id));
+
+// ─── ADMIN (API JSON) ──────────────────────────────────────────
+$router->get('/api/admin/stats',    static fn() => (new AdminController())->stats());
+$router->get('/api/admin/usuarios', static fn() => (new AdminController())->usuarios());
+$router->post('/api/admin/usuario/crear',      static fn() => (new AdminController())->crearUsuario());
+$router->post('/api/admin/usuario/actualizar', static fn() => (new AdminController())->actualizarUsuario());
 
 // ─── 404 por defecto ───────────────────────────────────────────
 $router->fallback(static function (): void {

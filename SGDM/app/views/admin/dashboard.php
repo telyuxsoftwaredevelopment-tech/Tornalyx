@@ -136,6 +136,28 @@
     .dot-green  { background:#22c55e; box-shadow:0 0 6px rgba(34,197,94,.6); }
     .dot-yellow { background:#eab308; }
     .dot-muted  { background:var(--muted-2); }
+
+    /* Tarjeta de torneo del listado (misma presentación que el panel del organizador) */
+    .torneo-item {
+      padding:var(--space-4);
+      border:1px solid var(--line); border-radius:14px;
+      background:var(--bg-card); margin-bottom:var(--space-3);
+      transition:border-color .2s;
+    }
+    .torneo-item:hover { border-color:var(--red-deep); }
+    .torneo-item__head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--space-3); }
+    .torneo-item__title { font-family:var(--head); font-weight:700; color:var(--ink); font-size:var(--font-size-base); }
+    .torneo-item__meta  { font-size:12px; color:var(--muted-2); margin-top:2px; }
+
+    .progress-bar  { height:6px; background:var(--line); border-radius:3px; overflow:hidden; margin-top:6px; }
+    .progress-fill { height:100%; border-radius:3px; background:var(--red); transition:width .5s ease; }
+
+    .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
+    .form-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--space-4); }
+    @media(max-width:640px) {
+      .form-grid-2 { grid-template-columns:1fr; }
+      .form-grid-3 { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
@@ -209,49 +231,33 @@
             <p>Resumen general del sistema Tornalyx · Actualizado ahora</p>
           </div>
         </div>
+        <!-- KPIs y actividad los completa admin.js con GET /api/admin/stats -->
         <div class="kpi-grid" data-reveal>
           <div class="kpi-card">
             <div class="kpi-card__label">Usuarios registrados</div>
-            <div class="kpi-card__value">248</div>
-            <div class="kpi-card__delta">? +12 esta semana</div>
+            <div class="kpi-card__value" id="kpiUsuarios">—</div>
+            <div class="kpi-card__delta" id="kpiUsuariosDelta"></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-card__label">Torneos activos</div>
-            <div class="kpi-card__value">34</div>
-            <div class="kpi-card__delta">? +3 este mes</div>
+            <div class="kpi-card__value" id="kpiTorneos">—</div>
+            <div class="kpi-card__delta" id="kpiTorneosDelta"></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-card__label">Equipos inscritos</div>
-            <div class="kpi-card__value">87</div>
-            <div class="kpi-card__delta">Sin cambios</div>
+            <div class="kpi-card__value" id="kpiEquipos">—</div>
+            <div class="kpi-card__delta" id="kpiEquiposDelta"></div>
           </div>
           <div class="kpi-card">
             <div class="kpi-card__label">Partidos registrados</div>
-            <div class="kpi-card__value">412</div>
-            <div class="kpi-card__delta">? +28 esta semana</div>
+            <div class="kpi-card__value" id="kpiPartidos">—</div>
+            <div class="kpi-card__delta" id="kpiPartidosDelta"></div>
           </div>
         </div>
         <div class="card">
           <div class="card__header"><h3>Actividad reciente</h3></div>
-          <div style="display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-4)">
-            <div style="display:flex;align-items:center;gap:var(--space-3);font-size:var(--font-size-sm)">
-              <span class="dot dot-green"></span>
-              <span style="color:var(--muted)">Nuevo torneo:</span>
-              <span style="color:var(--ink);font-weight:500">Copa Verano 2026</span>
-              <span style="margin-left:auto;color:var(--muted-2);font-family:var(--mono);font-size:11px">hace 2h</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:var(--space-3);font-size:var(--font-size-sm)">
-              <span class="dot dot-yellow"></span>
-              <span style="color:var(--muted)">Resultado:</span>
-              <span style="color:var(--ink);font-weight:500">Atlético Norte 3 · 1 Los Guerreros</span>
-              <span style="margin-left:auto;color:var(--muted-2);font-family:var(--mono);font-size:11px">hace 4h</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:var(--space-3);font-size:var(--font-size-sm)">
-              <span class="dot dot-muted"></span>
-              <span style="color:var(--muted)">Usuario registrado:</span>
-              <span style="color:var(--ink);font-weight:500">mariagomez@email.com</span>
-              <span style="margin-left:auto;color:var(--muted-2);font-family:var(--mono);font-size:11px">hace 6h</span>
-            </div>
+          <div id="actividadReciente" style="display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-4)">
+            <div style="color:var(--muted);font-size:var(--font-size-sm)">Cargando actividad…</div>
           </div>
         </div>
       </div>
@@ -260,56 +266,32 @@
       <div class="section-panel" id="panel-usuarios">
         <div class="page-header">
           <div><h1>Usuarios</h1><p>Gestión de usuarios del sistema</p></div>
-          <button class="btn btn-primary btn-sm">+ Nuevo usuario</button>
+          <button class="btn btn-primary btn-sm" id="nuevoUsuarioBtn">+ Nuevo usuario</button>
         </div>
         <div class="card">
-          <div class="card__header" style="display:flex;justify-content:space-between;align-items:center">
+          <div class="card__header" style="display:flex;justify-content:space-between;align-items:center;gap:var(--space-3);flex-wrap:wrap">
             <h3>Lista de usuarios</h3>
-            <input class="form-control" type="search" placeholder="Buscar..." style="max-width:240px;padding:8px 14px" />
+            <div style="display:flex;gap:var(--space-2)">
+              <select class="form-control" id="usuariosRol" style="max-width:180px;padding:8px 14px">
+                <option value="">Todos los roles</option>
+                <option value="participante">Participantes</option>
+                <option value="organizador">Organizadores</option>
+                <option value="administrador">Administradores</option>
+              </select>
+              <input class="form-control" type="search" id="usuariosBuscar" placeholder="Buscar..." style="max-width:240px;padding:8px 14px" />
+            </div>
           </div>
           <div style="overflow-x:auto">
             <table class="data-table">
               <thead>
                 <tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Registrado</th><th></th></tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>Carlos García</td>
-                  <td style="color:var(--muted-2)">cgarcia@email.com</td>
-                  <td><span class="badge badge-blue">Participante</span></td>
-                  <td><span class="dot dot-green"></span>Activo</td>
-                  <td style="font-family:var(--mono);font-size:12px">10/03/2026</td>
-                  <td><a href="#" style="color:var(--red-bright);font-size:12px">Editar</a></td>
-                </tr>
-                <tr>
-                  <td>María López</td>
-                  <td style="color:var(--muted-2)">mlopez@email.com</td>
-                  <td><span class="badge badge-yellow">Organizador</span></td>
-                  <td><span class="dot dot-green"></span>Activo</td>
-                  <td style="font-family:var(--mono);font-size:12px">22/01/2026</td>
-                  <td><a href="#" style="color:var(--red-bright);font-size:12px">Editar</a></td>
-                </tr>
-                <tr>
-                  <td>Juan Pérez</td>
-                  <td style="color:var(--muted-2)">jperez@email.com</td>
-                  <td><span class="badge badge-blue">Participante</span></td>
-                  <td><span class="dot dot-muted"></span>Inactivo</td>
-                  <td style="font-family:var(--mono);font-size:12px">05/12/2025</td>
-                  <td><a href="#" style="color:var(--red-bright);font-size:12px">Editar</a></td>
-                </tr>
-                <tr>
-                  <td>Ana Torres</td>
-                  <td style="color:var(--muted-2)">atorres@email.com</td>
-                  <td><span class="badge badge-red">Admin</span></td>
-                  <td><span class="dot dot-green"></span>Activo</td>
-                  <td style="font-family:var(--mono);font-size:12px">01/09/2025</td>
-                  <td><a href="#" style="color:var(--red-bright);font-size:12px">Editar</a></td>
-                </tr>
-              </tbody>
+              <!-- Las filas las completa admin.js con GET /api/admin/usuarios -->
+              <tbody id="usuariosBody"></tbody>
             </table>
           </div>
-          <div class="card__footer" style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">
-            Mostrando 4 de 248 usuarios
+          <div class="card__footer" id="usuariosFooter" style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">
+            Cargando usuarios…
           </div>
         </div>
       </div>
@@ -318,37 +300,81 @@
       <div class="section-panel" id="panel-torneos">
         <div class="page-header">
           <div><h1>Torneos</h1><p>Todos los torneos del sistema</p></div>
-          <button class="btn btn-primary btn-sm">+ Nuevo torneo</button>
+          <button class="btn btn-primary btn-sm" data-toggle-create>+ Nuevo torneo</button>
         </div>
-        <div class="cards-grid">
-          <div class="card">
-            <div class="card__body">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-2)">
-                <h4 style="color:var(--ink)">Copa Regional Fútbol 2026</h4>
-                <span class="badge badge-green">Activo</span>
+
+        <!-- Formulario de creación: oculto hasta pulsar "+ Nuevo torneo" -->
+        <div class="card hidden" id="createCard" style="max-width:720px;margin-bottom:var(--space-6)">
+          <div class="card__header"><h3>Nuevo torneo</h3></div>
+          <div class="card__body">
+            <form id="createForm" novalidate>
+              <div class="form-group">
+                <label class="form-label" for="torneoNombre">Nombre del torneo</label>
+                <input class="form-control" type="text" id="torneoNombre" name="nombre"
+                       placeholder="ej. Copa Verano 2026" maxlength="120" required />
               </div>
-              <p style="color:var(--muted);font-size:var(--font-size-sm)">Liga · 12 equipos · Jornada 8/22</p>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card__body">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-2)">
-                <h4 style="color:var(--ink)">Torneo Basket Invierno</h4>
-                <span class="badge badge-yellow">Próximo</span>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="deporte">Deporte</label>
+                  <select class="form-control" id="deporte" name="disciplina" required>
+                    <option value="">Seleccionar...</option>
+                    <option value="Fútbol">Fútbol</option>
+                    <option value="Básquetbol">Básquetbol</option>
+                    <option value="Tenis">Tenis</option>
+                    <option value="Vóley">Vóley</option>
+                    <option value="Ajedrez">Ajedrez</option>
+                    <option value="eSports">eSports</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="sistema">Sistema de torneo</label>
+                  <!-- Los value coinciden con el ENUM `formato` de la tabla torneos -->
+                  <select class="form-control" id="sistema" name="formato" required>
+                    <option value="">Seleccionar...</option>
+                    <option value="liga">Liga (todos contra todos)</option>
+                    <option value="eliminacion_directa">Eliminación directa</option>
+                    <option value="suizo">Sistema suizo</option>
+                    <option value="grupos_playoff">Grupos + playoffs</option>
+                  </select>
+                </div>
               </div>
-              <p style="color:var(--muted);font-size:var(--font-size-sm)">Eliminatoria · 8 equipos · Inicio 01/07</p>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card__body">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--space-2)">
-                <h4 style="color:var(--ink)">Liga Tenis Dobles 2025</h4>
-                <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Finalizado</span>
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label class="form-label" for="maxEquipos">Máx. participantes</label>
+                  <input class="form-control" type="number" id="maxEquipos" name="max_participantes"
+                         placeholder="16" min="2" max="512" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="fechaInicio">Fecha inicio</label>
+                  <input class="form-control" type="date" id="fechaInicio" name="fecha_inicio" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="fechaFin">Fecha estimada fin</label>
+                  <input class="form-control" type="date" id="fechaFin" name="fecha_fin" />
+                </div>
               </div>
-              <p style="color:var(--muted);font-size:var(--font-size-sm)">Liga · 16 equipos · Completado</p>
-            </div>
+              <div class="form-group">
+                <label class="form-label" for="descripcion">Descripción del torneo</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" maxlength="2000"
+                  placeholder="Describe el torneo, reglas especiales, premios, etc." style="resize:vertical"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="publicar">Al crearlo</label>
+                <select class="form-control" id="publicar" name="publicar">
+                  <option value="1">Publicar y abrir inscripciones</option>
+                  <option value="0">Guardar como borrador (no visible al público)</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:var(--space-3)">
+                <button type="submit" class="btn btn-primary">Crear torneo</button>
+                <button type="reset" class="btn btn-ghost" data-toggle-create>Cancelar</button>
+              </div>
+            </form>
           </div>
         </div>
+
+        <!-- Lista de todos los torneos: la completa organizador.js -->
+        <div id="misTorneos"></div>
       </div>
 
       <!-- EQUIPOS -->
@@ -460,8 +486,69 @@
     </main>
   </div>
 
+  <!-- Modal de alta/edición de usuario (lo maneja admin.js) -->
+  <div class="modal" id="usuarioModal" aria-hidden="true">
+    <div class="modal__box" style="max-width:560px">
+      <button class="modal__close" data-modal-close aria-label="Cerrar">✕</button>
+      <h3 class="modal__title" id="usuarioModalTitle">Nuevo usuario</h3>
+      <form id="usuarioForm" novalidate>
+        <input type="hidden" name="id" id="usuarioId" />
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="usuarioNombre">Nombre</label>
+            <input class="form-control" type="text" id="usuarioNombre" name="nombre" maxlength="60" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="usuarioApellido">Apellido</label>
+            <input class="form-control" type="text" id="usuarioApellido" name="apellido" maxlength="60" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="usuarioEmail">Correo electrónico</label>
+          <input class="form-control" type="email" id="usuarioEmail" name="email" maxlength="120" required />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="usuarioRolCampo">Rol</label>
+            <select class="form-control" id="usuarioRolCampo" name="rol" required>
+              <option value="participante">Participante</option>
+              <option value="organizador">Organizador</option>
+              <option value="administrador">Administrador</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="usuarioEstado">Estado</label>
+            <select class="form-control" id="usuarioEstado" name="estado" required>
+              <option value="activo">Activo</option>
+              <option value="suspendido">Suspendido</option>
+              <option value="pendiente">Pendiente</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="usuarioFechaNac">Fecha de nacimiento</label>
+          <input class="form-control" type="date" id="usuarioFechaNac" name="fecha_nac" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="usuarioPassword">Contraseña</label>
+          <input class="form-control" type="password" id="usuarioPassword" name="password"
+                 autocomplete="new-password" />
+          <!-- El texto de ayuda cambia entre alta y edición desde admin.js -->
+          <small id="usuarioPasswordHint" style="color:var(--muted-2);font-size:12px"></small>
+        </div>
+        <div style="display:flex;gap:var(--space-3);margin-top:var(--space-4)">
+          <button type="submit" class="btn btn-primary" id="usuarioSubmit">Crear usuario</button>
+          <button type="button" class="btn btn-ghost" data-modal-close>Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="../../js/main.js"></script>
   <script src="../../js/dashboard.js"></script>
+  <script src="../../js/torneo-ui.js"></script>
+  <script src="../../js/organizador.js"></script>
+  <script src="../../js/admin.js"></script>
 </body>
 </html>
 

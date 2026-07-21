@@ -15,10 +15,13 @@ class Torneo extends Model {
      * @return array
      */
     public function listarPublicos(array $filtros = []): array {
-        $sql    = 'SELECT t.*, u.nombre AS org_nombre, u.apellido AS org_apellido
+        // Los borradores nunca salen en el listado público: son torneos que el
+        // organizador todavía está preparando.
+        $sql    = 'SELECT t.*, u.nombre AS org_nombre, u.apellido AS org_apellido, '
+                . self::METRICAS_SQL . '
                    FROM torneos t
                    INNER JOIN usuarios u ON u.id = t.organizador_id
-                   WHERE t.publico = 1';
+                   WHERE t.publico = 1 AND t.estado <> \'borrador\'';
         $params = [];
 
         if (!empty($filtros['estado'])) {
@@ -42,17 +45,83 @@ class Torneo extends Model {
     }
 
     /**
-     * Lista torneos de un organizador específico.
+     * Subconsultas de métricas que acompañan a cada torneo en los paneles de
+     * gestión (inscriptos aprobados, equipos aprobados y avance de partidos).
+     */
+    private const METRICAS_SQL = '
+        (SELECT COUNT(*) FROM inscripciones i
+          WHERE i.torneo_id = t.id AND i.estado = \'aprobada\')      AS inscriptos,
+        (SELECT COUNT(*) FROM equipos eq
+          WHERE eq.torneo_id = t.id AND eq.estado = \'aprobado\')    AS equipos,
+        (SELECT COUNT(*) FROM partidos p
+          WHERE p.torneo_id = t.id)                                  AS partidos,
+        (SELECT COUNT(*) FROM partidos p
+          WHERE p.torneo_id = t.id AND p.estado = \'finalizado\')    AS partidos_jugados';
+
+    /**
+     * Lista torneos de un organizador específico, con métricas de gestión.
      *
      * @param int $organizadorId
      * @return array
      */
     public function listarDeOrganizador(int $organizadorId): array {
         $stmt = $this->db->prepare(
-            'SELECT * FROM torneos WHERE organizador_id = ? ORDER BY created_at DESC'
+            'SELECT t.*, ' . self::METRICAS_SQL . '
+               FROM torneos t
+              WHERE t.organizador_id = ?
+              ORDER BY t.created_at DESC'
         );
         $stmt->execute([$organizadorId]);
         return $stmt->fetchAll();
+    }
+
+    /**
+     * Lista todos los torneos con métricas de gestión (panel de administración).
+     *
+     * @return array
+     */
+    public function listarTodosConMetricas(): array {
+        $stmt = $this->db->query(
+            'SELECT t.*, ' . self::METRICAS_SQL . '
+               FROM torneos t
+              ORDER BY t.created_at DESC'
+        );
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Indica si un organizador ya tiene un torneo con ese nombre. Evita
+     * duplicados por doble envío del formulario o por error de carga.
+     *
+     * @param int    $organizadorId
+     * @param string $nombre
+     * @return bool
+     */
+    public function existeNombreDeOrganizador(int $organizadorId, string $nombre): bool {
+        $stmt = $this->db->prepare(
+            'SELECT 1 FROM torneos WHERE organizador_id = ? AND nombre = ? LIMIT 1'
+        );
+        $stmt->execute([$organizadorId, $nombre]);
+        return (bool) $stmt->fetchColumn();
+    }
+
+    /**
+     * Busca un torneo por ID incluyendo el nombre del organizador y las
+     * métricas de participación (para la página de detalle).
+     *
+     * @param int $id
+     * @return array|null
+     */
+    public function findConOrganizador(int $id): ?array {
+        $stmt = $this->db->prepare(
+            'SELECT t.*, u.nombre AS org_nombre, u.apellido AS org_apellido, ' . self::METRICAS_SQL . '
+               FROM torneos t
+               INNER JOIN usuarios u ON u.id = t.organizador_id
+              WHERE t.id = ?'
+        );
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
     }
 
     /**

@@ -165,6 +165,30 @@ const Utils = {
   },
 
   /**
+   * Tiempo relativo en español a partir de una fecha del servidor
+   * ("hace 2h", "hace 3d", "recién"). Interpreta la fecha SQL como hora
+   * local del servidor, que es como la genera MySQL con NOW().
+   * @param {string} fechaSql  'YYYY-MM-DD HH:MM:SS'
+   * @returns {string}
+   */
+  timeAgo(fechaSql) {
+    if (!fechaSql) return '';
+    const t = new Date(String(fechaSql).replace(' ', 'T'));
+    if (isNaN(t)) return '';
+    const seg = Math.max(0, Math.floor((Date.now() - t.getTime()) / 1000));
+    if (seg < 60)     return 'recién';
+    const min = Math.floor(seg / 60);
+    if (min < 60)     return `hace ${min}m`;
+    const hs = Math.floor(min / 60);
+    if (hs < 24)      return `hace ${hs}h`;
+    const dias = Math.floor(hs / 24);
+    if (dias < 30)    return `hace ${dias}d`;
+    const meses = Math.floor(dias / 30);
+    if (meses < 12)   return `hace ${meses} mes${meses > 1 ? 'es' : ''}`;
+    return `hace ${Math.floor(meses / 12)} año(s)`;
+  },
+
+  /**
    * Lee una cookie por nombre.
    * @param {string} name
    * @returns {string}
@@ -199,6 +223,74 @@ const Utils = {
       clearTimeout(timer);
       timer = setTimeout(() => fn(...args), wait);
     };
+  }
+};
+
+/* ─── Cliente del API JSON ───────────────────────────── */
+/* Centraliza fetch + CSRF + manejo de errores para no repetirlo en cada
+   pantalla. Todos los endpoints responden {success:true|false, ...}. */
+const Api = {
+  /**
+   * Petición genérica al API.
+   * @param {string} url
+   * @param {RequestInit} options
+   * @returns {Promise<Object>} Cuerpo JSON de una respuesta exitosa.
+   * @throws {Error} Con .status y .data cuando el servidor rechaza la petición.
+   */
+  async request(url, options = {}) {
+    let res;
+    try {
+      res = await fetch(url, {
+        credentials: 'same-origin',
+        ...options,
+        headers: { 'X-Requested-With': 'XMLHttpRequest', ...(options.headers || {}) }
+      });
+    } catch {
+      throw new Error('No se pudo conectar con el servidor. Revisá tu conexión.');
+    }
+
+    let data = null;
+    try { data = await res.json(); } catch { /* respuesta vacía o no-JSON */ }
+
+    if (!data) {
+      throw new Error('El servidor respondió de forma inesperada.');
+    }
+    if (!res.ok || data.success === false) {
+      /* Sesión vencida: avisamos y mandamos al login (el API no redirige
+         para no romper el parseo JSON del cliente). */
+      if (res.status === 401 || data.login) {
+        Toast.error(data.error || 'Tu sesión expiró.');
+        setTimeout(() => { window.location.href = '/login'; }, 1500);
+      }
+      const err = new Error(data.error || 'No se pudo completar la operación.');
+      err.status = res.status;
+      err.data = data;
+      throw err;
+    }
+    return data;
+  },
+
+  /** GET de un endpoint JSON. */
+  get(url) {
+    return this.request(url);
+  },
+
+  /**
+   * POST de un formulario (urlencoded) con token CSRF.
+   * @param {string} url
+   * @param {Object} fields Pares campo => valor.
+   */
+  post(url, fields = {}) {
+    const body = new URLSearchParams();
+    Object.entries(fields).forEach(([k, v]) => body.append(k, v ?? ''));
+    return this.request(url, {
+      method: 'POST',
+      body,
+      headers: {
+        ...Utils.csrfHeaders(),
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      }
+    });
   }
 };
 
@@ -324,4 +416,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initCurrentUser();
 });
 
-window.Tornalyx = { Toast, Utils, Modal };
+window.Tornalyx = { Toast, Utils, Modal, Api };
