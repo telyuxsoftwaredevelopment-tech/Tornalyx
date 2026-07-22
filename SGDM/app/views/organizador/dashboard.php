@@ -55,7 +55,7 @@
     }
     .user-avatar {
       width:34px; height:34px; border-radius:50%;
-      background:linear-gradient(135deg,var(--red),var(--red-deep));
+      background:var(--red);
       display:flex; align-items:center; justify-content:center;
       font-weight:700; font-size:12px; color:#fff; flex:none; font-family:var(--head);
     }
@@ -172,7 +172,7 @@
 
   <aside class="sidebar" id="sidebar">
     <a class="sidebar-brand" href="/">
-      <img class="mark" src="../../assets/ICONO.png" alt="Tornalyx" data-fallback="mark">
+      <span class="mark badge-crop" style="background-image:url(../../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
       Tornalyx
     </a>
     <nav class="sidebar__nav">
@@ -201,7 +201,7 @@
           <div class="user-name" data-user-name>María López</div>
           <div class="user-role" data-user-role>organizador</div>
         </div>
-        <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">?</a>
+        <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">🚪</a>
       </div>
     </div>
   </aside>
@@ -209,7 +209,7 @@
   <div class="app-main">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" id="menuToggle" aria-label="Menú">?</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menú">☰</button>
         <span id="topbarTitle" style="font-family:var(--head);font-weight:700;color:var(--ink)">Mis torneos</span>
       </div>
       <div style="display:flex;align-items:center;gap:var(--space-3)">

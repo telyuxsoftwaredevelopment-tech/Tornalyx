@@ -17,20 +17,16 @@
       padding:clamp(36px,5vw,64px) 0 clamp(28px,4vw,48px);
       border-bottom:1px solid var(--line-soft);
     }
-    .profile-hero::before {
-      content:''; position:absolute; inset:0; pointer-events:none;
-      background:radial-gradient(ellipse 55% 80% at 20% 50%,rgba(236,28,36,.12),transparent 60%);
-    }
     .profile-hero-in { position:relative; z-index:2; }
     .profile-grid {
       display:flex; align-items:flex-start; gap:var(--space-6); flex-wrap:wrap;
     }
     .avatar {
       width:88px; height:88px; border-radius:50%; flex:none;
-      background:linear-gradient(135deg,var(--red),var(--red-deep));
+      background:var(--red);
       display:flex; align-items:center; justify-content:center;
       font-family:var(--head); font-weight:900; font-size:2rem; color:#fff;
-      box-shadow:0 0 0 3px var(--bg-2), 0 0 0 5px var(--red-deep), 0 12px 40px -8px var(--red-glow);
+      box-shadow:0 0 0 3px var(--bg-2), 0 0 0 5px var(--red-deep);
     }
     .profile-info { flex:1; min-width:0; }
     .profile-name { font-size:var(--font-size-2xl); font-family:var(--head); font-weight:800; color:var(--ink); margin-bottom:4px; }
@@ -49,8 +45,7 @@
     .stat-card:hover { border-color:var(--red-deep); }
     .stat-card__value {
       font-family:var(--head); font-size:2rem; font-weight:800; line-height:1;
-      background:linear-gradient(180deg,#fff,var(--red-bright));
-      -webkit-background-clip:text; background-clip:text; color:transparent;
+      color:var(--red-bright);
       margin-bottom:6px;
     }
     .stat-card__label { font-size:12px; color:var(--muted); }
@@ -100,7 +95,7 @@
 
   <!-- Mobile nav -->
   <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
-    <button class="mobile-close" id="mobileClose" aria-label="Cerrar">?</button>
+    <button class="mobile-close" id="mobileClose" aria-label="Cerrar">✕</button>
     <a href="/">Inicio</a>
     <a href="/torneos">Torneos</a>
     <a class="btn btn-ghost mobile-cta" href="/logout">Cerrar sesión</a>
@@ -109,8 +104,7 @@
   <header class="nav">
     <div class="wrap nav-in">
       <a class="brand" href="/">
-        <img class="badge" src="../../assets/ICONO.png" alt="Tornalyx" width="32" height="32"
-             data-fallback="hide">
+        <span class="badge badge-crop" style="background-image:url(../../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
         Tornalyx
       </a>
       <nav class="nav-links">
@@ -137,9 +131,9 @@
             <span class="badge badge-blue">Participante</span>
           </div>
           <div class="profile-meta">
-            <span>? Miembro desde mar 2026</span>
-            <span>?? Montevideo, Uruguay</span>
-            <span>? Fútbol · ? Tenis</span>
+            <span>📅 Miembro desde mar 2026</span>
+            <span>📍 Montevideo, Uruguay</span>
+            <span>⚽ Fútbol · 🎾 Tenis</span>
           </div>
         </div>
         <div style="align-self:flex-end">
@@ -192,28 +186,28 @@
               <tbody>
                 <tr>
                   <td>Copa Regional Fútbol 2026</td>
-                  <td>? Fútbol</td>
+                  <td>⚽ Fútbol</td>
                   <td>Atlético Norte</td>
                   <td><span style="font-family:var(--head);color:var(--red-bright);font-weight:700">1°</span></td>
                   <td><span class="badge badge-green">Activo</span></td>
                 </tr>
                 <tr>
                   <td>Copa Tenis Rápido 2026</td>
-                  <td>? Tenis</td>
+                  <td>🎾 Tenis</td>
                   <td>Individual</td>
                   <td>3°</td>
                   <td><span class="badge badge-green">Activo</span></td>
                 </tr>
                 <tr>
                   <td>Liga Fútbol Invierno 2025</td>
-                  <td>? Fútbol</td>
+                  <td>⚽ Fútbol</td>
                   <td>Atlético Norte</td>
                   <td><span style="font-family:var(--head);color:var(--red-bright);font-weight:700">1°</span></td>
                   <td><span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Finalizado</span></td>
                 </tr>
                 <tr>
                   <td>Torneo Basket Amateur 2025</td>
-                  <td>??? Básquetbol</td>
+                  <td>🏀 Básquetbol</td>
                   <td>Norte United</td>
                   <td>4°</td>
                   <td><span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Finalizado</span></td>
@@ -228,7 +222,7 @@
       <div class="tab-content" id="tab-equipos" role="tabpanel">
         <div class="cards-grid">
           <div class="team-card">
-            <div class="team-card__icon">?</div>
+            <div class="team-card__icon">⚽</div>
             <div class="team-card__name">Atlético Norte</div>
             <div class="team-card__meta">Fútbol · 15 jugadores · Capitán: Carlos García</div>
             <div style="margin-top:var(--space-3)">
@@ -236,7 +230,7 @@
             </div>
           </div>
           <div class="team-card">
-            <div class="team-card__icon">???</div>
+            <div class="team-card__icon">🏀</div>
             <div class="team-card__name">Norte United</div>
             <div class="team-card__meta">Básquetbol · 10 jugadores · Miembro</div>
             <div style="margin-top:var(--space-3)">
@@ -244,7 +238,7 @@
             </div>
           </div>
           <div class="team-card">
-            <div class="team-card__icon">?</div>
+            <div class="team-card__icon">🎾</div>
             <div class="team-card__name">Individual · Tenis</div>
             <div class="team-card__meta">Inscripción individual · Copa Tenis Rápido</div>
             <div style="margin-top:var(--space-3)">
@@ -254,24 +248,24 @@
         </div>
       </div>
 
-      <!-- ESTAD??STICAS -->
+      <!-- ESTADÍSTICAS -->
       <div class="tab-content" id="tab-stats" role="tabpanel">
         <div style="display:grid;grid-template-columns:1fr;gap:var(--space-5)">
           <div class="card">
             <div class="card__header"><h3>Actividad por deporte</h3></div>
             <div class="card__body">
               <div class="sport-row">
-                <span class="sport-row__name">? Fútbol</span>
+                <span class="sport-row__name">⚽ Fútbol</span>
                 <div class="sport-row__bar"><div class="sport-row__fill" style="width:78%"></div></div>
                 <span class="sport-row__pct">78%</span>
               </div>
               <div class="sport-row">
-                <span class="sport-row__name">? Tenis</span>
+                <span class="sport-row__name">🎾 Tenis</span>
                 <div class="sport-row__bar"><div class="sport-row__fill" style="width:15%;background:var(--red-bright)"></div></div>
                 <span class="sport-row__pct">15%</span>
               </div>
               <div class="sport-row">
-                <span class="sport-row__name">??? Basket</span>
+                <span class="sport-row__name">🏀 Basket</span>
                 <div class="sport-row__bar"><div class="sport-row__fill" style="width:7%;background:var(--muted-2)"></div></div>
                 <span class="sport-row__pct">7%</span>
               </div>

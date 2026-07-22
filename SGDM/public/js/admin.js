@@ -6,6 +6,10 @@
 
 'use strict';
 
+/* IIFE: evita colisiones de `const` de nivel superior con organizador.js,
+   que se carga en la misma página (pestaña Torneos del admin). */
+(function () {
+
 const { Api, Utils, Toast, Modal } = window.Tornalyx;
 
 /* Punto y color del feed según el tipo de evento. */
@@ -301,3 +305,5 @@ document.addEventListener('DOMContentLoaded', () => {
     if (buscar) buscar.addEventListener('input', Utils.debounce(renderUsuarios, 200));
   }
 });
+
+})();
