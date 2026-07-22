@@ -11,10 +11,10 @@
 <header class="nav">
   <div class="wrap nav-in">
     <a class="brand" href="/">
-      <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
+      <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
       Tornalyx
     </a>
-    <div class="nav-right">
+    <div class="nav-right nav-right-static">
       <?php foreach (($links ?? []) as $lnk): ?>
         <a class="<?= e($lnk['class'] ?? '') ?>" href="<?= e($lnk['href'] ?? '#') ?>"><?= e($lnk['text'] ?? '') ?></a>
       <?php endforeach; ?>

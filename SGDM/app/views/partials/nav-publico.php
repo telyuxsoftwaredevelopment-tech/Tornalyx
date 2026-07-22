@@ -2,13 +2,12 @@
 /**
  * Parcial: navbar pública reutilizable (home de torneos, detalle de torneo).
  * El enlace "Torneos" queda marcado como activo porque las páginas que la usan
- * pertenecen a esa sección. El "?" del botón de cerrar es un placeholder del
- * diseño original (se conserva tal cual para no alterar el render).
+ * pertenecen a esa sección.
  */
 ?>
 <!-- Menú móvil -->
 <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
-  <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">?</button>
+  <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
   <a href="/">Inicio</a>
   <a href="/torneos">Torneos</a>
   <a href="/login">Iniciar sesión</a>
@@ -18,7 +17,7 @@
 <header class="nav">
   <div class="wrap nav-in">
     <a class="brand" href="/">
-      <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
+      <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
       Tornalyx
     </a>
     <nav class="nav-links" aria-label="Navegación principal">

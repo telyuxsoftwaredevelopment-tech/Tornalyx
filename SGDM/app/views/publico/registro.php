@@ -26,7 +26,7 @@
       text-align:center; background:var(--bg-2);
     }
     .role-card:hover  { border-color:var(--red-deep); background:rgba(236,28,36,.06); }
-    .role-card.selected { border-color:var(--red); background:rgba(236,28,36,.12); box-shadow:0 0 20px -8px var(--red-glow); }
+    .role-card.selected { border-color:var(--red); background:rgba(236,28,36,.12); }
     .role-card__icon  { font-size:2rem; margin-bottom:var(--space-2); }
     .role-card__title { font-family:var(--head); font-weight:600; font-size:var(--font-size-sm); color:var(--ink); margin-bottom:4px; }
     .role-card__desc  { font-size:12px; color:var(--muted-2); }

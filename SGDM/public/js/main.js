@@ -63,19 +63,6 @@ function initTabs() {
   });
 }
 
-/* ─── Tabs de audiencia (index.html) ────────────────── */
-function initAudTabs() {
-  const tabBtns = document.querySelectorAll('#audTabs .aud-tab');
-  const panels  = document.querySelectorAll('#audPanels .aud-panel');
-  if (!tabBtns.length) return;
-  tabBtns.forEach(btn => btn.addEventListener('click', () => {
-    tabBtns.forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    const i = +btn.dataset.aud;
-    panels.forEach((p, j) => p.classList.toggle('on', i === j));
-  }));
-}
-
 /* ─── Toast Notifications ────────────────────────────── */
 const Toast = {
   container: null,
@@ -408,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initScrollReveal();
   initTabs();
-  initAudTabs();
   initImageFallbacks();
   initTabShortcuts();
   Toast.init();

@@ -11,86 +11,6 @@
   <link rel="stylesheet" href="../css/main.css" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/torneos.css" />
-  <style>
-    /* Page header */
-    .page-hero {
-      position:relative; overflow:hidden;
-      padding:clamp(44px,7vw,80px) 0;
-      border-bottom:1px solid var(--line-soft);
-    }
-    .page-hero .glow-sm {
-      position:absolute; inset:0; pointer-events:none;
-      background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(236,28,36,.18),transparent 65%);
-    }
-    .page-hero .grid-lines-sm {
-      position:absolute; inset:0; z-index:0; opacity:.35;
-      background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),
-                       linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
-      background-size:64px 64px;
-      mask-image:radial-gradient(ellipse 80% 100% at 50% 0%,#000,transparent 80%);
-      -webkit-mask-image:radial-gradient(ellipse 80% 100% at 50% 0%,#000,transparent 80%);
-    }
-    .page-hero-in { position:relative; z-index:2; }
-    /* Filters */
-    .filters {
-      background:var(--bg-card);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:var(--space-5);
-      margin-bottom:var(--space-6);
-    }
-    .filters__grid { display:grid; grid-template-columns:1fr; gap:var(--space-3); }
-    @media(min-width:640px)  { .filters__grid { grid-template-columns:1fr 1fr; } }
-    @media(min-width:1024px) { .filters__grid { grid-template-columns:2fr 1fr 1fr 1fr auto; align-items:end; } }
-    /* Torneo card */
-    .torneo-card {
-      background:var(--bg-card);
-      border:1px solid var(--line);
-      border-radius:16px;
-      overflow:hidden;
-      transition:border-color .2s,transform .2s,box-shadow .2s;
-      display:flex; flex-direction:column;
-    }
-    .torneo-card:hover { border-color:var(--red-deep); transform:translateY(-4px); box-shadow:0 24px 50px -30px rgba(0,0,0,.9); }
-    .torneo-card__sport {
-      height:80px;
-      display:flex; align-items:center; justify-content:center;
-      font-size:2.2rem;
-      position:relative; overflow:hidden;
-    }
-    .torneo-card__sport::after {
-      content:"";
-      position:absolute; inset:0;
-      background:rgba(0,0,0,.3);
-    }
-    .torneo-card__body { padding:var(--space-4); flex:1; }
-    .torneo-card__meta { display:flex; gap:var(--space-2); flex-wrap:wrap; margin-bottom:var(--space-3); }
-    .torneo-card__title { font-family:var(--head); font-size:var(--font-size-lg); font-weight:700; margin-bottom:var(--space-2); color:var(--ink); }
-    .torneo-card__info {
-      font-size:var(--font-size-sm); color:var(--muted);
-      display:flex; flex-direction:column; gap:4px;
-      margin-bottom:var(--space-4);
-    }
-    .torneo-card__footer {
-      padding:var(--space-3) var(--space-4);
-      border-top:1px solid var(--line-soft);
-      display:flex; justify-content:space-between; align-items:center;
-      background:rgba(0,0,0,.2);
-    }
-    .status-live { font-size:12px; color:var(--red-bright); font-family:var(--mono); font-weight:600; }
-    .status-next { font-size:12px; color:var(--color-warning); font-family:var(--mono); font-weight:600; }
-    .status-done { font-size:12px; color:var(--muted-2); font-family:var(--mono); font-weight:600; }
-    /* Empty state */
-    .empty-state { text-align:center; padding:var(--space-16); color:var(--muted); }
-    .empty-state .icon { font-size:3.5rem; margin-bottom:var(--space-4); }
-    /* Results bar */
-    .results-bar {
-      display:flex; justify-content:space-between; align-items:center;
-      margin-bottom:var(--space-4);
-      font-size:var(--font-size-sm); color:var(--muted);
-    }
-    select.form-control { cursor:pointer; }
-  </style>
 </head>
 <body>
 
@@ -98,7 +18,6 @@
 
   <!-- Page hero -->
   <div class="page-hero">
-    <div class="glow-sm"></div>
     <div class="grid-lines-sm"></div>
     <div class="wrap page-hero-in">
       <p class="eyebrow">Torneos · deporte · mente · esports</p>
@@ -166,7 +85,7 @@
       </div><!-- /torneosGrid -->
 
       <div class="empty-state hidden" id="emptyState">
-        <div class="icon">??</div>
+        <div class="icon">🔍</div>
         <h3 style="color:var(--ink);margin-bottom:8px">No se encontraron torneos</h3>
         <p>Probá con otros filtros o buscá otro nombre.</p>
       </div>
