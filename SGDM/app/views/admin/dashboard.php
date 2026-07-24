@@ -187,6 +187,10 @@
       <a class="sidebar__item" data-section="resultados" data-title="Resultados">
         <span class="icon">?</span> Resultados
       </a>
+      <div class="sidebar__section">Documentación</div>
+      <a class="sidebar__item" data-section="solicitudes" data-title="Solicitudes de acceso">
+        <span class="icon">🔒</span> Solicitudes de acceso
+      </a>
       <div class="sidebar__section">Sistema</div>
       <a class="sidebar__item" data-section="reportes" data-title="Reportes">
         <span class="icon">?</span> Reportes
@@ -427,6 +431,28 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOLICITUDES DE ACCESO A DOCUMENTACIÓN -->
+      <div class="section-panel" id="panel-solicitudes">
+        <div class="page-header">
+          <div><h1>Solicitudes de acceso</h1><p>Autorizaciones para la documentación restringida</p></div>
+          <button class="btn btn-ghost btn-sm" id="solicitudesRefrescar">Actualizar</button>
+        </div>
+        <div class="card">
+          <div style="overflow-x:auto">
+            <table class="data-table">
+              <thead>
+                <tr><th>Usuario</th><th>Correo</th><th>Materia</th><th>Estado</th><th>Solicitado</th><th>Acciones</th></tr>
+              </thead>
+              <!-- Las filas las completa admin.js con GET /api/admin/doc-solicitudes -->
+              <tbody id="solicitudesBody"></tbody>
+            </table>
+          </div>
+          <div class="card__footer" id="solicitudesFooter" style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">
+            Cargando…
           </div>
         </div>
       </div>

@@ -1,5 +1,10 @@
 <?php
 require_once __DIR__ . '/../core/Controller.php';
+require_once __DIR__ . '/../shared/Session.php';
+require_once __DIR__ . '/../shared/Mailer.php';
+require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/../models/DocAcceso.php';
+require_once __DIR__ . '/../models/DocOtp.php';
 
 /**
  * Controlador de la documentación del proyecto (capa C del patrón MVC).
@@ -28,6 +33,15 @@ class DocsController extends Controller {
 
     /** Timeout de descarga en segundos. */
     private const FETCH_TIMEOUT = 8;
+
+    /**
+     * Materias de acceso restringido: exigen sesión + aprobación de un
+     * administrador + verificación por código enviado al correo.
+     */
+    private const SENSIBLES = ['ciberseguridad'];
+
+    /** Minutos que dura el acceso verificado por código antes de re-pedirlo. */
+    private const VERIF_TTL = 1800;
 
     /**
      * Lista blanca de materias: slug público → nombre, descripción y URL del
@@ -91,8 +105,29 @@ class DocsController extends Controller {
             return;
         }
 
-        // Estado 2 · materia elegida → su documento (en vivo desde Google Docs).
+        // Estado 2 · materia elegida.
         $materia = self::MATERIAS[$slug];
+
+        // Gate de las materias restringidas: si el usuario todavía no está
+        // registrado + aprobado + verificado por código, mostramos la pantalla
+        // de acceso en lugar del documento.
+        if (in_array($slug, self::SENSIBLES, true)) {
+            $gate = $this->evaluarAcceso($slug);
+            if ($gate !== null) {
+                $this->render('publico/documentacion', [
+                    'title'       => 'Tornalyx | ' . $materia['nombre'],
+                    'materias'    => self::MATERIAS,
+                    'materia'     => $materia,
+                    'materiaSlug' => $slug,
+                    'gate'        => $gate,
+                    'csrf'        => Session::csrfToken(),
+                    'flash'       => $this->tomarFlash(),
+                ]);
+                return;
+            }
+        }
+
+        // Autorizado (o materia pública): render del documento en vivo.
         [$contenido, $error] = $this->obtenerContenido($slug, $materia['url']);
 
         $this->render('publico/documentacion', [
@@ -103,6 +138,207 @@ class DocsController extends Controller {
             'contenido'   => $contenido,
             'error'       => $error,
         ]);
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // Acceso restringido: solicitud, aprobación y código por email
+    // ──────────────────────────────────────────────────────────
+
+    /**
+     * Evalúa si el usuario puede ver una materia restringida. Devuelve null si
+     * el acceso está concedido (registrado + aprobado + verificado en la
+     * sesión); en caso contrario, un array que describe qué pantalla mostrar.
+     *
+     * @return array<string,mixed>|null
+     */
+    private function evaluarAcceso(string $slug): ?array {
+        Session::start();
+
+        if (!Session::isLoggedIn()) {
+            return ['estado' => 'login'];
+        }
+
+        $usuarioId = (int) Session::getUserId();
+        $estado    = (new DocAcceso())->estado($usuarioId, $slug);
+
+        if ($estado === null)        return ['estado' => 'solicitar'];
+        if ($estado === 'pendiente') return ['estado' => 'pendiente'];
+        if ($estado === 'rechazado') return ['estado' => 'rechazado'];
+
+        // Aprobado: ¿ya verificó el código en esta sesión (dentro del TTL)?
+        $okHasta = (int) ($_SESSION['doc_ok'][$slug] ?? 0);
+        if (time() < $okHasta) {
+            return null; // acceso concedido
+        }
+
+        // Falta el código: preparamos los datos para la pantalla de verificación.
+        $otp     = new DocOtp();
+        $usuario = (new Usuario())->findById($usuarioId);
+        return [
+            'estado'       => 'codigo',
+            'codigoActivo' => $otp->activo($usuarioId, $slug),
+            'cooldown'     => $otp->cooldownRestante($usuarioId, $slug),
+            'emailMasked'  => $this->maskEmail((string) ($usuario['email'] ?? '')),
+        ];
+    }
+
+    /**
+     * POST /documentacion/solicitar — el usuario pide acceso a una materia
+     * restringida; queda pendiente de aprobación por un administrador.
+     */
+    public function solicitarAcceso(): void {
+        Session::start();
+        $slug = $this->slugSensibleDePost();
+        if ($slug === null) {
+            $this->volver('');
+        }
+        if (!Session::isLoggedIn()) {
+            header('Location: /login');
+            exit;
+        }
+        (new DocAcceso())->solicitar((int) Session::getUserId(), $slug);
+        $this->flash('Tu solicitud de acceso fue enviada. Un administrador la revisará.');
+        $this->volver($slug);
+    }
+
+    /**
+     * POST /documentacion/codigo — envía (o reenvía) el código de verificación
+     * al correo del usuario aprobado, respetando el enfriamiento.
+     */
+    public function enviarCodigo(): void {
+        Session::start();
+        $slug = $this->slugSensibleDePost();
+        if ($slug === null || !Session::isLoggedIn()) {
+            header('Location: /login');
+            exit;
+        }
+        $usuarioId = (int) Session::getUserId();
+
+        if ((new DocAcceso())->estado($usuarioId, $slug) !== 'aprobado') {
+            $this->flash('Tu acceso todavía no fue aprobado.');
+            $this->volver($slug);
+        }
+
+        $otp      = new DocOtp();
+        $cooldown = $otp->cooldownRestante($usuarioId, $slug);
+        if ($cooldown > 0) {
+            $this->flash("Esperá {$cooldown} segundos para pedir otro código.");
+            $this->volver($slug);
+        }
+
+        $usuario = (new Usuario())->findById($usuarioId);
+        if (!$usuario) {
+            $this->flash('No pudimos enviar el código. Iniciá sesión de nuevo.');
+            $this->volver($slug);
+        }
+
+        $codigo = $otp->generar($usuarioId, $slug);
+        try {
+            $this->enviarCodigoEmail($usuario, $slug, $codigo);
+        } catch (Throwable $e) {
+            error_log('Fallo al enviar código de acceso a documentación: ' . $e->getMessage());
+            $otp->invalidar($usuarioId, $slug);
+            $this->flash('No pudimos enviar el código. Probá de nuevo en unos minutos.');
+            $this->volver($slug);
+        }
+
+        $this->flash('Te enviamos un código de 6 dígitos a tu correo.');
+        $this->volver($slug);
+    }
+
+    /**
+     * POST /documentacion/verificar — valida el código; si es correcto, habilita
+     * el documento durante esta sesión (VERIF_TTL).
+     */
+    public function verificarCodigo(): void {
+        Session::start();
+        $slug = $this->slugSensibleDePost();
+        if ($slug === null || !Session::isLoggedIn()) {
+            header('Location: /login');
+            exit;
+        }
+        $usuarioId = (int) Session::getUserId();
+
+        if ((new DocAcceso())->estado($usuarioId, $slug) !== 'aprobado') {
+            $this->flash('Tu acceso todavía no fue aprobado.');
+            $this->volver($slug);
+        }
+
+        $codigo = preg_replace('/\D/', '', (string) ($_POST['codigo'] ?? ''));
+        if (strlen($codigo) !== 6) {
+            $this->flash('Ingresá el código de 6 dígitos.');
+            $this->volver($slug);
+        }
+
+        $error = null;
+        if (!(new DocOtp())->verificar($usuarioId, $slug, $codigo, $error)) {
+            $this->flash($error ?? 'Código incorrecto.');
+            $this->volver($slug);
+        }
+
+        // Verificado: habilitar el documento por un rato en esta sesión.
+        $_SESSION['doc_ok'][$slug] = time() + self::VERIF_TTL;
+        $this->volver($slug);
+    }
+
+    /** Lee y valida el slug de materia sensible del POST; null si no es válido. */
+    private function slugSensibleDePost(): ?string {
+        $slug = (string) ($_POST['materia'] ?? '');
+        return (isset(self::MATERIAS[$slug]) && in_array($slug, self::SENSIBLES, true)) ? $slug : null;
+    }
+
+    /** Guarda un mensaje flash para mostrar tras la redirección (patrón PRG). */
+    private function flash(string $mensaje): void {
+        $_SESSION['doc_flash'] = $mensaje;
+    }
+
+    /** Recupera y limpia el mensaje flash. */
+    private function tomarFlash(): ?string {
+        $f = $_SESSION['doc_flash'] ?? null;
+        unset($_SESSION['doc_flash']);
+        return is_string($f) ? $f : null;
+    }
+
+    /** Redirige de vuelta a la materia (o a la grilla si no hay slug) y corta. */
+    private function volver(string $slug): void {
+        $destino = $slug !== '' ? '/documentacion?materia=' . urlencode($slug) : '/documentacion';
+        header('Location: ' . $destino);
+        exit;
+    }
+
+    /** Envía el código de acceso por correo (mismo transporte que el 2FA). */
+    private function enviarCodigoEmail(array $usuario, string $slug, string $codigo): void {
+        $nombreMateria = self::MATERIAS[$slug]['nombre'] ?? $slug;
+        $nombre = trim((string) ($usuario['nombre'] ?? ''));
+        $email  = (string) ($usuario['email'] ?? '');
+
+        $subject = "Tornalyx · Código de acceso a {$nombreMateria}";
+        $text = "Hola {$nombre},\n\n"
+              . "Tu código para ver la documentación de {$nombreMateria} es: {$codigo}\n"
+              . "Vence en 10 minutos y es de un solo uso.\n\n"
+              . "Si no fuiste vos, ignorá este correo.\n\nTornalyx";
+        $html = '<div style="font-family:Arial,sans-serif;max-width:480px;margin:auto">'
+              . '<h2 style="color:#ec1c24">Tornalyx</h2>'
+              . '<p>Hola ' . htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') . ',</p>'
+              . '<p>Tu código para ver la documentación de <strong>' . htmlspecialchars($nombreMateria, ENT_QUOTES, 'UTF-8') . '</strong> es:</p>'
+              . '<p style="font-size:30px;font-weight:bold;letter-spacing:6px;color:#111">' . htmlspecialchars($codigo, ENT_QUOTES, 'UTF-8') . '</p>'
+              . '<p style="color:#666">Vence en 10 minutos y es de un solo uso. Si no fuiste vos, ignorá este correo.</p>'
+              . '</div>';
+
+        (new Mailer())->send($email, $nombre, $subject, $html, $text);
+    }
+
+    /** Enmascara el correo para mostrarlo sin revelarlo del todo. */
+    private function maskEmail(string $email): string {
+        $partes = explode('@', $email);
+        if (count($partes) !== 2 || $partes[0] === '') {
+            return '***';
+        }
+        $u    = $partes[0];
+        $len  = mb_strlen($u);
+        $ini  = mb_substr($u, 0, 1);
+        $fin  = $len > 1 ? mb_substr($u, -1) : '';
+        return $ini . str_repeat('*', max(1, $len - 2)) . $fin . '@' . $partes[1];
     }
 
     /**

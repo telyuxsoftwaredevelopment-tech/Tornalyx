@@ -63,6 +63,9 @@ $router->get('/torneos',        static fn() => $view->render('publico/torneos', 
 $router->get('/torneo-detalle', static fn() => $view->render('publico/torneo-detalle', ['title' => 'Tornalyx | Copa Regional Fútbol 2026']));
 $router->get('/terminos',       static fn() => $view->render('publico/terminos',       ['title' => 'Tornalyx | Términos y Condiciones']));
 $router->get('/documentacion',  static fn() => (new DocsController())->show());
+$router->post('/documentacion/solicitar', static fn() => (new DocsController())->solicitarAcceso());
+$router->post('/documentacion/codigo',    static fn() => (new DocsController())->enviarCodigo());
+$router->post('/documentacion/verificar', static fn() => (new DocsController())->verificarCodigo());
 
 // ─── AUTH ──────────────────────────────────────────────────────
 $router->get('/login',            static fn() => (new AuthController())->showLogin());
@@ -103,6 +106,8 @@ $router->get('/api/admin/stats',    static fn() => (new AdminController())->stat
 $router->get('/api/admin/usuarios', static fn() => (new AdminController())->usuarios());
 $router->post('/api/admin/usuario/crear',      static fn() => (new AdminController())->crearUsuario());
 $router->post('/api/admin/usuario/actualizar', static fn() => (new AdminController())->actualizarUsuario());
+$router->get('/api/admin/doc-solicitudes',         static fn() => (new AdminController())->docSolicitudes());
+$router->post('/api/admin/doc-solicitud/resolver', static fn() => (new AdminController())->resolverDocSolicitud());
 
 // ─── 404 por defecto ───────────────────────────────────────────
 $router->fallback(static function (): void {

@@ -274,6 +274,109 @@ function initUsuarioForm() {
   });
 }
 
+/* =====================================================
+   Solicitudes de acceso a documentación restringida
+   ===================================================== */
+
+/* Nombre legible de cada materia restringida. */
+const MATERIA_LABEL = { ciberseguridad: 'Ciberseguridad' };
+
+/* Punto y etiqueta de cada estado de solicitud. */
+const SOLICITUD_ESTADO = {
+  pendiente: { dot: 'dot-yellow', label: 'Pendiente' },
+  aprobado:  { dot: 'dot-green',  label: 'Aprobado'  },
+  rechazado: { dot: 'dot-muted',  label: 'Rechazado' }
+};
+
+/* Solicitudes cargadas en memoria. */
+let solicitudes = [];
+
+/**
+ * HTML de una fila de la tabla de solicitudes de acceso.
+ * @param {Object} s
+ * @returns {string}
+ */
+function solicitudRowHtml(s) {
+  const esc    = Utils.escapeHtml;
+  const nombre = [s.nombre, s.apellido].filter(Boolean).join(' ');
+  const est    = SOLICITUD_ESTADO[s.estado] || { dot: 'dot-muted', label: s.estado || '—' };
+  const mat    = MATERIA_LABEL[s.materia] || s.materia || '—';
+
+  /* Según el estado, se ofrece aprobar y/o rechazar (revocar). */
+  const aprobar  = `<a href="#" data-doc-accion="aprobar" data-id="${s.id}" style="color:#34d399;font-size:12px;margin-right:12px">Aprobar</a>`;
+  const rechazar = `<a href="#" data-doc-accion="rechazar" data-id="${s.id}" style="color:var(--red-bright);font-size:12px">${s.estado === 'aprobado' ? 'Revocar' : 'Rechazar'}</a>`;
+  let acciones;
+  if (s.estado === 'pendiente')      acciones = aprobar + rechazar;
+  else if (s.estado === 'aprobado')  acciones = rechazar;
+  else                               acciones = aprobar;
+
+  return `
+    <tr>
+      <td>${esc(nombre)}</td>
+      <td style="color:var(--muted-2)">${esc(s.email)}</td>
+      <td>${esc(mat)}</td>
+      <td><span class="dot ${est.dot}"></span>${esc(est.label)}</td>
+      <td style="font-family:var(--mono);font-size:12px">${esc(fechaRegistro(s.solicitado_at))}</td>
+      <td>${acciones}</td>
+    </tr>`;
+}
+
+/** Redibuja la tabla de solicitudes y engancha los botones de acción. */
+function renderSolicitudes() {
+  const body = document.getElementById('solicitudesBody');
+  if (!body) return;
+
+  body.innerHTML = solicitudes.length
+    ? solicitudes.map(solicitudRowHtml).join('')
+    : '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No hay solicitudes.</td></tr>';
+
+  body.querySelectorAll('[data-doc-accion]').forEach(a =>
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      resolverSolicitud(Number(a.dataset.id), a.dataset.docAccion);
+    })
+  );
+
+  const footer = document.getElementById('solicitudesFooter');
+  if (footer) {
+    const pend = solicitudes.filter(s => s.estado === 'pendiente').length;
+    footer.textContent = `${solicitudes.length} solicitud(es) · ${pend} pendiente(s)`;
+  }
+}
+
+/** Carga las solicitudes de acceso desde el backend. */
+async function cargarSolicitudes() {
+  const body = document.getElementById('solicitudesBody');
+  if (!body) return;
+
+  body.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">Cargando…</td></tr>';
+  try {
+    const data = await Api.get('/api/admin/doc-solicitudes');
+    solicitudes = data.solicitudes || [];
+    renderSolicitudes();
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="6" style="color:var(--muted)">${Utils.escapeHtml(err.message)}</td></tr>`;
+    const footer = document.getElementById('solicitudesFooter');
+    if (footer) footer.textContent = '';
+  }
+}
+
+/**
+ * Aprueba o rechaza una solicitud y recarga la lista.
+ * @param {number} id
+ * @param {string} accion 'aprobar' | 'rechazar'
+ */
+async function resolverSolicitud(id, accion) {
+  if (!id || !accion) return;
+  try {
+    const data = await Api.post('/api/admin/doc-solicitud/resolver', { id, accion });
+    Toast.success(data.mensaje || 'Listo.');
+    await cargarSolicitudes();
+  } catch (err) {
+    Toast.error(err.message);
+  }
+}
+
 /** Carga las estadísticas del sistema y pinta KPIs + actividad. */
 async function cargarStats() {
   try {
@@ -299,5 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('nuevoUsuarioBtn')?.addEventListener('click', () => abrirModalUsuario());
     const buscar = document.getElementById('usuariosBuscar');
     if (buscar) buscar.addEventListener('input', Utils.debounce(renderUsuarios, 200));
+  }
+
+  if (document.getElementById('solicitudesBody')) {
+    cargarSolicitudes();
+    document.getElementById('solicitudesRefrescar')?.addEventListener('click', cargarSolicitudes);
   }
 });

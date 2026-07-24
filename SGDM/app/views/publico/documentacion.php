@@ -73,6 +73,19 @@
     .markdown th { font-family:var(--head); color:var(--ink); background:rgba(255,255,255,.03); }
     .markdown td { color:var(--muted); }
 
+    /* ── Pantalla de acceso restringido (gate) ──────────── */
+    .doc-gate { max-width:520px; margin:var(--space-8) auto 0; }
+    .doc-gate__card { background:var(--bg-card); border:1px solid var(--line-soft); border-radius:16px; padding:var(--space-8); text-align:center; }
+    .doc-gate__ic { width:52px; height:52px; margin:0 auto var(--space-4); color:var(--red-bright); }
+    .doc-gate__ic svg { width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+    .doc-gate__card h2 { font-family:var(--head); font-size:var(--font-size-xl); color:var(--ink); margin-bottom:var(--space-3); }
+    .doc-gate__card p { color:var(--muted); font-size:var(--font-size-sm); line-height:1.7; margin-bottom:var(--space-5); }
+    .doc-gate__card p strong { color:var(--ink); }
+    .doc-gate form { display:flex; flex-direction:column; align-items:center; gap:var(--space-3); }
+    .doc-code-input { width:200px; text-align:center; font-family:var(--mono); font-size:1.4rem; letter-spacing:8px; padding:12px; }
+    .doc-resend { margin-top:var(--space-3); }
+    .doc-flash { max-width:520px; margin:0 auto var(--space-4); }
+
     @media (min-width:900px) {
       .doc-materias { grid-template-columns:1fr 1fr 1fr; }
     }
@@ -112,6 +125,7 @@
       </div>
 
 <?php else: ?>
+      <?php $gate = $gate ?? null; ?>
       <!-- ── Estado 2 · Documento de la materia (en vivo) ── -->
       <a class="doc-back" href="/documentacion">
         <img src="../assets/icon-volver.svg" width="17" height="17" alt="">Todas las materias
@@ -121,13 +135,83 @@
           <p class="eyebrow">Documentación</p>
           <h1><?= e($materia['nombre']) ?></h1>
         </div>
+        <?php if ($gate === null): ?>
         <div class="doc-meta">
           <span class="doc-live"><span class="status-dot status-dot--green"></span>Se actualiza automáticamente</span>
           <a href="<?= e($materia['url']) ?>" target="_blank" rel="noopener">Abrir original en Google Docs ↗</a>
         </div>
+        <?php endif; ?>
       </div>
 
-      <?php if (($error ?? null) !== null): ?>
+      <?php if ($gate !== null): ?>
+        <!-- Acceso restringido: registrado + aprobado + código por email -->
+        <?php if (!empty($flash)): ?>
+          <div class="doc-flash"><div class="alert alert-info"><?= e($flash) ?></div></div>
+        <?php endif; ?>
+        <div class="doc-gate">
+          <div class="doc-gate__card">
+            <div class="doc-gate__ic">
+              <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="15.5" r="1.2"/></svg>
+            </div>
+
+            <?php if ($gate['estado'] === 'login'): ?>
+              <h2>Documentación restringida</h2>
+              <p>Este documento solo está disponible para usuarios registrados y autorizados. Iniciá sesión para poder solicitar acceso.</p>
+              <a class="btn btn-primary" href="/login">Iniciar sesión</a>
+
+            <?php elseif ($gate['estado'] === 'solicitar'): ?>
+              <h2>Acceso restringido</h2>
+              <p>Para ver la documentación de <strong><?= e($materia['nombre']) ?></strong> necesitás autorización. Solicitá acceso y un administrador lo revisará.</p>
+              <form method="post" action="/documentacion/solicitar">
+                <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
+                <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
+                <button class="btn btn-primary" type="submit">Solicitar acceso</button>
+              </form>
+
+            <?php elseif ($gate['estado'] === 'pendiente'): ?>
+              <h2>Solicitud pendiente</h2>
+              <p>Tu solicitud de acceso está <strong>pendiente de aprobación</strong>. Te avisaremos por correo cuando un administrador la resuelva.</p>
+
+            <?php elseif ($gate['estado'] === 'rechazado'): ?>
+              <h2>Acceso rechazado</h2>
+              <p>Tu solicitud de acceso fue rechazada. Si creés que es un error, podés volver a solicitarlo.</p>
+              <form method="post" action="/documentacion/solicitar">
+                <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
+                <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
+                <button class="btn btn-primary" type="submit">Solicitar de nuevo</button>
+              </form>
+
+            <?php else: /* codigo */ ?>
+              <h2>Verificación por código</h2>
+              <p>Tu acceso está aprobado. Para ver el documento, verificá tu identidad con un código enviado a <strong><?= e($gate['emailMasked']) ?></strong>.</p>
+              <?php if (empty($gate['codigoActivo'])): ?>
+                <form method="post" action="/documentacion/codigo">
+                  <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
+                  <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
+                  <button class="btn btn-primary" type="submit">Enviarme el código</button>
+                </form>
+              <?php else: ?>
+                <form method="post" action="/documentacion/verificar">
+                  <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
+                  <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
+                  <input class="form-control doc-code-input" type="text" name="codigo"
+                         inputmode="numeric" maxlength="6" pattern="\d{6}" placeholder="000000"
+                         autocomplete="one-time-code" required aria-label="Código de 6 dígitos">
+                  <button class="btn btn-primary" type="submit">Verificar y ver documento</button>
+                </form>
+                <form class="doc-resend" method="post" action="/documentacion/codigo">
+                  <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
+                  <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
+                  <button class="btn btn-ghost btn-sm" type="submit" <?= ((int) ($gate['cooldown'] ?? 0)) > 0 ? 'disabled' : '' ?>>
+                    <?= ((int) ($gate['cooldown'] ?? 0)) > 0 ? 'Reenviar en ' . (int) $gate['cooldown'] . ' s' : 'Reenviar código' ?>
+                  </button>
+                </form>
+              <?php endif; ?>
+            <?php endif; ?>
+          </div>
+        </div>
+
+      <?php elseif (($error ?? null) !== null): ?>
         <div class="doc-error">
           <div class="alert alert-error"><?= e($error) ?></div>
         </div>
