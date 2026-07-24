@@ -27,6 +27,7 @@ require_once __DIR__ . '/../app/shared/Session.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/TorneoController.php';
 require_once __DIR__ . '/../app/controllers/AdminController.php';
+require_once __DIR__ . '/../app/controllers/DocsController.php';
 
 Session::start();
 
@@ -61,6 +62,7 @@ $router->get('/registro',       static fn() => $view->render('publico/registro',
 $router->get('/torneos',        static fn() => $view->render('publico/torneos',        ['title' => 'Tornalyx | Buscar Torneos']));
 $router->get('/torneo-detalle', static fn() => $view->render('publico/torneo-detalle', ['title' => 'Tornalyx | Copa Regional Fútbol 2026']));
 $router->get('/terminos',       static fn() => $view->render('publico/terminos',       ['title' => 'Tornalyx | Términos y Condiciones']));
+$router->get('/documentacion',  static fn() => (new DocsController())->show());
 
 // ─── AUTH ──────────────────────────────────────────────────────
 $router->get('/login',            static fn() => (new AuthController())->showLogin());

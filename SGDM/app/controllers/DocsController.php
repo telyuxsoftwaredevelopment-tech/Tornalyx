@@ -1,0 +1,278 @@
+<?php
+require_once __DIR__ . '/../core/Controller.php';
+
+/**
+ * Controlador de la documentación del proyecto (capa C del patrón MVC).
+ *
+ * La documentación son Google Docs nativos que el equipo actualiza de forma
+ * continua. Cada materia se corresponde con UN documento "publicado en la web"
+ * (Archivo → Compartir → Publicar en la Web). Este controlador:
+ *   1. descarga el HTML publicado (que Google refresca cada ~5 min),
+ *   2. extrae solo el contenido (#contents) y lo SANEA con una lista blanca de
+ *      etiquetas y atributos (defensa anti-XSS ante HTML externo),
+ *   3. lo cachea en disco unos minutos (rendimiento y resiliencia),
+ * y la vista lo pinta con los estilos de Tornalyx. Así queda "siempre al día"
+ * conservando tablas, índices y encabezados, sin redirigir a Google.
+ *
+ * Navegación (100% en servidor; la CSP prohíbe scripts inline):
+ *   - /documentacion                 → grilla de materias
+ *   - /documentacion?materia=<slug>  → documento de esa materia
+ *
+ * Para agregar una materia nueva: publicá su Doc en la web y sumá una entrada a
+ * MATERIAS con su slug, nombre, descripción y la URL '.../pub'.
+ */
+class DocsController extends Controller {
+
+    /** Vida de la caché en segundos (Google republica el pub cada ~5 min). */
+    private const CACHE_TTL = 300;
+
+    /** Timeout de descarga en segundos. */
+    private const FETCH_TIMEOUT = 8;
+
+    /**
+     * Lista blanca de materias: slug público → nombre, descripción y URL del
+     * Google Doc publicado. El orden es el que se muestra en la grilla.
+     */
+    private const MATERIAS = [
+        'ingenieria-software' => [
+            'nombre' => 'Ingeniería de Software',
+            'desc'   => 'Documentación de inicio, organización del equipo, ciclo de vida y relevamiento de requisitos.',
+            'url'    => 'https://docs.google.com/document/d/e/2PACX-1vRNPU_Vc_0dfoxOP5JWTOqqwBDzRezTEvIDMLOXt1QYw0drRfw_Zq-1gB4KhQHb4K7xcn5syj28VJ5f/pub',
+        ],
+        'ciberseguridad' => [
+            'nombre' => 'Ciberseguridad',
+            'desc'   => 'Amenazas, vulnerabilidades de infraestructura, controles de acceso, política de contraseñas y medidas de seguridad.',
+            'url'    => 'https://docs.google.com/document/d/e/2PACX-1vQdP4ZXer6vjoQ26e8R1-eEcmss2anrn3YXf4IhZPvg4F__gTTa6kgyLIcC7geuGfg75S923FNhQIGU/pub',
+        ],
+        'tutoria' => [
+            'nombre' => 'Tutoría',
+            'desc'   => 'Nombre y logo del grupo, logotipo de la aplicación, pensamiento S.C.A.M.P.E.R y actas de reunión.',
+            'url'    => 'https://docs.google.com/document/d/e/2PACX-1vS98n_oJKtySAZNbLRjHq3VANtgaDZU0mIyjxhuomDXjs_k-n59_8cyMiZIaEzQ6OO6xvjPNX74wasi/pub',
+        ],
+    ];
+
+    /** Etiquetas HTML permitidas en el contenido saneado. */
+    private const TAGS_OK = [
+        'p', 'br', 'hr', 'span', 'div', 'a', 'img',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'ul', 'ol', 'li',
+        'table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th',
+        'strong', 'b', 'em', 'i', 'u', 'sup', 'sub', 'blockquote', 'code', 'pre',
+    ];
+
+    /** Etiquetas que se eliminan por completo (con su contenido). */
+    private const TAGS_KILL = [
+        'style', 'script', 'link', 'meta', 'iframe', 'object',
+        'embed', 'form', 'input', 'button', 'noscript', 'svg',
+    ];
+
+    /** Atributos permitidos por etiqueta (además de 'id', global para el índice). */
+    private const ATTRS_OK = [
+        'a'   => ['href', 'title', 'rel', 'target'],
+        'img' => ['src', 'alt'],
+        'td'  => ['colspan', 'rowspan'],
+        'th'  => ['colspan', 'rowspan'],
+    ];
+
+    /**
+     * GET /documentacion. Según los parámetros, muestra la grilla de materias o
+     * el documento de una materia concreta.
+     */
+    public function show(): void {
+        $slug = isset($_GET['materia']) ? (string) $_GET['materia'] : '';
+
+        // Estado 1 · sin materia válida → grilla de materias.
+        if (!isset(self::MATERIAS[$slug])) {
+            $this->render('publico/documentacion', [
+                'title'    => 'Tornalyx | Documentación',
+                'materias' => self::MATERIAS,
+                'materia'  => null,
+            ]);
+            return;
+        }
+
+        // Estado 2 · materia elegida → su documento (en vivo desde Google Docs).
+        $materia = self::MATERIAS[$slug];
+        [$contenido, $error] = $this->obtenerContenido($slug, $materia['url']);
+
+        $this->render('publico/documentacion', [
+            'title'       => 'Tornalyx | ' . $materia['nombre'],
+            'materias'    => self::MATERIAS,
+            'materia'     => $materia,
+            'materiaSlug' => $slug,
+            'contenido'   => $contenido,
+            'error'       => $error,
+        ]);
+    }
+
+    /**
+     * Devuelve [htmlContenido, mensajeError|null]. Sirve de la caché si sigue
+     * fresca; si venció, descarga y reprocesa; si la descarga falla, cae a la
+     * copia en caché aunque esté vencida (resiliencia ante caídas de red).
+     *
+     * @return array{0:string,1:?string}
+     */
+    private function obtenerContenido(string $slug, string $url): array {
+        $dir   = __DIR__ . '/../../storage/docs-cache';
+        $cache = $dir . '/' . $slug . '.html';
+
+        // 1 · Caché fresca.
+        if (is_file($cache) && (time() - filemtime($cache)) < self::CACHE_TTL) {
+            return [(string) file_get_contents($cache), null];
+        }
+
+        // 2 · Descargar y procesar.
+        $html = $this->descargar($url);
+        if ($html !== null) {
+            $contenido = $this->extraer($html);
+            if ($contenido !== '') {
+                if (!is_dir($dir)) {
+                    @mkdir($dir, 0775, true);
+                }
+                @file_put_contents($cache, $contenido, LOCK_EX);
+                return [$contenido, null];
+            }
+        }
+
+        // 3 · Fallback: caché vencida, mejor mostrar algo que nada.
+        if (is_file($cache)) {
+            return [(string) file_get_contents($cache), null];
+        }
+
+        return ['', 'No pudimos cargar la documentación en este momento. Probá de nuevo en unos minutos.'];
+    }
+
+    /** Descarga el HTML del Doc publicado (curl si está; si no, file_get_contents). */
+    private function descargar(string $url): ?string {
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS      => 3,
+                CURLOPT_TIMEOUT        => self::FETCH_TIMEOUT,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_USERAGENT      => 'Tornalyx-Docs/1.0',
+            ]);
+            $body = curl_exec($ch);
+            $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            return ($body !== false && $code >= 200 && $code < 300) ? (string) $body : null;
+        }
+
+        $ctx  = stream_context_create(['http' => [
+            'timeout'    => self::FETCH_TIMEOUT,
+            'user_agent' => 'Tornalyx-Docs/1.0',
+        ]]);
+        $body = @file_get_contents($url, false, $ctx);
+        return $body === false ? null : $body;
+    }
+
+    /**
+     * Extrae el nodo #contents del HTML publicado y devuelve su interior ya
+     * saneado. Si no encuentra el contenedor, devuelve cadena vacía.
+     */
+    private function extraer(string $html): string {
+        $doc = new DOMDocument();
+        libxml_use_internal_errors(true);
+        // El prefijo XML fuerza UTF-8 para que no se rompan los acentos.
+        $doc->loadHTML('<?xml encoding="UTF-8"?>' . $html, LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+
+        $xpath    = new DOMXPath($doc);
+        $contents = $xpath->query('//*[@id="contents"]')->item(0);
+        if (!$contents instanceof DOMElement) {
+            return '';
+        }
+
+        $this->sanear($contents);
+
+        $out = '';
+        foreach (iterator_to_array($contents->childNodes) as $node) {
+            $out .= $doc->saveHTML($node);
+        }
+        return trim($out);
+    }
+
+    /**
+     * Limpieza recursiva del árbol: elimina etiquetas peligrosas (con su
+     * contenido), desenvuelve las desconocidas, quita atributos no permitidos
+     * (class, style, on*, etc.), normaliza los enlaces envueltos por Google y
+     * descarta encabezados/párrafos vacíos.
+     */
+    private function sanear(DOMNode $nodo): void {
+        // Copia estática: el árbol se muta durante la iteración.
+        foreach (iterator_to_array($nodo->childNodes) as $hijo) {
+            if ($hijo->nodeType !== XML_ELEMENT_NODE) {
+                continue;
+            }
+            /** @var DOMElement $hijo */
+            $tag = strtolower($hijo->nodeName);
+
+            // Etiquetas peligrosas: fuera por completo.
+            if (in_array($tag, self::TAGS_KILL, true)) {
+                $nodo->removeChild($hijo);
+                continue;
+            }
+
+            // Etiqueta desconocida: desenvolver (conservar sus hijos).
+            if (!in_array($tag, self::TAGS_OK, true)) {
+                $this->sanear($hijo);
+                while ($hijo->firstChild) {
+                    $nodo->insertBefore($hijo->firstChild, $hijo);
+                }
+                $nodo->removeChild($hijo);
+                continue;
+            }
+
+            // Depurar atributos (se permite 'id' global para el índice/anclas).
+            $permitidos = array_merge(['id'], self::ATTRS_OK[$tag] ?? []);
+            foreach (iterator_to_array($hijo->attributes) as $attr) {
+                if (!in_array(strtolower($attr->name), $permitidos, true)) {
+                    $hijo->removeAttribute($attr->name);
+                }
+            }
+
+            // Normalizar enlaces (Google envuelve externos en /url?q=REAL).
+            if ($tag === 'a') {
+                $href = $hijo->hasAttribute('href') ? $this->normalizarHref($hijo->getAttribute('href')) : '';
+                if ($href === '') {
+                    $hijo->removeAttribute('href');
+                } else {
+                    $hijo->setAttribute('href', $href);
+                    // Los enlaces externos se abren en pestaña nueva y sin fugas de referrer.
+                    if ($href[0] !== '#') {
+                        $hijo->setAttribute('rel', 'noopener nofollow');
+                        $hijo->setAttribute('target', '_blank');
+                    }
+                }
+            }
+
+            // Recursión en el subárbol ya validado.
+            $this->sanear($hijo);
+
+            // Descartar encabezados/párrafos que quedaron vacíos (Google mete varios).
+            if (in_array($tag, ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'], true)
+                && trim($hijo->textContent) === ''
+                && $hijo->getElementsByTagName('img')->length === 0) {
+                $nodo->removeChild($hijo);
+            }
+        }
+    }
+
+    /** Desenvuelve el redirector de Google y solo deja esquemas seguros. */
+    private function normalizarHref(string $href): string {
+        $href = trim($href);
+        if ($href === '') {
+            return '';
+        }
+        if (preg_match('#^https?://www\.google\.com/url\?#i', $href)) {
+            parse_str((string) parse_url($href, PHP_URL_QUERY), $q);
+            if (!empty($q['q']) && is_string($q['q'])) {
+                $href = $q['q'];
+            }
+        }
+        // Anclas internas (índice), http(s) y mailto; nada de javascript:, data:, etc.
+        return preg_match('~^(https?://|mailto:|#)~i', $href) ? $href : '';
+    }
+}

@@ -23,6 +23,7 @@
   <a href="#como">Cómo funciona</a>
   <a href="#roles">Roles</a>
   <a href="#empresa">Empresa</a>
+  <a href="/documentacion">Documentación</a>
   <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
   <a class="btn btn-primary mobile-cta" href="/torneos">Ver torneos</a>
 </div>
@@ -40,6 +41,7 @@
       <a href="#como">Cómo funciona</a>
       <a href="#roles">Roles</a>
       <a href="#empresa">Empresa</a>
+      <a href="/documentacion">Documentación</a>
     </nav>
     <div class="nav-right">
       <a class="ghost-link" href="/login">Entrar</a>
@@ -406,6 +408,7 @@
           <h2 data-reveal>Hecho por Telyux Software Development</h2>
           <p class="lead" data-reveal>Tornalyx nace para resolver un problema concreto: organizar competencias sin perder horas en planillas y herramientas sueltas. Construimos una plataforma modular, clara y pensada para durar toda la temporada.</p>
           <div class="btn-row" data-reveal style="margin-top:24px">
+            <a class="btn btn-primary" href="/documentacion">Ver documentación</a>
             <a class="btn btn-ghost" href="/registro">Crear cuenta gratis ?</a>
           </div>
         </div>
@@ -481,6 +484,7 @@
         <a href="#empresa">Sobre Telyux</a>
         <a href="/login">Entrar</a>
         <a href="/registro">Registrarse</a>
+        <a href="/documentacion">Documentación</a>
         <a href="/terminos">Términos y condiciones</a>
       </div>
     </div>
