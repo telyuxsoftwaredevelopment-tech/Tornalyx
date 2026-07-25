@@ -38,7 +38,10 @@ CREATE TABLE IF NOT EXISTS doc_otps (
     usuario_id   INT UNSIGNED NOT NULL,
     materia      VARCHAR(40)  NOT NULL,
     code_hash    VARCHAR(255) NOT NULL,                  -- bcrypt del código de 6 dígitos
-    expires_at   TIMESTAMP    NOT NULL,
+    -- Default fijo explícito: evita que MariaDB (con explicit_defaults_for_timestamp
+    -- apagado) le agregue ON UPDATE CURRENT_TIMESTAMP al primer TIMESTAMP, lo que
+    -- pisaría expires_at en cada UPDATE de attempts y rompería el reintento.
+    expires_at   TIMESTAMP    NOT NULL DEFAULT '1970-01-01 00:00:01',
     attempts     TINYINT UNSIGNED NOT NULL DEFAULT 0,
     last_sent_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (usuario_id, materia),
@@ -46,3 +49,10 @@ CREATE TABLE IF NOT EXISTS doc_otps (
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     INDEX idx_expires (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ──────────────────────────────────────────────────────────────
+-- Corrección idempotente: si un entorno ya había creado doc_otps con el
+-- esquema anterior (expires_at TIMESTAMP sin default), MariaDB le habrá puesto
+-- ON UPDATE CURRENT_TIMESTAMP implícito. Re-ejecutar la migración lo normaliza.
+-- ──────────────────────────────────────────────────────────────
+ALTER TABLE doc_otps MODIFY expires_at TIMESTAMP NOT NULL DEFAULT '1970-01-01 00:00:01';
