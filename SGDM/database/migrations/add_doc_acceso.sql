@@ -21,12 +21,18 @@ CREATE TABLE IF NOT EXISTS doc_acceso (
     solicitado_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resuelto_at   TIMESTAMP    NULL DEFAULT NULL,
     resuelto_por  INT UNSIGNED NULL DEFAULT NULL,        -- admin que aprobó/rechazó
+    -- Aprobación por email (estilo Google Docs): al solicitar acceso se genera un
+    -- token de un solo uso; su hash SHA-256 viaja hasheado acá y el token en claro
+    -- va en el enlace del correo al aprobador. Se limpia al resolver la solicitud.
+    aprob_token_hash CHAR(64)  NULL DEFAULT NULL,
+    aprob_token_exp  TIMESTAMP NULL DEFAULT NULL,
     CONSTRAINT fk_docacceso_usuario
         FOREIGN KEY (usuario_id)  REFERENCES usuarios(id) ON DELETE CASCADE,
     CONSTRAINT fk_docacceso_resuelto
         FOREIGN KEY (resuelto_por) REFERENCES usuarios(id) ON DELETE SET NULL,
     UNIQUE KEY uq_usuario_materia (usuario_id, materia),
-    INDEX idx_estado (estado)
+    INDEX idx_estado (estado),
+    INDEX idx_aprob_token (aprob_token_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ──────────────────────────────────────────────────────────────
@@ -56,3 +62,11 @@ CREATE TABLE IF NOT EXISTS doc_otps (
 -- ON UPDATE CURRENT_TIMESTAMP implícito. Re-ejecutar la migración lo normaliza.
 -- ──────────────────────────────────────────────────────────────
 ALTER TABLE doc_otps MODIFY expires_at TIMESTAMP NOT NULL DEFAULT '1970-01-01 00:00:01';
+
+-- ──────────────────────────────────────────────────────────────
+-- Columnas de aprobación por email (idempotente): si doc_acceso ya existía sin
+-- ellas, se agregan. MariaDB soporta ADD COLUMN IF NOT EXISTS.
+-- ──────────────────────────────────────────────────────────────
+ALTER TABLE doc_acceso ADD COLUMN IF NOT EXISTS aprob_token_hash CHAR(64)  NULL DEFAULT NULL;
+ALTER TABLE doc_acceso ADD COLUMN IF NOT EXISTS aprob_token_exp  TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE doc_acceso ADD INDEX IF NOT EXISTS idx_aprob_token (aprob_token_hash);

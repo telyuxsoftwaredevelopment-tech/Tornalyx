@@ -66,6 +66,8 @@ $router->get('/documentacion',  static fn() => (new DocsController())->show());
 $router->post('/documentacion/solicitar', static fn() => (new DocsController())->solicitarAcceso());
 $router->post('/documentacion/codigo',    static fn() => (new DocsController())->enviarCodigo());
 $router->post('/documentacion/verificar', static fn() => (new DocsController())->verificarCodigo());
+$router->get('/documentacion/aprobar',    static fn() => (new DocsController())->revisarSolicitud());
+$router->post('/documentacion/resolver',  static fn() => (new DocsController())->resolverSolicitud());
 
 // ─── AUTH ──────────────────────────────────────────────────────
 $router->get('/login',            static fn() => (new AuthController())->showLogin());

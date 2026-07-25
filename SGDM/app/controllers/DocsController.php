@@ -184,7 +184,9 @@ class DocsController extends Controller {
 
     /**
      * POST /documentacion/solicitar — el usuario pide acceso a una materia
-     * restringida; queda pendiente de aprobación por un administrador.
+     * restringida. Queda pendiente y se envía un correo al aprobador con un
+     * enlace (token de un solo uso) para aprobarla o rechazarla, al estilo de las
+     * solicitudes de acceso de Google Docs.
      */
     public function solicitarAcceso(): void {
         Session::start();
@@ -196,9 +198,125 @@ class DocsController extends Controller {
             header('Location: /login');
             exit;
         }
-        (new DocAcceso())->solicitar((int) Session::getUserId(), $slug);
-        $this->flash('Tu solicitud de acceso fue enviada. Un administrador la revisará.');
+
+        $usuarioId = (int) Session::getUserId();
+        $token     = (new DocAcceso())->solicitar($usuarioId, $slug);
+
+        // $token === null significa que ya estaba aprobado (nada que notificar).
+        if ($token !== null) {
+            try {
+                $this->enviarSolicitudEmail($usuarioId, $slug, $token);
+            } catch (Throwable $e) {
+                // El aviso al aprobador es best-effort: si falla el correo, la
+                // solicitud igual queda registrada y se puede resolver por panel.
+                error_log('Fallo al enviar email de solicitud de acceso a documentación: ' . $e->getMessage());
+            }
+        }
+
+        $this->flash('Tu solicitud de acceso fue enviada. Recibirás un correo cuando la aprueben.');
         $this->volver($slug);
+    }
+
+    /**
+     * GET /documentacion/aprobar?token=… — pantalla de aprobación que abre el
+     * aprobador desde el enlace del correo. Muestra quién pide acceso y a qué
+     * materia, con botones para Aprobar o Rechazar (POST). Es una página
+     * intermedia a propósito: así los escáneres de correo que precargan enlaces
+     * (GET) no resuelven la solicitud por sí solos.
+     */
+    public function revisarSolicitud(): void {
+        $token = (string) ($_GET['token'] ?? '');
+        $sol   = (new DocAcceso())->buscarPorToken($token);
+
+        if ($sol === null) {
+            $this->render('publico/doc-aprobacion', [
+                'title'  => 'Tornalyx | Solicitud de acceso',
+                'estado' => 'invalido',
+            ]);
+            return;
+        }
+
+        $this->render('publico/doc-aprobacion', [
+            'title'         => 'Tornalyx | Solicitud de acceso',
+            'estado'        => 'confirmar',
+            'token'         => $token,
+            'solicitante'   => trim(($sol['nombre'] ?? '') . ' ' . ($sol['apellido'] ?? '')),
+            'email'         => (string) ($sol['email'] ?? ''),
+            'materiaNombre' => self::MATERIAS[$sol['materia']]['nombre'] ?? (string) $sol['materia'],
+        ]);
+    }
+
+    /**
+     * POST /documentacion/resolver — aplica la decisión (aprobar/rechazar) usando
+     * el token del enlace. El token es el secreto que autoriza la acción (magic
+     * link de un solo uso), por eso no exige sesión de administrador.
+     */
+    public function resolverSolicitud(): void {
+        $token  = (string) ($_POST['token'] ?? '');
+        $accion = (string) ($_POST['accion'] ?? '');
+        $sol    = (new DocAcceso())->resolverPorToken($token, $accion);
+
+        if ($sol === null) {
+            $this->render('publico/doc-aprobacion', [
+                'title'  => 'Tornalyx | Solicitud de acceso',
+                'estado' => 'invalido',
+            ]);
+            return;
+        }
+
+        $this->render('publico/doc-aprobacion', [
+            'title'         => 'Tornalyx | Solicitud de acceso',
+            'estado'        => 'resuelto',
+            'resultado'     => $sol['estado'], // 'aprobado' | 'rechazado'
+            'solicitante'   => trim(($sol['nombre'] ?? '') . ' ' . ($sol['apellido'] ?? '')),
+            'materiaNombre' => self::MATERIAS[$sol['materia']]['nombre'] ?? (string) $sol['materia'],
+        ]);
+    }
+
+    /** Correo del aprobador de solicitudes (configurable por entorno). */
+    private function approverEmail(): string {
+        return (string) (getenv('DOC_APPROVER_EMAIL') ?: 'rcurbelo551@gmail.com');
+    }
+
+    /** Base absoluta (esquema + host) para armar enlaces en los correos. */
+    private function baseUrl(): string {
+        $https  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+                  || ((string) ($_SERVER['SERVER_PORT'] ?? '') === '443');
+        $scheme = $https ? 'https' : 'http';
+        $host   = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
+        return $scheme . '://' . $host;
+    }
+
+    /** Envía al aprobador el correo con el enlace para resolver la solicitud. */
+    private function enviarSolicitudEmail(int $usuarioId, string $slug, string $token): void {
+        $usuario  = (new Usuario())->findById($usuarioId);
+        $nombreU  = trim((string) (($usuario['nombre'] ?? '') . ' ' . ($usuario['apellido'] ?? '')));
+        $emailU   = (string) ($usuario['email'] ?? '');
+        $materia  = self::MATERIAS[$slug]['nombre'] ?? $slug;
+        $link     = $this->baseUrl() . '/documentacion/aprobar?token=' . urlencode($token);
+
+        $subject = "Tornalyx · Solicitud de acceso a {$materia}";
+        $text = "Nueva solicitud de acceso a la documentación de {$materia}.\n\n"
+              . "Solicitante: {$nombreU} ({$emailU})\n\n"
+              . "Para aprobar o rechazar, abrí este enlace:\n{$link}\n\n"
+              . "El enlace es de un solo uso y vence en 7 días.\n\nTornalyx";
+        $safeNombre  = htmlspecialchars($nombreU, ENT_QUOTES, 'UTF-8');
+        $safeEmail   = htmlspecialchars($emailU, ENT_QUOTES, 'UTF-8');
+        $safeMateria = htmlspecialchars($materia, ENT_QUOTES, 'UTF-8');
+        $safeLink    = htmlspecialchars($link, ENT_QUOTES, 'UTF-8');
+        $html = '<div style="font-family:Arial,sans-serif;max-width:480px;margin:auto">'
+              . '<h2 style="color:#ec1c24">Tornalyx</h2>'
+              . '<p>Nueva solicitud de acceso a la documentación de <strong>' . $safeMateria . '</strong>.</p>'
+              . '<p style="color:#333"><strong>' . $safeNombre . '</strong><br>'
+              . '<span style="color:#666">' . $safeEmail . '</span></p>'
+              . '<p style="margin:24px 0">'
+              . '<a href="' . $safeLink . '" style="background:#ec1c24;color:#fff;text-decoration:none;'
+              . 'padding:12px 24px;border-radius:8px;font-weight:bold;display:inline-block">Revisar solicitud</a></p>'
+              . '<p style="color:#666;font-size:13px">El enlace es de un solo uso y vence en 7 días. '
+              . 'En la página vas a poder aprobar o rechazar el acceso.</p>'
+              . '</div>';
+
+        (new Mailer())->send($this->approverEmail(), 'Aprobador Tornalyx', $subject, $html, $text);
     }
 
     /**
