@@ -69,10 +69,7 @@
 </head>
 <body>
 
-  <?= $partial('partials/nav-auth', ['links' => [
-      ['class' => 'ghost-link',           'href' => '/registro', 'text' => 'Crear cuenta'],
-      ['class' => 'btn btn-primary btn-sm', 'href' => '/registro', 'text' => 'Registrarse'],
-  ]]) ?>
+  <?= $partial('partials/nav-auth', ['links' => []]) ?>
 
   <main class="auth-page">
     <div class="auth-card">

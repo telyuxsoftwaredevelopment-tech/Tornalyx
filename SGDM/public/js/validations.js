@@ -323,7 +323,6 @@ function initRegistroSubmit() {
     const fecha       = document.getElementById('fechaNac');
     const pass        = document.getElementById('passReg');
     const passConfirm = document.getElementById('passConfirm');
-    const rol         = document.getElementById('rolSelected');
     const terminos    = document.getElementById('terminos');
 
     /* Como ahora todo está en una sola pantalla (sin el paso "Continuar" que
@@ -352,10 +351,6 @@ function initRegistroSubmit() {
     /* Validaciones de cliente que el backend no puede inferir */
     if ((pass?.value || '') !== (passConfirm?.value || '')) {
       authError('Las contraseñas no coinciden.');
-      return;
-    }
-    if (!rol?.value) {
-      authError('Seleccioná un rol para continuar.');
       return;
     }
     if (terminos && !terminos.checked) {
@@ -390,28 +385,6 @@ function initRegistroSubmit() {
   });
 }
 
-/* ─── Selección de rol en registro ──────────────────── */
-function initRoleSelection() {
-  const roleCards = document.querySelectorAll('.role-card');
-  if (!roleCards.length) return;
-
-  roleCards.forEach(card => {
-    card.addEventListener('click', function () {
-      roleCards.forEach(c => {
-        c.classList.remove('selected');
-        c.setAttribute('aria-checked', 'false');
-      });
-      this.classList.add('selected');
-      this.setAttribute('aria-checked', 'true');
-      const hidden = document.getElementById('rolSelected');
-      if (hidden) hidden.value = this.dataset.role;
-    });
-    card.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
-    });
-  });
-}
-
 /* ─── Validación en tiempo real genérica ─────────────── */
 function initRealtimeValidation() {
   const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -439,6 +412,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initPasswordStrength();
   initPasswordRequirements();
   initRegistroSubmit();
-  initRoleSelection();
   initRealtimeValidation();
 });

@@ -19,7 +19,6 @@
 <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú de navegación">
   <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
   <a href="#audiencias">Soluciones</a>
-  <a href="#empresa">Empresa</a>
   <a href="/documentacion">Documentación</a>
   <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
   <a class="btn btn-primary mobile-cta" href="/torneos">Ver torneos</a>
@@ -34,7 +33,6 @@
     </a>
     <nav class="nav-links" aria-label="Navegación principal">
       <a href="#audiencias">Soluciones</a>
-      <a href="#empresa">Empresa</a>
       <a href="/documentacion">Documentación</a>
     </nav>
     <div class="nav-right">
@@ -53,12 +51,15 @@
   <section class="hero">
     <div class="grid-lines"></div>
     <div class="wrap hero-in">
-      <p class="eyebrow eyebrow-center">Torneos · deporte · mente · esports</p>
-      <h1>Un sistema.<br><span class="accent">Cualquier competencia.</span></h1>
-      <p class="lead">Liga, eliminación directa o sistema suizo. Del club de barrio a la liga online · participantes, calendarios, llaves y resultados en una sola plataforma modular.</p>
-      <div class="btn-row">
-        <a class="btn btn-primary" href="/torneos">Ver torneos</a>
-        <a class="btn btn-ghost" href="/registro">Crear cuenta</a>
+      <div class="hero-top">
+        <div class="hero-text">
+          <p class="eyebrow">Torneos · deporte · mente · esports</p>
+          <h1>Un sistema.<br><span class="accent">Cualquier competencia.</span></h1>
+          <p class="lead">Liga, eliminación directa o sistema suizo. Del club de barrio a la liga online · participantes, calendarios, llaves y resultados en una sola plataforma modular.</p>
+        </div>
+        <div class="hero-cta">
+          <a class="btn btn-primary btn-lg" href="/registro">Crear cuenta</a>
+        </div>
       </div>
       <div class="chips">
         <span class="chip chip-solid"><span class="dot"></span>Liga</span>
@@ -71,31 +72,14 @@
 
   <!-- ?? AUDIENCIAS ??????????????????????????????????????? -->
   <section class="section section--alt" id="audiencias">
-    <div class="wrap text-center">
-      <p class="eyebrow eyebrow-center" data-reveal>Para cada organización</p>
-      <h2 data-reveal>Pensado para todo tipo de competencia</h2>
-      <p class="lead" data-reveal style="max-width:56ch;margin:12px auto 0">Clubes deportivos, instituciones educativas, federaciones, comunidades de esports y de juegos de mesa: todos gestionan sus torneos desde la misma plataforma.</p>
-      <div class="chips" data-reveal style="justify-content:center;margin-top:28px">
-        <span class="chip chip-solid"><span class="dot"></span>Clubes deportivos</span>
-        <span class="chip">Instituciones educativas</span>
-        <span class="chip">Federaciones y ligas</span>
-        <span class="chip">Esports</span>
-        <span class="chip">Juegos de mesa</span>
+    <div class="wrap audiencias-grid">
+      <div class="audiencias-photo" data-reveal aria-hidden="true">
+        <span class="audiencias-photo__icon">🏆</span>
       </div>
-    </div>
-  </section>
-
-  <!-- ?? CIERRE ??????????????????????????????????????????? -->
-  <section class="section" id="empresa">
-    <div class="wrap">
-      <div class="cta-band" data-reveal style="text-align:center">
-        <p class="eyebrow eyebrow-center">Hecho por Telyux Software Development · UTU Montevideo</p>
-        <h2>Llevá tu torneo al siguiente nivel</h2>
-        <p class="lead" style="max-width:50ch;margin:0 auto">Creá tu primera competencia o explorá los torneos ya publicados. Sin planillas, sin complicaciones.</p>
-        <div class="btn-row btn-row-center" style="margin-top:28px">
-          <a class="btn btn-primary" href="/registro">Crear cuenta gratis</a>
-          <a class="btn btn-ghost" href="/torneos">Explorar torneos</a>
-        </div>
+      <div class="audiencias-text">
+        <p class="eyebrow" data-reveal>Para cada organización</p>
+        <h2 data-reveal>Pensado para todo tipo de competencia</h2>
+        <p class="lead" data-reveal style="max-width:56ch;margin-top:12px">Clubes deportivos, instituciones educativas, federaciones, comunidades de esports y de juegos de mesa: todos gestionan sus torneos desde la misma plataforma.</p>
       </div>
     </div>
   </section>
@@ -116,6 +100,7 @@
       <div class="foot-col">
         <h5>Producto</h5>
         <a href="#audiencias">Soluciones</a>
+        <a href="/documentacion">Documentación</a>
       </div>
       <div class="foot-col">
         <h5>Formatos</h5>
@@ -124,11 +109,9 @@
         <a href="/torneos">Sistema suizo</a>
       </div>
       <div class="foot-col">
-        <h5>Empresa</h5>
-        <a href="#empresa">Sobre Telyux</a>
+        <h5>Cuenta</h5>
         <a href="/login">Entrar</a>
         <a href="/registro">Registrarse</a>
-        <a href="/documentacion">Documentación</a>
         <a href="/terminos">Términos y condiciones</a>
       </div>
     </div>

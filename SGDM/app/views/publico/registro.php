@@ -17,19 +17,6 @@
       padding:var(--space-8) var(--space-4);
     }
     .auth-card { width:100%; max-width:520px; }
-    /* Role cards */
-    .role-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-3); }
-    .role-card {
-      border:1.5px solid var(--line); border-radius:14px;
-      padding:var(--space-5); cursor:pointer;
-      transition:all var(--transition-fast);
-      text-align:center; background:var(--bg-2);
-    }
-    .role-card:hover  { border-color:var(--red-deep); background:rgba(236,28,36,.06); }
-    .role-card.selected { border-color:var(--red); background:rgba(236,28,36,.12); }
-    .role-card__icon  { font-size:2rem; margin-bottom:var(--space-2); }
-    .role-card__title { font-family:var(--head); font-weight:600; font-size:var(--font-size-sm); color:var(--ink); margin-bottom:4px; }
-    .role-card__desc  { font-size:12px; color:var(--muted-2); }
     /* Password strength */
     .strength-bar { height:4px; border-radius:2px; background:var(--line); margin-top:8px; overflow:hidden; }
     .strength-fill { height:100%; border-radius:2px; transition:all var(--transition-base); width:0; }
@@ -112,25 +99,7 @@
             <input class="form-control" type="date" id="fechaNac" name="fecha_nacimiento" required />
           </div>
 
-          <hr style="border:none;border-top:1px solid var(--line);margin:var(--space-6) 0" />
-
-          <!-- Rol -->
-          <h2 style="font-size:var(--font-size-xl);margin-bottom:6px;color:var(--ink)">¿Cuál es tu rol?</h2>
-          <p style="color:var(--muted);font-size:var(--font-size-sm);margin-bottom:var(--space-5)">Podrás cambiarlo más adelante desde tu perfil.</p>
-
-          <div class="role-grid" role="radiogroup" aria-label="Seleccionar rol">
-            <div class="role-card" data-role="participante" tabindex="0" role="radio" aria-checked="false">
-              <div class="role-card__icon"><img src="../assets/icon-participante.svg" width="28" height="28" alt=""></div>
-              <div class="role-card__title">Participante</div>
-              <div class="role-card__desc">Inscríbete a torneos y compite</div>
-            </div>
-            <div class="role-card" data-role="organizador" tabindex="0" role="radio" aria-checked="false">
-              <div class="role-card__icon"><img src="../assets/icon-organizador.svg" width="28" height="28" alt=""></div>
-              <div class="role-card__title">Organizador</div>
-              <div class="role-card__desc">Crea y gestiona torneos</div>
-            </div>
-          </div>
-          <input type="hidden" id="rolSelected" name="rol" value="" />
+          <input type="hidden" name="rol" value="participante" />
 
           <div class="form-group" style="margin-top:var(--space-5)">
             <label class="check-label">

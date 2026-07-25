@@ -1,5 +1,47 @@
 /* =====================================================
    TORNALYX – pages/home.css
    Estilos exclusivos de la home (index.php).
-   Por ahora la home no necesita CSS propio: usa main.css/components.css.
    ===================================================== */
+
+/* ─── Hero: texto a la izquierda, CTA a la derecha ────── */
+.hero-top {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:28px;
+  width:100%;
+  animation:fade-up .6s .12s cubic-bezier(.22,1,.36,1) both;
+}
+.hero-text { text-align:left; }
+.hero-text .eyebrow { justify-content:flex-start; }
+.hero-text h1 { margin:0 0 20px; }
+.hero-text .lead { margin:0; max-width:56ch; }
+.hero-cta { flex:none; animation:fade-up .6s .28s cubic-bezier(.22,1,.36,1) both; }
+
+@media(min-width:860px) {
+  .hero-top { flex-direction:row; align-items:center; justify-content:space-between; gap:40px; }
+  .hero-text { flex:1 1 auto; }
+  .hero-cta { align-self:center; }
+}
+
+/* ─── Audiencias: foto a la izquierda, texto a la derecha ─ */
+.audiencias-grid {
+  display:grid;
+  grid-template-columns:1fr;
+  gap:32px;
+  align-items:center;
+  text-align:left;
+}
+.audiencias-photo {
+  aspect-ratio:4/3;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:linear-gradient(145deg,var(--bg-2),rgba(236,28,36,.08));
+  display:flex; align-items:center; justify-content:center;
+}
+.audiencias-photo__icon { font-size:56px; opacity:.5; }
+.audiencias-text .eyebrow { justify-content:flex-start; }
+
+@media(min-width:860px) {
+  .audiencias-grid { grid-template-columns:1fr 1.1fr; gap:56px; }
+}
