@@ -161,8 +161,32 @@ class Torneo extends Model {
      * @return array
      */
     public function getPosiciones(int $torneoId): array {
+        // Resuelve el nombre del contendiente (equipo o usuario) según su tipo,
+        // para que la tabla muestre nombres reales y no IDs.
         $stmt = $this->db->prepare(
-            'SELECT * FROM posiciones WHERE torneo_id = ? ORDER BY pts DESC, dg DESC'
+            'SELECT p.*,
+                    COALESCE(e.nombre, TRIM(CONCAT(u.nombre, \' \', COALESCE(u.apellido, \'\')))) AS contendiente
+               FROM posiciones p
+               LEFT JOIN equipos  e ON p.tipo = \'equipo\'  AND e.id = p.contendiente_id
+               LEFT JOIN usuarios u ON p.tipo = \'usuario\' AND u.id = p.contendiente_id
+              WHERE p.torneo_id = ?
+              ORDER BY p.pts DESC, p.dg DESC'
+        );
+        $stmt->execute([$torneoId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Equipos aprobados de un torneo, para la pestaña "Equipos" del detalle
+     * público. Devuelve id y nombre, ordenados alfabéticamente.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function getEquipos(int $torneoId): array {
+        $stmt = $this->db->prepare(
+            'SELECT id, nombre FROM equipos
+              WHERE torneo_id = ? AND estado = \'aprobado\'
+              ORDER BY nombre ASC'
         );
         $stmt->execute([$torneoId]);
         return $stmt->fetchAll();

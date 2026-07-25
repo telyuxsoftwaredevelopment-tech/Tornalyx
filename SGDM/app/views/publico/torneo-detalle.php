@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><?= e($title ?? 'Tornalyx | Copa Regional Fútbol 2026') ?></title>
-  
+  <title><?= e($title ?? 'Tornalyx | Torneo') ?></title>
+
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../css/variables.css" />
@@ -84,202 +84,68 @@
       font-family:var(--head); font-size:var(--font-size-xl); font-weight:800;
       text-align:center; min-width:64px; color:var(--ink);
     }
+    .doc-empty { color:var(--muted); padding:var(--space-8) 0; text-align:center; }
   </style>
 </head>
 <body>
 
   <?= $partial('partials/nav-publico') ?>
 
-  <!-- Breadcrumb -->
-  <nav class="breadcrumb" aria-label="Ubicación">
-    <div class="wrap">
-      <a href="/">Inicio</a><span>›</span>
-      <a href="/torneos">Torneos</a><span>›</span>
-      Copa Regional Fútbol 2026
-    </div>
-  </nav>
+  <!-- Todo el contenido se rellena desde /api/torneo/{id} con torneo-detalle.js -->
+  <div id="detalleRoot">
 
-  <!-- Hero del torneo -->
-  <div class="torneo-hero">
-    <div class="wrap torneo-hero-in">
-      <div class="torneo-hero__grid">
-        <div>
-          <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-3)">
-            <span class="badge badge-green">Activo</span>
-            <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)">⚽ Fútbol</span>
-            <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)">Liga</span>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Ubicación">
+      <div class="wrap">
+        <a href="/">Inicio</a><span>›</span>
+        <a href="/torneos">Torneos</a><span>›</span>
+        <span id="bcNombre" style="color:var(--muted)">Torneo</span>
+      </div>
+    </nav>
+
+    <!-- Hero del torneo -->
+    <div class="torneo-hero">
+      <div class="wrap torneo-hero-in">
+        <div class="torneo-hero__grid">
+          <div>
+            <div id="heroBadges" style="display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-3)"></div>
+            <h1 id="heroNombre" style="margin-bottom:var(--space-3)">Cargando…</h1>
+            <p class="lead" id="heroDesc" style="max-width:580px;margin-bottom:var(--space-5);display:none"></p>
+            <div id="heroMeta" style="display:flex;flex-wrap:wrap;gap:var(--space-4);font-size:var(--font-size-sm);color:var(--muted)"></div>
           </div>
-          <h1 style="margin-bottom:var(--space-3)">Copa Regional Fútbol 2026</h1>
-          <p class="lead" style="max-width:580px;margin-bottom:var(--space-5)">
-            Torneo de fútbol por sistema de liga entre los mejores equipos de Montevideo. Todos los equipos se enfrentan entre sí en un partido de ida y vuelta.
-          </p>
-          <div style="display:flex;flex-wrap:wrap;gap:var(--space-4);font-size:var(--font-size-sm);color:var(--muted)">
-            <span>📅 Inicio: 10 mar 2026</span>
-            <span>🏁 Estimado: 30 ago 2026</span>
-            <span>📍 Montevideo, Uruguay</span>
-            <span>🎽 Organiza: FC Deportivo Norte</span>
-          </div>
-        </div>
-        <div>
-          <a href="/login" class="btn btn-primary btn-lg" style="white-space:nowrap">Inscribir equipo</a>
+          <div id="heroAction"></div>
         </div>
       </div>
     </div>
+
+    <main class="section" style="padding-top:clamp(28px,4vw,48px)">
+      <div class="wrap">
+
+        <!-- Info boxes (las llena el JS) -->
+        <div class="info-grid" id="infoGrid"></div>
+
+        <!-- Tabs -->
+        <div class="tab-list" role="tablist">
+          <button class="tab active" role="tab" data-tab="posiciones">Posiciones</button>
+          <button class="tab" role="tab" data-tab="partidos">Resultados</button>
+          <button class="tab" role="tab" data-tab="equipos">Equipos</button>
+          <button class="tab" role="tab" data-tab="info">Información</button>
+        </div>
+
+        <div class="tab-content active" id="tab-posiciones" role="tabpanel"></div>
+        <div class="tab-content" id="tab-partidos" role="tabpanel"></div>
+        <div class="tab-content" id="tab-equipos" role="tabpanel"></div>
+        <div class="tab-content" id="tab-info" role="tabpanel"></div>
+
+      </div>
+    </main>
+
   </div>
-
-  <main class="section" style="padding-top:clamp(28px,4vw,48px)">
-    <div class="wrap">
-
-      <!-- Info boxes -->
-      <div class="info-grid" data-reveal>
-        <div class="info-box">
-          <div class="info-box__value">12</div>
-          <div class="info-box__label">Equipos inscritos</div>
-        </div>
-        <div class="info-box">
-          <div class="info-box__value">Jornada 8</div>
-          <div class="info-box__label">de 22 jornadas</div>
-        </div>
-        <div class="info-box">
-          <div class="info-box__value">67%</div>
-          <div class="info-box__label">Partidos jugados</div>
-        </div>
-      </div>
-
-      <!-- Tabs -->
-      <div class="tab-list" role="tablist">
-        <button class="tab active" role="tab" data-tab="posiciones">Posiciones</button>
-        <button class="tab" role="tab" data-tab="partidos">Resultados</button>
-        <button class="tab" role="tab" data-tab="equipos">Equipos</button>
-        <button class="tab" role="tab" data-tab="info">Información</button>
-      </div>
-
-      <!-- Tab: Posiciones -->
-      <div class="tab-content active" id="tab-posiciones" role="tabpanel">
-        <div class="card">
-          <div class="card__header">
-            <h3>Tabla de posiciones</h3>
-          </div>
-          <div style="overflow-x:auto">
-            <table class="table-pos">
-              <thead>
-                <tr>
-                  <th>#</th><th>Equipo</th><th>PJ</th><th>G</th>
-                  <th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><span class="pos-badge pos-1">1</span></td>
-                  <td><span class="equipo-tag">🛡️ Atlético Norte</span></td>
-                  <td>8</td><td>6</td><td>1</td><td>1</td><td>18</td><td>7</td><td>+11</td>
-                  <td><strong style="font-family:var(--head);color:var(--ink)">19</strong></td>
-                </tr>
-                <tr>
-                  <td><span class="pos-badge pos-2">2</span></td>
-                  <td><span class="equipo-tag">🛡️ Deportivo Sur</span></td>
-                  <td>8</td><td>5</td><td>2</td><td>1</td><td>14</td><td>8</td><td>+6</td>
-                  <td><strong style="font-family:var(--head);color:var(--ink)">17</strong></td>
-                </tr>
-                <tr>
-                  <td><span class="pos-badge pos-3">3</span></td>
-                  <td><span class="equipo-tag">🛡️ Club Rivera FC</span></td>
-                  <td>8</td><td>5</td><td>1</td><td>2</td><td>12</td><td>9</td><td>+3</td>
-                  <td><strong style="font-family:var(--head);color:var(--ink)">16</strong></td>
-                </tr>
-                <tr><td>4</td><td>FC Este</td><td>8</td><td>4</td><td>1</td><td>3</td><td>11</td><td>10</td><td>+1</td><td>13</td></tr>
-                <tr><td>5</td><td>Unión Central</td><td>8</td><td>3</td><td>2</td><td>3</td><td>9</td><td>11</td><td>-2</td><td>11</td></tr>
-                <tr><td>6</td><td>Los Guerreros</td><td>8</td><td>2</td><td>3</td><td>3</td><td>8</td><td>10</td><td>-2</td><td>9</td></tr>
-                <tr><td>7</td><td>Montevideo FC</td><td>8</td><td>2</td><td>1</td><td>5</td><td>7</td><td>14</td><td>-7</td><td>7</td></tr>
-                <tr><td>8</td><td>Cerro Verde</td><td>8</td><td>1</td><td>0</td><td>7</td><td>4</td><td>14</td><td>-10</td><td>3</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="card__footer" style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">
-            PJ: Partidos jugados · G: Ganados · E: Empatados · P: Perdidos · GF/GC: Goles · DG: Diferencia · Pts: Puntos
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab: Resultados -->
-      <div class="tab-content" id="tab-partidos" role="tabpanel">
-        <h3 style="margin-bottom:var(--space-4);color:var(--ink)">Jornada 8 · Resultados</h3>
-        <div>
-          <div class="partido-row">
-            <span style="flex:1;text-align:right;font-weight:600;color:var(--ink)">Atlético Norte</span>
-            <div class="partido-score">3 · 1</div>
-            <span style="flex:1;font-weight:600;color:var(--ink)">Los Guerreros</span>
-          </div>
-          <div class="partido-row">
-            <span style="flex:1;text-align:right;font-weight:600;color:var(--ink)">Deportivo Sur</span>
-            <div class="partido-score">2 · 2</div>
-            <span style="flex:1;font-weight:600;color:var(--ink)">Club Rivera FC</span>
-          </div>
-          <div class="partido-row">
-            <span style="flex:1;text-align:right;font-weight:600;color:var(--ink)">FC Este</span>
-            <div class="partido-score">1 · 0</div>
-            <span style="flex:1;font-weight:600;color:var(--ink)">Cerro Verde</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab: Equipos -->
-      <div class="tab-content" id="tab-equipos" role="tabpanel">
-        <div class="cards-grid">
-          <div class="card">
-            <div class="card__body">
-              <h4 style="color:var(--ink);margin-bottom:6px">🛡️ Atlético Norte</h4>
-              <p style="color:var(--muted);font-size:var(--font-size-sm)">15 jugadores · Fundado 2018</p>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card__body">
-              <h4 style="color:var(--ink);margin-bottom:6px">🛡️ Deportivo Sur</h4>
-              <p style="color:var(--muted);font-size:var(--font-size-sm)">14 jugadores · Fundado 2015</p>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card__body">
-              <h4 style="color:var(--ink);margin-bottom:6px">🛡️ Club Rivera FC</h4>
-              <p style="color:var(--muted);font-size:var(--font-size-sm)">16 jugadores · Fundado 2020</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab: Info -->
-      <div class="tab-content" id="tab-info" role="tabpanel">
-        <div class="card">
-          <div class="card__body">
-            <h3 style="margin-bottom:var(--space-4);color:var(--ink)">Reglamento del torneo</h3>
-            <ul style="display:flex;flex-direction:column;gap:var(--space-3)">
-              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
-                <span style="color:var(--red-bright);flex:none">•</span> Todos los equipos se enfrentan entre sí en partidos de ida y vuelta.
-              </li>
-              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
-                <span style="color:var(--red-bright);flex:none">•</span> Victoria: 3 puntos · Empate: 1 punto · Derrota: 0 puntos.
-              </li>
-              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
-                <span style="color:var(--red-bright);flex:none">•</span> En caso de empate en puntos, se desempata por diferencia de goles.
-              </li>
-              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
-                <span style="color:var(--red-bright);flex:none">•</span> Los 4 mejores clasificados pasan a playoff final.
-              </li>
-              <li style="display:flex;gap:var(--space-3);color:var(--muted);font-size:var(--font-size-sm)">
-                <span style="color:var(--red-bright);flex:none">•</span> Alineaciones deben registrarse 30 minutos antes de cada partido.
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </main>
 
   <?= $partial('partials/footer') ?>
 
   <script src="../js/main.js"></script>
+  <script src="../js/torneo-ui.js"></script>
+  <script src="../js/torneo-detalle.js"></script>
 </body>
 </html>
-
-
