@@ -162,6 +162,12 @@ class DocsController extends Controller {
             return ['estado' => 'login'];
         }
 
+        // Los administradores tienen acceso total a la documentación: no
+        // necesitan solicitar acceso, ser aprobados ni verificar por código.
+        if (Session::getUserRole() === 'administrador') {
+            return null; // acceso concedido
+        }
+
         $usuarioId = (int) Session::getUserId();
         $estado    = (new DocAcceso())->estado($usuarioId, $slug);
 
