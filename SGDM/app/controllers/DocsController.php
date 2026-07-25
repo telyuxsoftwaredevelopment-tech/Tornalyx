@@ -35,10 +35,14 @@ class DocsController extends Controller {
     private const FETCH_TIMEOUT = 8;
 
     /**
-     * Materias de acceso restringido: exigen sesión + aprobación de un
-     * administrador + verificación por código enviado al correo.
+     * Acceso restringido: TODA la documentación exige sesión + aprobación (por el
+     * enlace del correo al aprobador) + verificación por código enviado al correo.
+     * Al ser "todas", cualquier materia nueva que se agregue a MATERIAS queda
+     * protegida automáticamente, sin tener que mantener una lista aparte.
      */
-    private const SENSIBLES = ['ciberseguridad'];
+    private function esRestringida(string $slug): bool {
+        return isset(self::MATERIAS[$slug]);
+    }
 
     /** Minutos que dura el acceso verificado por código antes de re-pedirlo. */
     private const VERIF_TTL = 1800;
@@ -111,7 +115,7 @@ class DocsController extends Controller {
         // Gate de las materias restringidas: si el usuario todavía no está
         // registrado + aprobado + verificado por código, mostramos la pantalla
         // de acceso en lugar del documento.
-        if (in_array($slug, self::SENSIBLES, true)) {
+        if ($this->esRestringida($slug)) {
             $gate = $this->evaluarAcceso($slug);
             if ($gate !== null) {
                 $this->render('publico/documentacion', [
@@ -225,6 +229,10 @@ class DocsController extends Controller {
      * (GET) no resuelven la solicitud por sí solos.
      */
     public function revisarSolicitud(): void {
+        // Arrancamos sesión (aunque el aprobador no esté logueado) para tener un
+        // token CSRF: la protección global exige csrf_token en el POST siguiente.
+        Session::start();
+
         $token = (string) ($_GET['token'] ?? '');
         $sol   = (new DocAcceso())->buscarPorToken($token);
 
@@ -240,6 +248,7 @@ class DocsController extends Controller {
             'title'         => 'Tornalyx | Solicitud de acceso',
             'estado'        => 'confirmar',
             'token'         => $token,
+            'csrf'          => Session::csrfToken(),
             'solicitante'   => trim(($sol['nombre'] ?? '') . ' ' . ($sol['apellido'] ?? '')),
             'email'         => (string) ($sol['email'] ?? ''),
             'materiaNombre' => self::MATERIAS[$sol['materia']]['nombre'] ?? (string) $sol['materia'],
@@ -399,10 +408,10 @@ class DocsController extends Controller {
         $this->volver($slug);
     }
 
-    /** Lee y valida el slug de materia sensible del POST; null si no es válido. */
+    /** Lee y valida el slug de materia restringida del POST; null si no es válido. */
     private function slugSensibleDePost(): ?string {
         $slug = (string) ($_POST['materia'] ?? '');
-        return (isset(self::MATERIAS[$slug]) && in_array($slug, self::SENSIBLES, true)) ? $slug : null;
+        return $this->esRestringida($slug) ? $slug : null;
     }
 
     /** Guarda un mensaje flash para mostrar tras la redirección (patrón PRG). */

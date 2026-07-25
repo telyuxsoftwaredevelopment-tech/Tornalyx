@@ -50,11 +50,13 @@
         </div>
         <div class="aprob-actions">
           <form method="post" action="/documentacion/resolver">
+            <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
             <input type="hidden" name="token" value="<?= e($token ?? '') ?>">
             <input type="hidden" name="accion" value="aprobar">
             <button class="btn btn-primary" type="submit">Aprobar acceso</button>
           </form>
           <form method="post" action="/documentacion/resolver">
+            <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
             <input type="hidden" name="token" value="<?= e($token ?? '') ?>">
             <input type="hidden" name="accion" value="rechazar">
             <button class="btn btn-ghost" type="submit">Rechazar</button>
