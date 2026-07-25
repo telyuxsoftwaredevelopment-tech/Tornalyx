@@ -27,7 +27,10 @@ RewriteRule ^ index.php [QSA,L]
 
     # Content-Security-Policy: scripts solo locales; estilos inline permitidos
     # (las vistas usan atributos style=); fuentes desde Google Fonts.
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    # img-src incluye los hosts de imágenes de Google Docs porque la página de
+    # Documentación incrusta el contenido publicado de los Docs (que trae imágenes
+    # servidas desde docs.google.com / googleusercontent.com). El resto sigue cerrado.
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://docs.google.com https://*.googleusercontent.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 
     # X-XSS-Protection está deprecado y puede introducir vulnerabilidades;
     # se reemplaza por la CSP de arriba. Lo desactivamos explícitamente.

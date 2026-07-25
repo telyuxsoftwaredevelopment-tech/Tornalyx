@@ -2,7 +2,9 @@
 require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../models/Estadistica.php';
 require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/../models/DocAcceso.php';
 require_once __DIR__ . '/../shared/Session.php';
+require_once __DIR__ . '/../shared/Mailer.php';
 
 /**
  * Controlador del panel de administración.
@@ -160,6 +162,101 @@ class AdminController extends Controller {
             'usuario' => $this->usuarioPublico($id),
             'mensaje' => 'Usuario actualizado correctamente.',
         ]);
+    }
+
+    /** Nombres legibles de materias restringidas (para el correo de aviso). */
+    private const MATERIA_NOMBRES = [
+        'ciberseguridad' => 'Ciberseguridad',
+    ];
+
+    /**
+     * Lista las solicitudes de acceso a documentación restringida
+     * (GET /api/admin/doc-solicitudes). Solo para administradores.
+     */
+    public function docSolicitudes(): void {
+        if (!$this->requireApiRole(['administrador'])) {
+            return;
+        }
+
+        $solicitudes = array_map(static function (array $s): array {
+            $s['id']         = (int) $s['id'];
+            $s['usuario_id'] = (int) $s['usuario_id'];
+            return $s;
+        }, (new DocAcceso())->listarSolicitudes());
+
+        $this->jsonSuccess(['solicitudes' => $solicitudes]);
+    }
+
+    /**
+     * Aprueba o rechaza una solicitud de acceso
+     * (POST /api/admin/doc-solicitud/resolver). Solo para administradores.
+     */
+    public function resolverDocSolicitud(): void {
+        if (!$this->requireApiRole(['administrador'])) {
+            return;
+        }
+
+        $id     = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $accion = (string) (filter_input(INPUT_POST, 'accion', FILTER_DEFAULT) ?? '');
+
+        if (!$id) {
+            $this->jsonError('Falta el identificador de la solicitud.');
+            return;
+        }
+        if (!in_array($accion, ['aprobar', 'rechazar'], true)) {
+            $this->jsonError('Acción inválida.');
+            return;
+        }
+
+        $acceso    = new DocAcceso();
+        $solicitud = $acceso->findById($id);
+        if (!$solicitud) {
+            $this->jsonError('La solicitud no existe.', [], 404);
+            return;
+        }
+
+        $nuevoEstado = $acceso->resolverPorId($id, $accion, (int) Session::getUserId());
+
+        // Aviso al usuario (best-effort: un fallo de correo no frena la acción).
+        try {
+            $this->notificarResolucionDoc((int) $solicitud['usuario_id'], (string) $solicitud['materia'], $accion);
+        } catch (Throwable $e) {
+            error_log('Fallo al notificar resolución de acceso a documentación: ' . $e->getMessage());
+        }
+
+        $this->jsonSuccess([
+            'estado'  => $nuevoEstado,
+            'mensaje' => $accion === 'aprobar' ? 'Solicitud aprobada.' : 'Solicitud rechazada.',
+        ]);
+    }
+
+    /** Envía al usuario el resultado de su solicitud de acceso. */
+    private function notificarResolucionDoc(int $usuarioId, string $materia, string $accion): void {
+        $usuario = $this->usuarioModel->findById($usuarioId);
+        if (!$usuario || empty($usuario['email'])) {
+            return;
+        }
+
+        $nombreMateria = self::MATERIA_NOMBRES[$materia] ?? $materia;
+        $nombre        = trim((string) $usuario['nombre']);
+        $aprobado      = $accion === 'aprobar';
+
+        $subject = 'Tornalyx · Acceso a la documentación de ' . $nombreMateria;
+        if ($aprobado) {
+            $textoCuerpo = "Tu solicitud de acceso a la documentación de {$nombreMateria} fue APROBADA. "
+                         . 'Entrá a la sección Documentación y pedí el código de verificación para verla.';
+        } else {
+            $textoCuerpo = "Tu solicitud de acceso a la documentación de {$nombreMateria} fue rechazada.";
+        }
+
+        $text = "Hola {$nombre},\n\n{$textoCuerpo}\n\nTornalyx";
+        $html = '<div style="font-family:Arial,sans-serif;max-width:480px;margin:auto">'
+              . '<h2 style="color:#ec1c24">Tornalyx</h2>'
+              . '<p>Hola ' . htmlspecialchars($nombre, ENT_QUOTES, 'UTF-8') . ',</p>'
+              . '<p>' . htmlspecialchars($textoCuerpo, ENT_QUOTES, 'UTF-8') . '</p>'
+              . '</div>';
+
+        (new Mailer())->send((string) $usuario['email'], $nombre, $subject, $html, $text);
     }
 
     // ──────────────────────────────────────────────────────

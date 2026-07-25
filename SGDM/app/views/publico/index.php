@@ -20,6 +20,7 @@
   <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
   <a href="#audiencias">Soluciones</a>
   <a href="#empresa">Empresa</a>
+  <a href="/documentacion">Documentación</a>
   <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
   <a class="btn btn-primary mobile-cta" href="/torneos">Ver torneos</a>
 </div>
@@ -34,6 +35,7 @@
     <nav class="nav-links" aria-label="Navegación principal">
       <a href="#audiencias">Soluciones</a>
       <a href="#empresa">Empresa</a>
+      <a href="/documentacion">Documentación</a>
     </nav>
     <div class="nav-right">
       <a class="ghost-link" href="/login">Entrar</a>
@@ -126,6 +128,7 @@
         <a href="#empresa">Sobre Telyux</a>
         <a href="/login">Entrar</a>
         <a href="/registro">Registrarse</a>
+        <a href="/documentacion">Documentación</a>
         <a href="/terminos">Términos y condiciones</a>
       </div>
     </div>
