@@ -56,7 +56,7 @@
     }
     .user-avatar {
       width:34px; height:34px; border-radius:50%;
-      background:linear-gradient(135deg,var(--red),var(--red-deep));
+      background:var(--red);
       display:flex; align-items:center; justify-content:center;
       font-weight:700; font-size:12px; color:#fff; flex:none; font-family:var(--head);
     }
@@ -166,26 +166,26 @@
 
   <aside class="sidebar" id="sidebar">
     <a class="sidebar-brand" href="/">
-      <img class="mark" src="../../assets/ICONO.png" alt="Tornalyx" data-fallback="mark">
+      <span class="mark badge-crop" style="background-image:url(../../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
       Tornalyx
     </a>
     <nav class="sidebar__nav">
       <div class="sidebar__section">Principal</div>
       <a class="sidebar__item active" data-section="inicio" data-title="Dashboard">
-        <span class="icon">?</span> Dashboard
+        <span class="icon">📊</span> Dashboard
       </a>
       <div class="sidebar__section">Gestión</div>
       <a class="sidebar__item" data-section="usuarios" data-title="Usuarios">
-        <span class="icon">?</span> Usuarios
+        <span class="icon">👤</span> Usuarios
       </a>
       <a class="sidebar__item" data-section="torneos" data-title="Torneos">
-        <span class="icon">???</span> Torneos
+        <span class="icon">🏆</span> Torneos
       </a>
       <a class="sidebar__item" data-section="equipos" data-title="Equipos">
-        <span class="icon">?</span> Equipos
+        <span class="icon">👥</span> Equipos
       </a>
       <a class="sidebar__item" data-section="resultados" data-title="Resultados">
-        <span class="icon">?</span> Resultados
+        <span class="icon">📋</span> Resultados
       </a>
       <div class="sidebar__section">Documentación</div>
       <a class="sidebar__item" data-section="solicitudes" data-title="Solicitudes de acceso">
@@ -193,10 +193,10 @@
       </a>
       <div class="sidebar__section">Sistema</div>
       <a class="sidebar__item" data-section="reportes" data-title="Reportes">
-        <span class="icon">?</span> Reportes
+        <span class="icon">📈</span> Reportes
       </a>
       <a class="sidebar__item" data-section="config" data-title="Configuración">
-        <span class="icon">???</span> Configuración
+        <span class="icon">⚙️</span> Configuración
       </a>
     </nav>
     <div class="sidebar__footer">
@@ -206,7 +206,7 @@
           <div class="user-name" data-user-name>Administrador</div>
           <div class="user-role" data-user-role>admin</div>
         </div>
-        <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">?</a>
+        <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">🚪</a>
       </div>
     </div>
   </aside>
@@ -214,7 +214,7 @@
   <div class="app-main">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" id="menuToggle" aria-label="Menú">?</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menú">☰</button>
         <span id="topbarTitle" style="font-family:var(--head);font-weight:700;color:var(--ink)">Dashboard</span>
       </div>
       <div style="display:flex;align-items:center;gap:var(--space-4)">
@@ -467,17 +467,17 @@
           <div class="kpi-card">
             <div class="kpi-card__label">Torneos este mes</div>
             <div class="kpi-card__value">8</div>
-            <div class="kpi-card__delta">? +2 vs mes anterior</div>
+            <div class="kpi-card__delta">▲ +2 vs mes anterior</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-card__label">Partidos este mes</div>
             <div class="kpi-card__value">96</div>
-            <div class="kpi-card__delta">? +14 vs mes anterior</div>
+            <div class="kpi-card__delta">▲ +14 vs mes anterior</div>
           </div>
           <div class="kpi-card">
             <div class="kpi-card__label">Nuevos usuarios</div>
             <div class="kpi-card__value">42</div>
-            <div class="kpi-card__delta">? -3 vs mes anterior</div>
+            <div class="kpi-card__delta">▼ -3 vs mes anterior</div>
           </div>
         </div>
       </div>

@@ -20,15 +20,13 @@
     .auth-logo { text-align:center; margin-bottom:var(--space-6); }
     .auth-logo .logo-mark {
       width:80px; height:80px; border-radius:50%;
-      object-fit:contain;
-      box-shadow:0 0 0 2px var(--red-deep),0 12px 40px -8px var(--red-glow);
-      display:block;
+      box-shadow:0 0 0 2px var(--red-deep);
       margin:0 auto var(--space-4);
     }
     .auth-logo .logo-mark-fallback {
       width:80px; height:80px; border-radius:50%;
-      background:linear-gradient(135deg,var(--red),var(--red-deep));
-      box-shadow:0 0 0 2px var(--red-deep),0 12px 40px -8px var(--red-glow);
+      background:var(--red);
+      box-shadow:0 0 0 2px var(--red-deep);
       display:flex; align-items:center; justify-content:center;
       font-family:var(--head); font-weight:700; font-size:1.5rem; color:#fff;
       margin:0 auto var(--space-4);
@@ -79,7 +77,7 @@
   <main class="auth-page">
     <div class="auth-card">
       <div class="auth-logo">
-        <img class="logo-mark" src="../assets/ICONO.png" alt="Tornalyx" width="80" height="80" data-fallback="logo">
+        <span class="logo-mark badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
         <h1>Iniciar sesión</h1>
         <p>Ingresa tus credenciales para acceder al sistema</p>
       </div>
@@ -113,7 +111,7 @@
                 <input class="form-control" type="password" id="password" name="password"
                        placeholder="••••••••" autocomplete="current-password" required
                        aria-required="true" style="padding-right:44px" />
-                <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar contraseña">??</button>
+                <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar contraseña">👁</button>
               </div>
               <span class="form-error hidden" id="passwordError">La contraseña es obligatoria.</span>
             </div>

@@ -17,11 +17,8 @@
 
 <!-- ?? MOBILE NAV ???????????????????????????????????????? -->
 <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú de navegación">
-  <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">?</button>
+  <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
   <a href="#audiencias">Soluciones</a>
-  <a href="#modulos">Módulos</a>
-  <a href="#como">Cómo funciona</a>
-  <a href="#roles">Roles</a>
   <a href="#empresa">Empresa</a>
   <a href="/documentacion">Documentación</a>
   <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
@@ -32,14 +29,11 @@
 <header class="nav">
   <div class="wrap nav-in">
     <a class="brand" href="/">
-      <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="36" height="36" data-fallback="hide">
+      <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
       Tornalyx
     </a>
     <nav class="nav-links" aria-label="Navegación principal">
       <a href="#audiencias">Soluciones</a>
-      <a href="#modulos">Módulos</a>
-      <a href="#como">Cómo funciona</a>
-      <a href="#roles">Roles</a>
       <a href="#empresa">Empresa</a>
       <a href="/documentacion">Documentación</a>
     </nav>
@@ -57,11 +51,8 @@
 
   <!-- ?? HERO ??????????????????????????????????????????? -->
   <section class="hero">
-    <div class="glow"></div>
     <div class="grid-lines"></div>
     <div class="wrap hero-in">
-      <img class="badge-xl" src="../assets/ICONO.png" alt="Tornalyx"
-           data-fallback="hide">
       <p class="eyebrow eyebrow-center">Torneos · deporte · mente · esports</p>
       <h1>Un sistema.<br><span class="accent">Cualquier competencia.</span></h1>
       <p class="lead">Liga, eliminación directa o sistema suizo. Del club de barrio a la liga online · participantes, calendarios, llaves y resultados en una sola plataforma modular.</p>
@@ -80,371 +71,27 @@
 
   <!-- ?? AUDIENCIAS ??????????????????????????????????????? -->
   <section class="section section--alt" id="audiencias">
-    <div class="wrap">
-      <div class="text-center" style="margin-bottom:6px">
-        <p class="eyebrow eyebrow-center" data-reveal>Para cada organización</p>
-        <h2 data-reveal>Una plataforma, muchas competencias</h2>
-      </div>
-      <div class="aud-tabs" id="audTabs" data-reveal>
-        <button class="aud-tab on" data-aud="0">Clubes deportivos</button>
-        <button class="aud-tab" data-aud="1">Instituciones</button>
-        <button class="aud-tab" data-aud="2">Federaciones</button>
-        <button class="aud-tab" data-aud="3">Esports</button>
-        <button class="aud-tab" data-aud="4">Juegos de mesa</button>
-      </div>
-
-      <div id="audPanels" data-reveal>
-        <!-- 0 Clubes -->
-        <div class="aud-panel on">
-          <div class="aud-grid">
-            <div class="copy">
-              <h3>Clubes deportivos</h3>
-              <p class="lead">Llevá tu liga interna o el torneo del fin de semana sin planillas. Cargás resultados y la tabla de posiciones se actualiza al instante, visible para todos.</p>
-              <div class="chips">
-                <span class="chip chip-solid"><span class="dot"></span>Liga</span>
-                <span class="chip">Resultados</span>
-                <span class="chip">Consulta pública</span>
-              </div>
-            </div>
-            <div class="mock">
-              <div class="mock-bar"><i></i><i></i><i></i><span class="tt">tornalyx · posiciones</span></div>
-              <div class="mock-body">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                  <span style="font-family:var(--head);font-weight:600;font-size:14px">Liga Apertura · Zona A</span>
-                  <span style="font-family:var(--mono);font-size:10px;color:var(--red-bright);border:1px solid var(--red-deep);border-radius:999px;padding:3px 9px">Fecha 7</span>
-                </div>
-                <table class="stand">
-                  <thead><tr><th>#</th><th>Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
-                  <tbody>
-                    <tr class="lead-row"><td>1</td><td><span class="team"><span class="av"></span>Halcones FC</span></td><td>7</td><td>+12</td><td class="pts">19</td></tr>
-                    <tr><td>2</td><td><span class="team"><span class="av"></span>Real Norte</span></td><td>7</td><td>+8</td><td class="pts">16</td></tr>
-                    <tr><td>3</td><td><span class="team"><span class="av"></span>Atlético Sur</span></td><td>7</td><td>+3</td><td class="pts">13</td></tr>
-                    <tr><td>4</td><td><span class="team"><span class="av"></span>Defensores</span></td><td>7</td><td>?1</td><td class="pts">11</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 1 Instituciones -->
-        <div class="aud-panel">
-          <div class="aud-grid">
-            <div class="copy">
-              <h3>Instituciones educativas</h3>
-              <p class="lead">Organizá torneos internos por categorías y cursos con roles definidos. Profesores administran, alumnos consultan · todo desde el mismo lugar.</p>
-              <div class="chips">
-                <span class="chip chip-solid"><span class="dot"></span>Torneos internos</span>
-                <span class="chip">Categorías</span>
-                <span class="chip">Roles</span>
-              </div>
-            </div>
-            <div class="mock">
-              <div class="mock-bar"><i></i><i></i><i></i><span class="tt">tornalyx · calendario</span></div>
-              <div class="mock-body">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                  <span style="font-family:var(--head);font-weight:600;font-size:14px">Intercolegial · Sub-15</span>
-                  <span style="font-family:var(--mono);font-size:10px;color:var(--red-bright);border:1px solid var(--red-deep);border-radius:999px;padding:3px 9px">Hoy</span>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:8px">
-                  <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:9px;background:#0f090a"><span style="font-family:var(--mono);font-size:11px;color:var(--muted-2);width:56px">14:00</span><span style="flex:1;font-size:13px">6° A <span style="color:var(--muted-2);font-size:11px">vs</span> 6° C</span><span style="font-family:var(--mono);font-size:10px;color:var(--red-bright);border:1px solid var(--red-deep);border-radius:999px;padding:3px 8px">En vivo</span></div>
-                  <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:9px;background:#0f090a"><span style="font-family:var(--mono);font-size:11px;color:var(--muted-2);width:56px">15:30</span><span style="flex:1;font-size:13px">5° B <span style="color:var(--muted-2);font-size:11px">vs</span> 6° B</span><span style="font-family:var(--mono);font-size:10px;color:var(--muted-2);border:1px solid var(--line);border-radius:999px;padding:3px 8px">15 · 12</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2 Federaciones -->
-        <div class="aud-panel">
-          <div class="aud-grid">
-            <div class="copy">
-              <h3>Federaciones y ligas</h3>
-              <p class="lead">Gestioná múltiples torneos en paralelo con calendarios coordinados y rankings históricos. Una mirada de conjunto sobre toda la temporada.</p>
-              <div class="chips">
-                <span class="chip chip-solid"><span class="dot"></span>Multi-torneo</span>
-                <span class="chip">Calendarios</span>
-                <span class="chip">Rankings</span>
-              </div>
-            </div>
-            <div class="mock">
-              <div class="mock-bar"><i></i><i></i><i></i><span class="tt">tornalyx · panel federación</span></div>
-              <div class="mock-body">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                  <span style="font-family:var(--head);font-weight:600;font-size:14px">Temporada 2026</span>
-                  <span style="font-family:var(--mono);font-size:10px;color:var(--red-bright);border:1px solid var(--red-deep);border-radius:999px;padding:3px 9px">8 torneos activos</span>
-                </div>
-                <table class="stand">
-                  <thead><tr><th>#</th><th>Competencia</th><th>Equipos</th><th>Estado</th></tr></thead>
-                  <tbody>
-                    <tr class="lead-row"><td>1</td><td><span class="team"><span class="av"></span>Liga Mayor</span></td><td>16</td><td style="color:var(--red-bright);font-weight:700">Fecha 9</td></tr>
-                    <tr><td>2</td><td><span class="team"><span class="av"></span>Copa Apertura</span></td><td>32</td><td style="color:var(--ink)">Octavos</td></tr>
-                    <tr><td>3</td><td><span class="team"><span class="av"></span>Femenino A</span></td><td>10</td><td style="color:var(--ink)">Fecha 6</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3 Esports -->
-        <div class="aud-panel">
-          <div class="aud-grid">
-            <div class="copy">
-              <h3>Esports y ligas online</h3>
-              <p class="lead">Armá llaves de eliminación directa en segundos. La plataforma genera los enfrentamientos, avanza a los ganadores y publica el bracket en vivo.</p>
-              <div class="chips">
-                <span class="chip chip-solid"><span class="dot"></span>Eliminación directa</span>
-                <span class="chip">Llaves</span>
-                <span class="chip">En vivo</span>
-              </div>
-            </div>
-            <div class="mock">
-              <div class="mock-bar"><i></i><i></i><i></i><span class="tt">tornalyx · bracket</span></div>
-              <div class="mock-body">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                  <span style="font-family:var(--head);font-weight:600;font-size:14px">Clausura Cup · Playoffs</span>
-                  <span style="font-family:var(--mono);font-size:10px;color:var(--red-bright);border:1px solid var(--red-deep);border-radius:999px;padding:3px 9px">Semis</span>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:center">
-                  <div style="display:flex;flex-direction:column;gap:10px">
-                    <div style="border:1px solid var(--line-soft);border-radius:8px;overflow:hidden;background:#0f090a">
-                      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;font-size:12px;font-weight:600;color:#fff"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,var(--red),var(--red-deep));"></span>NovaX</span><span style="font-family:var(--head);font-weight:700;color:var(--red-bright)">2</span></div>
-                      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;font-size:12px;color:var(--muted);border-top:1px solid var(--line-soft)"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:#2a1a1b;"></span>Viper</span><span style="font-family:var(--head)">1</span></div>
-                    </div>
-                    <div style="border:1px solid var(--line-soft);border-radius:8px;overflow:hidden;background:#0f090a">
-                      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;font-size:12px;font-weight:600;color:#fff"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,var(--red),var(--red-deep));"></span>Flux</span><span style="font-family:var(--head);font-weight:700;color:var(--red-bright)">2</span></div>
-                      <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 9px;font-size:12px;color:var(--muted);border-top:1px solid var(--line-soft)"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:#2a1a1b;"></span>Echo</span><span style="font-family:var(--head)">0</span></div>
-                    </div>
-                  </div>
-                  <div></div>
-                  <div style="border:1.5px solid var(--red);border-radius:9px;background:rgba(236,28,36,.10);padding:12px;text-align:center">
-                    <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red-bright)">Final</div>
-                    <div style="font-family:var(--head);font-weight:700;color:#fff;margin-top:5px;font-size:13px">NovaX vs Flux</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 4 Juegos de mesa -->
-        <div class="aud-panel">
-          <div class="aud-grid">
-            <div class="copy">
-              <h3>Juegos de mesa y estrategia</h3>
-              <p class="lead">El sistema suizo arma los emparejamientos por puntaje ronda a ronda, sin repetir rivales. Ideal para ajedrez, cartas y juegos de tablero.</p>
-              <div class="chips">
-                <span class="chip chip-solid"><span class="dot"></span>Sistema suizo</span>
-                <span class="chip">Emparejamientos</span>
-                <span class="chip">Posiciones</span>
-              </div>
-            </div>
-            <div class="mock">
-              <div class="mock-bar"><i></i><i></i><i></i><span class="tt">tornalyx · ronda suiza</span></div>
-              <div class="mock-body">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-                  <span style="font-family:var(--head);font-weight:600;font-size:14px">Abierto de Ajedrez</span>
-                  <span style="font-family:var(--mono);font-size:10px;color:var(--red-bright);border:1px solid var(--red-deep);border-radius:999px;padding:3px 9px">Ronda 4/7</span>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:8px">
-                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:9px;background:#0f090a"><span style="font-family:var(--mono);font-size:11px;color:var(--muted-2);width:54px">Mesa 1</span><span style="flex:1;font-size:13px">M. Sosa (9) <span style="color:var(--muted-2)">vs</span> L. Paz (9)</span><span style="font-family:var(--mono);font-size:10px;color:var(--red-bright);border:1px solid var(--red-deep);border-radius:999px;padding:3px 8px">Jugando</span></div>
-                  <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line-soft);border-radius:9px;background:#0f090a"><span style="font-family:var(--mono);font-size:11px;color:var(--muted-2);width:54px">Mesa 2</span><span style="flex:1;font-size:13px">R. Díaz (7.5) <span style="color:var(--muted-2)">vs</span> J. Cruz (7.5)</span><span style="font-family:var(--mono);font-size:10px;color:var(--muted-2);border:1px solid var(--line);border-radius:999px;padding:3px 8px">1 · 0</span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="wrap text-center">
+      <p class="eyebrow eyebrow-center" data-reveal>Para cada organización</p>
+      <h2 data-reveal>Pensado para todo tipo de competencia</h2>
+      <p class="lead" data-reveal style="max-width:56ch;margin:12px auto 0">Clubes deportivos, instituciones educativas, federaciones, comunidades de esports y de juegos de mesa: todos gestionan sus torneos desde la misma plataforma.</p>
+      <div class="chips" data-reveal style="justify-content:center;margin-top:28px">
+        <span class="chip chip-solid"><span class="dot"></span>Clubes deportivos</span>
+        <span class="chip">Instituciones educativas</span>
+        <span class="chip">Federaciones y ligas</span>
+        <span class="chip">Esports</span>
+        <span class="chip">Juegos de mesa</span>
       </div>
     </div>
   </section>
 
-  <!-- ?? MÓDULOS ??????????????????????????????????????????? -->
-  <section class="section" id="modulos">
-    <div class="wrap">
-      <div class="section__header">
-        <p class="eyebrow eyebrow-center" data-reveal>Módulos</p>
-        <h2 data-reveal>Construí el sistema que tu torneo necesita</h2>
-        <p class="lead" data-reveal style="max-width:54ch;margin:12px auto 0">Activá solo lo que usás. Cada formato y cada función es un módulo independiente.</p>
-      </div>
-      <div class="mod-grid">
-        <div class="mod" data-reveal>
-          <div class="ic">
-            <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6.2a3 3 0 0 1 0 5.6"/><path d="M17.5 19a5.2 5.2 0 0 0-3-4.7"/></svg>
-          </div>
-          <h3>Participantes y equipos</h3>
-          <p>Inscripción, plantillas y perfiles en un único registro.</p>
-        </div>
-        <div class="mod" data-reveal>
-          <div class="ic">
-            <svg viewBox="0 0 24 24"><path d="M6 4h12v3a6 6 0 0 1-12 0V4Z"/><path d="M6 5H3.5v2A2.5 2.5 0 0 0 6 9.5"/><path d="M18 5h2.5v2A2.5 2.5 0 0 1 18 9.5"/><path d="M9 20h6"/><path d="M12 13v7"/></svg>
-          </div>
-          <h3>Torneos</h3>
-          <p>Creá y configurá la competencia en pocos pasos.</p>
-        </div>
-        <div class="mod" data-reveal>
-          <div class="ic">
-            <svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="3.4" rx="1"/><rect x="3.5" y="10.3" width="17" height="3.4" rx="1"/><rect x="3.5" y="15.6" width="17" height="3.4" rx="1"/></svg>
-          </div>
-          <h3>Liga · todos contra todos</h3>
-          <p>Fechas y fixtures generados automáticamente.</p>
-        </div>
-        <div class="mod" data-reveal>
-          <div class="ic">
-            <svg viewBox="0 0 24 24"><path d="M4 5h5v6h5v8"/><path d="M4 13h5"/><path d="M14 11h6"/><path d="M14 19h6"/></svg>
-          </div>
-          <h3>Eliminación directa</h3>
-          <p>Llaves que avanzan solas a cada ronda.</p>
-        </div>
-        <div class="mod" data-reveal>
-          <div class="ic">
-            <svg viewBox="0 0 24 24"><path d="M3 7h6l3 5"/><path d="M3 17h6l9-13"/><path d="M16 4h4v4"/><path d="M16 20h4v-4"/></svg>
-          </div>
-          <h3>Sistema suizo</h3>
-          <p>Emparejamientos por puntaje sin repetir rivales.</p>
-        </div>
-        <div class="mod" data-reveal>
-          <div class="ic">
-            <svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="5"/><rect x="12" y="8" width="3" height="8"/><rect x="17" y="13" width="3" height="3"/></svg>
-          </div>
-          <h3>Resultados y posiciones</h3>
-          <p>Tablas y clasificaciones siempre al día.</p>
-        </div>
-        <div class="mod" data-reveal>
-          <div class="ic">
-            <svg viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>
-          </div>
-          <h3>Consulta pública</h3>
-          <p>Cualquiera ve torneos y resultados sin registrarse.</p>
-        </div>
-        <div class="mod" data-reveal>
-          <div class="ic">
-            <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3Z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
-          </div>
-          <h3>Administración y roles</h3>
-          <p>Permisos por persona y registro de auditoría.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ?? CÓMO FUNCIONA ????????????????????????????????????? -->
-  <section class="section section--alt" id="como">
-    <div class="wrap">
-      <div class="section__header">
-        <p class="eyebrow eyebrow-center" data-reveal>Cómo funciona</p>
-        <h2 data-reveal>De la idea al primer partido en tres pasos</h2>
-      </div>
-      <div class="steps">
-        <div class="step" data-reveal>
-          <div class="n">01</div>
-          <h3>Creá y configurá</h3>
-          <p>Definí el torneo, las reglas y el formato: liga, eliminación directa o sistema suizo.</p>
-        </div>
-        <div class="step" data-reveal>
-          <div class="n">02</div>
-          <h3>Inscribí participantes</h3>
-          <p>Cargá equipos y jugadores. Elegí categorías y dejá todo listo para arrancar.</p>
-        </div>
-        <div class="step" data-reveal>
-          <div class="n">03</div>
-          <h3>Generá y publicá</h3>
-          <p>El sistema arma los enfrentamientos y todo queda visible en la consulta pública.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ?? STATS ????????????????????????????????????????????? -->
-  <section class="section" style="padding-top:0">
-    <div class="wrap">
-      <div class="stats-grid" data-reveal>
-        <div class="stat"><div class="num">3</div><div class="lbl">formatos de torneo</div></div>
-        <div class="stat"><div class="num">9</div><div class="lbl">módulos funcionales</div></div>
-        <div class="stat"><div class="num">4</div><div class="lbl">roles de usuario</div></div>
-        <div class="stat"><div class="num">3</div><div class="lbl">disciplinas: deporte, mente y esports</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ?? ROLES ????????????????????????????????????????????? -->
-  <section class="section section--alt" id="roles">
-    <div class="wrap">
-      <div class="section__header">
-        <p class="eyebrow eyebrow-center" data-reveal>Roles del sistema</p>
-        <h2 data-reveal>Un rol para cada persona</h2>
-      </div>
-      <div class="roles-grid">
-        <div class="role-item" data-reveal>
-          <div class="tag">Acceso total</div>
-          <h3>Administrador general</h3>
-          <p>Gestiona la plataforma, los torneos y los permisos de todos los usuarios.</p>
-        </div>
-        <div class="role-item" data-reveal>
-          <div class="tag">Gestión</div>
-          <h3>Organizador de torneo</h3>
-          <p>Crea competencias, inscribe participantes y carga los resultados.</p>
-        </div>
-        <div class="role-item" data-reveal>
-          <div class="tag">Participación</div>
-          <h3>Participante</h3>
-          <p>Consulta su calendario, sus enfrentamientos y su posición en la tabla.</p>
-        </div>
-        <div class="role-item" data-reveal>
-          <div class="tag">Sin registro</div>
-          <h3>Usuario público</h3>
-          <p>Ve torneos, calendarios y resultados sin necesidad de iniciar sesión.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ?? EMPRESA ??????????????????????????????????????????? -->
+  <!-- ?? CIERRE ??????????????????????????????????????????? -->
   <section class="section" id="empresa">
     <div class="wrap">
-      <div style="display:grid;grid-template-columns:1fr;gap:32px;align-items:center" id="empresaGrid">
-        <div>
-          <p class="eyebrow" data-reveal>Quiénes somos</p>
-          <h2 data-reveal>Hecho por Telyux Software Development</h2>
-          <p class="lead" data-reveal>Tornalyx nace para resolver un problema concreto: organizar competencias sin perder horas en planillas y herramientas sueltas. Construimos una plataforma modular, clara y pensada para durar toda la temporada.</p>
-          <div class="btn-row" data-reveal style="margin-top:24px">
-            <a class="btn btn-primary" href="/documentacion">Ver documentación</a>
-            <a class="btn btn-ghost" href="/registro">Crear cuenta gratis ?</a>
-          </div>
-        </div>
-        <div class="card" data-reveal style="border-radius:20px">
-          <div class="card__body" style="padding:36px">
-            <p class="eyebrow">El proyecto en números</p>
-            <div style="display:flex;flex-direction:column;gap:16px;margin-top:8px">
-              <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line-soft);padding-bottom:12px">
-                <span style="font-size:14px;color:var(--muted)">Formatos de competencia</span>
-                <span style="font-family:var(--head);font-weight:600;color:var(--ink)">Liga · Eliminación · Suizo</span>
-              </div>
-              <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line-soft);padding-bottom:12px">
-                <span style="font-size:14px;color:var(--muted)">Módulos funcionales</span>
-                <span style="font-family:var(--head);font-weight:600;color:var(--ink)">9 activables</span>
-              </div>
-              <div style="display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line-soft);padding-bottom:12px">
-                <span style="font-size:14px;color:var(--muted)">Roles de usuario</span>
-                <span style="font-family:var(--head);font-weight:600;color:var(--ink)">4 niveles</span>
-              </div>
-              <div style="display:flex;align-items:baseline;justify-content:space-between">
-                <span style="font-size:14px;color:var(--muted)">Disciplinas</span>
-                <span style="font-family:var(--head);font-weight:600;color:var(--ink)">Deporte · Mente · Esports</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ?? CTA ??????????????????????????????????????????????? -->
-  <section class="section" style="padding-top:0">
-    <div class="wrap">
-      <div class="cta-band" data-reveal>
+      <div class="cta-band" data-reveal style="text-align:center">
+        <p class="eyebrow eyebrow-center">Hecho por Telyux Software Development · UTU Montevideo</p>
         <h2>Llevá tu torneo al siguiente nivel</h2>
-        <p class="lead">Creá tu primera competencia o explorá los torneos ya publicados. Sin planillas, sin complicaciones.</p>
+        <p class="lead" style="max-width:50ch;margin:0 auto">Creá tu primera competencia o explorá los torneos ya publicados. Sin planillas, sin complicaciones.</p>
         <div class="btn-row btn-row-center" style="margin-top:28px">
           <a class="btn btn-primary" href="/registro">Crear cuenta gratis</a>
           <a class="btn btn-ghost" href="/torneos">Explorar torneos</a>
@@ -461,17 +108,14 @@
     <div class="foot-grid">
       <div class="foot-brand">
         <a class="brand" href="/">
-          <img class="badge" src="../assets/ICONO.png" alt="Tornalyx" width="32" height="32" data-fallback="hide">
+          <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
           Tornalyx
         </a>
         <p>La plataforma que organiza todo. Torneos de deporte, mente y esports.</p>
       </div>
       <div class="foot-col">
         <h5>Producto</h5>
-        <a href="#modulos">Módulos</a>
         <a href="#audiencias">Soluciones</a>
-        <a href="#como">Cómo funciona</a>
-        <a href="#roles">Roles</a>
       </div>
       <div class="foot-col">
         <h5>Formatos</h5>
@@ -494,12 +138,6 @@
     </div>
   </div>
 </footer>
-
-<style>
-  @media(min-width:860px) {
-    #empresaGrid { grid-template-columns:1fr 1fr; gap:48px; }
-  }
-</style>
 
 <script src="../js/main.js"></script>
 </body>

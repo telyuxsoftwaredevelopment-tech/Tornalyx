@@ -18,12 +18,12 @@ let catalogo = [];
  */
 function fondoDisciplina(disciplina) {
   const paletas = [
-    'linear-gradient(135deg,#1e3a8a,#2563eb)',
-    'linear-gradient(135deg,#4c1d95,#7c3aed)',
-    'linear-gradient(135deg,#065f46,#059669)',
-    'linear-gradient(135deg,#92400e,#d97706)',
-    'linear-gradient(135deg,#1f2937,#374151)',
-    'linear-gradient(135deg,#0c4a6e,#0284c7)'
+    '#1e3a8a',
+    '#4c1d95',
+    '#065f46',
+    '#92400e',
+    '#1f2937',
+    '#0c4a6e'
   ];
   /* Hash simple del nombre: la misma disciplina siempre recibe el mismo color. */
   const texto = String(disciplina || '');

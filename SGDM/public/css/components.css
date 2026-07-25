@@ -24,12 +24,10 @@
   background: var(--red);
   color: #fff;
   border-color: var(--red);
-  box-shadow: 0 0 0 0 var(--red-glow);
 }
 .btn-primary:hover {
   background: var(--red-bright);
   border-color: var(--red-bright);
-  box-shadow: 0 4px 24px var(--red-glow);
   transform: translateY(-1px);
 }
 .btn-ghost {
@@ -210,10 +208,7 @@
   font-family: var(--head);
   font-size: 2rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--ink), var(--muted));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--ink);
   line-height: 1;
 }
 .kpi-card__sub {

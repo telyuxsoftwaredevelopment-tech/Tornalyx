@@ -17,10 +17,6 @@
       padding:clamp(44px,7vw,80px) 0;
       border-bottom:1px solid var(--line-soft);
     }
-    .torneo-hero .glow-hero {
-      position:absolute; inset:0; pointer-events:none;
-      background:radial-gradient(ellipse 70% 60% at 30% 50%,rgba(236,28,36,.15),transparent 65%);
-    }
     .torneo-hero-in { position:relative; z-index:2; }
     .torneo-hero__grid { display:grid; grid-template-columns:1fr; gap:var(--space-6); }
     @media(min-width:768px) { .torneo-hero__grid { grid-template-columns:1fr auto; align-items:center; } }
@@ -50,8 +46,7 @@
     .info-box:hover { border-color:var(--red-deep); }
     .info-box__value {
       font-family:var(--head); font-size:var(--font-size-2xl); font-weight:800;
-      background:linear-gradient(180deg,#fff,var(--red-bright));
-      -webkit-background-clip:text; background-clip:text; color:transparent;
+      color:var(--red-bright);
     }
     .info-box__label { font-size:var(--font-size-sm); color:var(--muted); margin-top:6px; }
 
@@ -106,13 +101,12 @@
 
   <!-- Hero del torneo -->
   <div class="torneo-hero">
-    <div class="glow-hero"></div>
     <div class="wrap torneo-hero-in">
       <div class="torneo-hero__grid">
         <div>
           <div style="display:flex;gap:var(--space-2);margin-bottom:var(--space-3)">
             <span class="badge badge-green">Activo</span>
-            <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)">? Fútbol</span>
+            <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)">⚽ Fútbol</span>
             <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)">Liga</span>
           </div>
           <h1 style="margin-bottom:var(--space-3)">Copa Regional Fútbol 2026</h1>
@@ -120,14 +114,14 @@
             Torneo de fútbol por sistema de liga entre los mejores equipos de Montevideo. Todos los equipos se enfrentan entre sí en un partido de ida y vuelta.
           </p>
           <div style="display:flex;flex-wrap:wrap;gap:var(--space-4);font-size:var(--font-size-sm);color:var(--muted)">
-            <span>? Inicio: 10 mar 2026</span>
-            <span>??? Estimado: 30 ago 2026</span>
-            <span>?? Montevideo, Uruguay</span>
-            <span>??? Organiza: FC Deportivo Norte</span>
+            <span>📅 Inicio: 10 mar 2026</span>
+            <span>🏁 Estimado: 30 ago 2026</span>
+            <span>📍 Montevideo, Uruguay</span>
+            <span>🎽 Organiza: FC Deportivo Norte</span>
           </div>
         </div>
         <div>
-          <a href="/login" class="btn btn-primary btn-lg" style="white-space:nowrap">Inscribir equipo ?</a>
+          <a href="/login" class="btn btn-primary btn-lg" style="white-space:nowrap">Inscribir equipo</a>
         </div>
       </div>
     </div>
@@ -177,19 +171,19 @@
               <tbody>
                 <tr>
                   <td><span class="pos-badge pos-1">1</span></td>
-                  <td><span class="equipo-tag">? Atlético Norte</span></td>
+                  <td><span class="equipo-tag">🛡️ Atlético Norte</span></td>
                   <td>8</td><td>6</td><td>1</td><td>1</td><td>18</td><td>7</td><td>+11</td>
                   <td><strong style="font-family:var(--head);color:var(--ink)">19</strong></td>
                 </tr>
                 <tr>
                   <td><span class="pos-badge pos-2">2</span></td>
-                  <td><span class="equipo-tag">? Deportivo Sur</span></td>
+                  <td><span class="equipo-tag">🛡️ Deportivo Sur</span></td>
                   <td>8</td><td>5</td><td>2</td><td>1</td><td>14</td><td>8</td><td>+6</td>
                   <td><strong style="font-family:var(--head);color:var(--ink)">17</strong></td>
                 </tr>
                 <tr>
                   <td><span class="pos-badge pos-3">3</span></td>
-                  <td><span class="equipo-tag">? Club Rivera FC</span></td>
+                  <td><span class="equipo-tag">🛡️ Club Rivera FC</span></td>
                   <td>8</td><td>5</td><td>1</td><td>2</td><td>12</td><td>9</td><td>+3</td>
                   <td><strong style="font-family:var(--head);color:var(--ink)">16</strong></td>
                 </tr>
@@ -234,19 +228,19 @@
         <div class="cards-grid">
           <div class="card">
             <div class="card__body">
-              <h4 style="color:var(--ink);margin-bottom:6px">? Atlético Norte</h4>
+              <h4 style="color:var(--ink);margin-bottom:6px">🛡️ Atlético Norte</h4>
               <p style="color:var(--muted);font-size:var(--font-size-sm)">15 jugadores · Fundado 2018</p>
             </div>
           </div>
           <div class="card">
             <div class="card__body">
-              <h4 style="color:var(--ink);margin-bottom:6px">? Deportivo Sur</h4>
+              <h4 style="color:var(--ink);margin-bottom:6px">🛡️ Deportivo Sur</h4>
               <p style="color:var(--muted);font-size:var(--font-size-sm)">14 jugadores · Fundado 2015</p>
             </div>
           </div>
           <div class="card">
             <div class="card__body">
-              <h4 style="color:var(--ink);margin-bottom:6px">? Club Rivera FC</h4>
+              <h4 style="color:var(--ink);margin-bottom:6px">🛡️ Club Rivera FC</h4>
               <p style="color:var(--muted);font-size:var(--font-size-sm)">16 jugadores · Fundado 2020</p>
             </div>
           </div>

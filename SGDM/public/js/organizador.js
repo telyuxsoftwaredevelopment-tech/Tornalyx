@@ -6,6 +6,10 @@
 
 'use strict';
 
+/* IIFE: evita colisiones de `const` de nivel superior con admin.js,
+   que se carga en la misma página (panel de administración). */
+(function () {
+
 const { Api, Toast, Utils } = window.Tornalyx;
 
 /* Torneos cargados, en el orden en que se muestran. */
@@ -227,3 +231,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initCreateForm();
   cargarTorneos();
 });
+
+})();
