@@ -60,7 +60,7 @@ $view   = new View();
 $router->get('/',               static fn() => $view->render('publico/index',          ['title' => 'Tornalyx · La plataforma que organiza todo']));
 $router->get('/registro',       static fn() => $view->render('publico/registro',       ['title' => 'Tornalyx | Crear cuenta']));
 $router->get('/torneos',        static fn() => $view->render('publico/torneos',        ['title' => 'Tornalyx | Buscar Torneos']));
-$router->get('/torneo-detalle', static fn() => $view->render('publico/torneo-detalle', ['title' => 'Tornalyx | Copa Regional Fútbol 2026']));
+$router->get('/torneo-detalle', static fn() => $view->render('publico/torneo-detalle', ['title' => 'Tornalyx | Torneo']));
 $router->get('/terminos',       static fn() => $view->render('publico/terminos',       ['title' => 'Tornalyx | Términos y Condiciones']));
 $router->get('/documentacion',  static fn() => (new DocsController())->show());
 $router->post('/documentacion/solicitar', static fn() => (new DocsController())->solicitarAcceso());

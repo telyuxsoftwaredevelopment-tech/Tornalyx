@@ -90,10 +90,12 @@ class TorneoController extends Controller {
         }
         $posiciones = $this->torneoModel->getPosiciones($id);
         $resultados = $this->resultadoModel->listarPorTorneo($id);
+        $equipos    = $this->torneoModel->getEquipos($id);
         $this->jsonSuccess([
             'torneo'     => $this->normalizar($torneo),
             'posiciones' => $posiciones,
             'resultados' => $resultados,
+            'equipos'    => $equipos,
         ]);
     }
 
