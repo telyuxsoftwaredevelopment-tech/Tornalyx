@@ -213,12 +213,17 @@ CREATE TABLE IF NOT EXISTS doc_acceso (
     solicitado_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resuelto_at   TIMESTAMP    NULL DEFAULT NULL,
     resuelto_por  INT UNSIGNED NULL DEFAULT NULL,
+    -- Aprobación por email (magic link estilo Google Docs): token de un solo uso
+    -- hasheado, con vencimiento. Ver add_doc_acceso.sql. Mantener en sincronía.
+    aprob_token_hash CHAR(64)  NULL DEFAULT NULL,
+    aprob_token_exp  TIMESTAMP NULL DEFAULT NULL,
     CONSTRAINT fk_docacceso_usuario
         FOREIGN KEY (usuario_id)  REFERENCES usuarios(id) ON DELETE CASCADE,
     CONSTRAINT fk_docacceso_resuelto
         FOREIGN KEY (resuelto_por) REFERENCES usuarios(id) ON DELETE SET NULL,
     UNIQUE KEY uq_usuario_materia (usuario_id, materia),
-    INDEX idx_estado (estado)
+    INDEX idx_estado (estado),
+    INDEX idx_aprob_token (aprob_token_hash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ──────────────────────────────────────────────────────────────
@@ -229,7 +234,10 @@ CREATE TABLE IF NOT EXISTS doc_otps (
     usuario_id   INT UNSIGNED NOT NULL,
     materia      VARCHAR(40)  NOT NULL,
     code_hash    VARCHAR(255) NOT NULL,
-    expires_at   TIMESTAMP    NOT NULL,
+    -- Default fijo explícito: evita que MariaDB (con explicit_defaults_for_timestamp
+    -- apagado) le agregue ON UPDATE CURRENT_TIMESTAMP al primer TIMESTAMP, lo que
+    -- pisaría expires_at en cada UPDATE de attempts y rompería el reintento del código.
+    expires_at   TIMESTAMP    NOT NULL DEFAULT '1970-01-01 00:00:01',
     attempts     TINYINT UNSIGNED NOT NULL DEFAULT 0,
     last_sent_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (usuario_id, materia),
