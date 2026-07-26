@@ -22,7 +22,6 @@
   <a href="/torneos">Torneos</a>
   <a href="/documentacion">Documentación</a>
   <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
-  <a class="btn btn-primary mobile-cta" href="/torneos">Ver torneos</a>
   <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro" style="margin-top:8px">
     <input type="checkbox" class="theme-toggle__input" />
     <span class="theme-toggle__track">
@@ -47,7 +46,6 @@
     </nav>
     <div class="nav-right">
       <a class="ghost-link" href="/login">Entrar</a>
-      <a class="btn btn-primary btn-sm" href="/torneos">Ver torneos</a>
       <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
         <input type="checkbox" class="theme-toggle__input" />
         <span class="theme-toggle__track">
