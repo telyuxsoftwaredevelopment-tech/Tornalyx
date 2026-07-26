@@ -112,7 +112,7 @@
 </head>
 <body>
 
-  <?= $partial('partials/nav-publico') ?>
+  <?= $partial('partials/nav-publico', ['activo' => 'torneos']) ?>
 
   <!-- Todo el contenido se rellena desde /api/torneo/{id} con torneo-detalle.js -->
   <div id="detalleRoot">

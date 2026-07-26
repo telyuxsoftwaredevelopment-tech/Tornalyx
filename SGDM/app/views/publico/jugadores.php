@@ -42,7 +42,7 @@
 </head>
 <body>
 
-  <?= $partial('partials/nav-publico') ?>
+  <?= $partial('partials/nav-publico', ['activo' => 'jugadores']) ?>
 
   <div class="page-hero">
     <div class="grid-lines-sm"></div>

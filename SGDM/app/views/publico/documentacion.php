@@ -94,7 +94,7 @@
 </head>
 <body>
 
-  <?= $partial('partials/nav-publico') ?>
+  <?= $partial('partials/nav-publico', ['activo' => 'documentacion']) ?>
 
   <main class="doc-page">
     <div class="wrap">

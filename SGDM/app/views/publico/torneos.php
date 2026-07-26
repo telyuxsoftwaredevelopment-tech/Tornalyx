@@ -15,7 +15,7 @@
 </head>
 <body>
 
-  <?= $partial('partials/nav-publico') ?>
+  <?= $partial('partials/nav-publico', ['activo' => 'torneos']) ?>
 
   <!-- Page hero -->
   <div class="page-hero">
