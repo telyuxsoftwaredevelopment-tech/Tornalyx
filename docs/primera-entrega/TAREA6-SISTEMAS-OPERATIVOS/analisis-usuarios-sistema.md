@@ -9,7 +9,7 @@ En un servidor Linux que aloja la aplicación Tornalyx, es fundamental definir l
 
 ---
 
-## 2. Usuarios del Sistema Operativo (Ubuntu Server)
+## 2. Usuarios del Sistema Operativo (AlmaLinux 8.10)
 
 ### 2.1 Usuario: `admin_tornalyx`
 **Tipo:** Usuario sudoer (administrador del sistema)
@@ -19,7 +19,7 @@ En un servidor Linux que aloja la aplicación Tornalyx, es fundamental definir l
 | **Nombre de usuario** | `admin_tornalyx` |
 | **UID** | 1001 |
 | **Grupo principal** | `admin_tornalyx` |
-| **Grupos secundarios** | `sudo`, `www-data` |
+| **Grupos secundarios** | `wheel`, `apache` |
 | **Shell** | `/bin/bash` |
 | **Directorio home** | `/home/admin_tornalyx` |
 | **Acceso SSH** | Sí (clave pública RSA/ED25519 únicamente) |
@@ -28,7 +28,7 @@ En un servidor Linux que aloja la aplicación Tornalyx, es fundamental definir l
 **Responsabilidades:**
 - Instalar, actualizar y configurar paquetes del sistema (Apache, PHP, MySQL).
 - Gestionar certificados SSL con Certbot.
-- Configurar el firewall con `ufw`.
+- Configurar el firewall con `firewalld`.
 - Ejecutar tareas de mantenimiento del servidor (reinicios, logs).
 - Revisar y aplicar parches de seguridad.
 
@@ -36,7 +36,7 @@ En un servidor Linux que aloja la aplicación Tornalyx, es fundamental definir l
 ```bash
 # Puede ejecutar cualquier comando como root mediante sudo
 # Acceso: sudo -i o sudo <comando>
-# Política: cada acción sudo queda registrada en /var/log/auth.log
+# Política: cada acción sudo queda registrada en /var/log/secure
 ```
 
 **Restricciones:**
@@ -53,7 +53,7 @@ En un servidor Linux que aloja la aplicación Tornalyx, es fundamental definir l
 |----------|-------|
 | **Nombre de usuario** | `operador_web` |
 | **UID** | 1002 |
-| **Grupo principal** | `www-data` |
+| **Grupo principal** | `apache` |
 | **Grupos secundarios** | ninguno |
 | **Shell** | `/bin/bash` |
 | **Directorio home** | `/home/operador_web` |
@@ -70,19 +70,19 @@ En un servidor Linux que aloja la aplicación Tornalyx, es fundamental definir l
 **Permisos específicos:**
 ```bash
 # Propietario de los archivos de la aplicación
-sudo chown -R operador_web:www-data /var/www/tornalyx/
+sudo chown -R operador_web:apache /var/www/tornalyx/
 sudo chmod -R 750 /var/www/tornalyx/
 
 # Permisos específicos de sudo (solo comandos necesarios)
 # En /etc/sudoers.d/operador_web:
-operador_web ALL=(ALL) NOPASSWD: /bin/systemctl restart apache2
-operador_web ALL=(ALL) NOPASSWD: /bin/systemctl reload apache2
+operador_web ALL=(ALL) NOPASSWD: /bin/systemctl restart httpd
+operador_web ALL=(ALL) NOPASSWD: /bin/systemctl reload httpd
 operador_web ALL=(ALL) NOPASSWD: /usr/bin/certbot renew
 ```
 
 **Restricciones:**
 - No tiene acceso a `sudo` general.
-- No puede instalar paquetes del sistema (`apt install`).
+- No puede instalar paquetes del sistema (`dnf install`).
 - No puede modificar configuraciones de firewall.
 - Acceso a MySQL limitado a la base de datos `tornalyx_db` con usuario `tornalyx_user`.
 
@@ -96,7 +96,7 @@ operador_web ALL=(ALL) NOPASSWD: /usr/bin/certbot renew
 | **Nombre de usuario** | `dev_tornalyx` |
 | **UID** | 1003 |
 | **Grupo principal** | `dev_tornalyx` |
-| **Grupos secundarios** | `www-data` |
+| **Grupos secundarios** | `apache` |
 | **Shell** | `/bin/bash` |
 | **Directorio home** | `/home/dev_tornalyx` |
 | **Acceso SSH** | Sí (solo en servidor de desarrollo) |
@@ -117,7 +117,7 @@ sudo chown -R dev_tornalyx:dev_tornalyx /home/dev_tornalyx/tornalyx/
 # Acceso a Git en el servidor
 # Acceso a MySQL de desarrollo (base de datos tornalyx_dev)
 # Puede reiniciar servicios en servidor de desarrollo:
-dev_tornalyx ALL=(ALL) NOPASSWD: /bin/systemctl restart apache2, /bin/systemctl restart mysql
+dev_tornalyx ALL=(ALL) NOPASSWD: /bin/systemctl restart httpd, /bin/systemctl restart mysqld
 ```
 
 **Restricciones:**
@@ -136,7 +136,7 @@ dev_tornalyx ALL=(ALL) NOPASSWD: /bin/systemctl restart apache2, /bin/systemctl 
 | **UID** | 1004 |
 | **Grupo principal** | `backup_tornalyx` |
 | **Grupos secundarios** | ninguno |
-| **Shell** | `/usr/sbin/nologin` (no puede iniciar sesión interactiva) |
+| **Shell** | `/sbin/nologin` (no puede iniciar sesión interactiva) |
 | **Directorio home** | `/var/backups/tornalyx/` |
 | **Acceso SSH** | No |
 | **Contraseña** | No (cuenta del sistema) |
@@ -169,7 +169,7 @@ backup_tornalyx ALL=(ALL) NOPASSWD: /usr/bin/mysqldump
 ```
 
 **Restricciones:**
-- Shell = `/usr/sbin/nologin` → nadie puede iniciar sesión como este usuario.
+- Shell = `/sbin/nologin` → nadie puede iniciar sesión como este usuario.
 - Solo puede escribir en `/var/backups/tornalyx/`.
 - No tiene acceso de escritura a los archivos de la aplicación.
 - En caso de compromiso, el atacante no puede modificar la aplicación.
@@ -180,11 +180,11 @@ backup_tornalyx ALL=(ALL) NOPASSWD: /usr/bin/mysqldump
 
 | Acción | admin_tornalyx | operador_web | dev_tornalyx | backup_tornalyx |
 |--------|:--------------:|:------------:|:------------:|:---------------:|
-| Instalar paquetes (apt) | ✅ (sudo) | ❌ | ❌ | ❌ |
+| Instalar paquetes (dnf) | ✅ (sudo) | ❌ | ❌ | ❌ |
 | Reiniciar servicios | ✅ | ✅ (limitado) | ✅ (dev) | ❌ |
 | Modificar archivos web | ✅ | ✅ | ✅ | ❌ |
 | Leer archivos web | ✅ | ✅ | ✅ | ✅ |
-| Gestionar firewall (ufw) | ✅ | ❌ | ❌ | ❌ |
+| Gestionar firewall (firewalld) | ✅ | ❌ | ❌ | ❌ |
 | Acceso MySQL producción | ✅ | ✅ (limitado) | ❌ | ✅ (solo dump) |
 | Acceso MySQL desarrollo | ✅ | ❌ | ✅ | ❌ |
 | Ejecutar backups | ✅ | ❌ | ❌ | ✅ (automático) |
@@ -200,3 +200,6 @@ backup_tornalyx ALL=(ALL) NOPASSWD: /usr/bin/mysqldump
 3. **No uso de root:** el usuario root no se usa directamente; se usa `sudo` con registro de auditoría.
 4. **Cuenta de servicio sin shell:** `backup_tornalyx` no puede ser usado por atacantes para acceso interactivo.
 5. **Aislamiento de entornos:** el desarrollador no tiene acceso a producción.
+6. **Control de acceso obligatorio:** AlmaLinux trae SELinux en modo *enforcing*, que actúa como una segunda capa por encima de los permisos de usuarios y grupos. Aunque una cuenta lograra escribir dentro del directorio publicado, Apache no serviría ese archivo si no tiene el contexto `httpd_sys_content_t`.
+
+> **Nota sobre la distribución.** Los nombres de grupos y servicios de este documento son los de la familia RHEL, que difieren de los de Debian y Ubuntu: el grupo de administradores es `wheel` (no `sudo`), Apache corre como el usuario `apache` (no `www-data`) y su servicio se llama `httpd` (no `apache2`), las acciones de `sudo` se registran en `/var/log/secure` (no en `/var/log/auth.log`), los paquetes se instalan con `dnf` (no con `apt`) y el firewall es `firewalld` (no `ufw`).
