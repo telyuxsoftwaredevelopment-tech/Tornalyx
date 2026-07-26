@@ -74,9 +74,57 @@
         <div class="hero-text">
           <h1>Un sistema.<br><span class="accent">Cualquier competencia.</span></h1>
           <p class="lead">Liga, eliminación directa o sistema suizo. Del club de barrio a la liga online · participantes, calendarios, llaves y resultados en una sola plataforma modular.</p>
+          <div class="btn-row hero-cta">
+            <a class="btn btn-primary btn-lg" href="/registro">Crear cuenta</a>
+            <a class="btn btn-ghost btn-lg" href="/torneos">Ver torneos</a>
+          </div>
         </div>
-        <div class="hero-cta">
-          <a class="btn btn-primary btn-lg" href="/registro">Crear cuenta</a>
+
+        <!-- Vista previa de la interfaz: muestra de un vistazo lo que hace la
+             plataforma (llaves, resultados y próximo partido). Es ilustrativa,
+             por eso se oculta a los lectores de pantalla: todo lo que dice ya
+             está en el texto de al lado. -->
+        <div class="hero-visual" aria-hidden="true">
+          <div class="mockup">
+            <div class="mockup__bar">
+              <span class="mockup__dots"><i></i><i></i><i></i></span>
+              <span class="mockup__title">Copa Tornalyx 2026</span>
+            </div>
+            <div class="mockup__body">
+              <div class="mockup__head">
+                <span class="mockup__ronda">Semifinales</span>
+                <span class="mockup__estado">En curso</span>
+              </div>
+
+              <div class="llaves">
+                <div class="llaves__col">
+                  <div class="llave">
+                    <span class="llave__eq is-win">Halcones <b>3</b></span>
+                    <span class="llave__eq">Titanes <b>1</b></span>
+                  </div>
+                  <div class="llave">
+                    <span class="llave__eq is-win">Cóndores <b>2</b></span>
+                    <span class="llave__eq">Lobos <b>0</b></span>
+                  </div>
+                </div>
+                <div class="llaves__col llaves__col--final">
+                  <span class="llaves__label">Final</span>
+                  <div class="llave">
+                    <span class="llave__eq">Halcones</span>
+                    <span class="llave__eq">Cóndores</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mockup__pie">
+                <div>
+                  <span class="mockup__pie-lbl">Próximo partido</span>
+                  <strong class="mockup__pie-val">Hoy 19:00 · Cancha 2</strong>
+                </div>
+                <div class="mockup__cupos">16 equipos</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
