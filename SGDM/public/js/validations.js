@@ -47,15 +47,20 @@ async function postForm(url, data) {
 }
 
 /* ─── Toggle visibilidad de contraseña ──────────────── */
+/* El ícono es siempre el ojo; el estado "visible" se marca con la clase
+   .is-visible (estilo en CSS) y el aria-label, sin cambiar de emoji. */
+function togglePassVisibility(btn, input) {
+  if (!input) return;
+  const mostrar = input.type === 'password';
+  input.type = mostrar ? 'text' : 'password';
+  btn.classList.toggle('is-visible', mostrar);
+  btn.setAttribute('aria-label', mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña');
+}
+
 function initPasswordToggle() {
   document.querySelectorAll('[data-toggle-pass]').forEach(btn => {
     btn.addEventListener('click', function () {
-      const targetId = this.dataset.togglePass || 'password';
-      const input = document.getElementById(targetId);
-      if (!input) return;
-      const isText = input.type === 'text';
-      input.type = isText ? 'password' : 'text';
-      this.textContent = isText ? '👁' : '🙈';
+      togglePassVisibility(this, document.getElementById(this.dataset.togglePass || 'password'));
     });
   });
 
@@ -63,11 +68,7 @@ function initPasswordToggle() {
   const legacyBtn = document.getElementById('togglePassword');
   if (legacyBtn && !legacyBtn.dataset.togglePass) {
     legacyBtn.addEventListener('click', function () {
-      const input = document.getElementById('password');
-      if (!input) return;
-      const isText = input.type === 'text';
-      input.type = isText ? 'password' : 'text';
-      this.textContent = isText ? '👁' : '🙈';
+      togglePassVisibility(this, document.getElementById('password'));
     });
   }
 }

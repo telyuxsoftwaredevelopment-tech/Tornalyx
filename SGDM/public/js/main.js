@@ -423,9 +423,12 @@ function initAccessibility() {
     document.body.prepend(skip);
   }
 
-  /* Botón flotante + panel. */
+  /* Botón + panel. Va dentro del navbar (antes del burger, así también se
+     ve en mobile); si la página no tiene navbar (p. ej. dashboards),
+     queda como botón flotante abajo a la izquierda. */
+  const navIn  = document.querySelector('.nav .nav-in');
   const widget = document.createElement('div');
-  widget.className = 'a11y-widget';
+  widget.className = navIn ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
   widget.innerHTML = `
     <button type="button" class="a11y-btn" id="a11yBtn" aria-expanded="false"
             aria-controls="a11yPanel" aria-label="Opciones de accesibilidad" title="Accesibilidad">
@@ -454,7 +457,11 @@ function initAccessibility() {
         <input type="checkbox" data-pref="links" />
       </label>
     </div>`;
-  document.body.appendChild(widget);
+  if (navIn) {
+    navIn.insertBefore(widget, navIn.querySelector('.burger'));
+  } else {
+    document.body.appendChild(widget);
+  }
 
   const btn   = widget.querySelector('#a11yBtn');
   const panel = widget.querySelector('#a11yPanel');

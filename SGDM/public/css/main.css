@@ -802,8 +802,26 @@ select.form-control option { background:var(--bg-2); color:var(--ink); }
 }
 .skip-link:focus { left:0; }
 
-/* Botón flotante + panel */
+/* Botón + panel. Por defecto flotante (páginas sin navbar); con el
+   modificador --nav vive dentro del navbar junto a los enlaces. */
 .a11y-widget { position:fixed; left:18px; bottom:18px; z-index:200; }
+.a11y-widget--nav { position:relative; left:auto; bottom:auto; z-index:70; flex:none; margin-left:auto; }
+/* El burger trae su propio margin-left:auto; cuando el widget está antes,
+   el auto del widget es el que empuja y el burger queda pegado a él. */
+.a11y-widget--nav + .burger { margin-left:0; }
+/* En desktop .nav-right ya empuja a la derecha; el margen extra solo
+   hace falta en mobile, donde .nav-right está oculto. */
+@media(min-width:860px) { .a11y-widget--nav { margin-left:0; } }
+.a11y-widget--nav .a11y-btn {
+  width:34px; height:34px; font-size:16px;
+  box-shadow:3px 3px 8px rgba(0,0,0,.4), -2px -2px 6px rgba(255,255,255,.03);
+}
+[data-theme="light"] .a11y-widget--nav .a11y-btn {
+  box-shadow:3px 3px 8px rgba(163,163,163,.35), -2px -2px 6px rgba(255,255,255,.8);
+}
+.a11y-widget--nav .a11y-panel {
+  left:auto; right:0; bottom:auto; top:calc(100% + 14px);
+}
 .a11y-btn {
   width:48px; height:48px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
@@ -885,4 +903,8 @@ html.a11y-motion [data-reveal] { opacity:1; transform:none; }
 
 /* Modo: subrayar enlaces (en contenido, no en botones) */
 html.a11y-links a:not(.btn):not(.brand):not(.a11y-btn) { text-decoration:underline; }
+
+/* Toggle de contraseña: el ojo se enciende cuando la contraseña está
+   visible (antes cambiaba a un emoji de mono). */
+.password-toggle.is-visible { color:var(--red-bright); }
 .hidden { display:none !important; }
