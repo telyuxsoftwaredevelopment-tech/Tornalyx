@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Tornalyx · La plataforma que organiza todo. Torneos deportivos, mentales y esports." />
+  <meta name="description" content="Tornalyx · Organizá torneos de deporte, mente y esports: inscripciones, fixture, resultados y posiciones en un solo lugar." />
   <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-  <title><?= e($title ?? 'Tornalyx · La plataforma que organiza todo') ?></title>
+  <title><?= e($title ?? 'Tornalyx · Torneos de deporte, mente y esports') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
@@ -72,7 +72,6 @@
     <div class="wrap hero-in">
       <div class="hero-top">
         <div class="hero-text">
-          <p class="eyebrow">Torneos · deporte · mente · esports</p>
           <h1>Un sistema.<br><span class="accent">Cualquier competencia.</span></h1>
           <p class="lead">Liga, eliminación directa o sistema suizo. Del club de barrio a la liga online · participantes, calendarios, llaves y resultados en una sola plataforma modular.</p>
         </div>
@@ -80,15 +79,44 @@
           <a class="btn btn-primary btn-lg" href="/registro">Crear cuenta</a>
         </div>
       </div>
-      <p class="tagline">La plataforma que organiza todo</p>
     </div>
   </section>
 
   <!-- ?? AUDIENCIAS ??????????????????????????????????????? -->
   <section class="section section--alt" id="audiencias">
     <div class="wrap audiencias-grid">
-      <div class="audiencias-photo" data-reveal aria-hidden="true">
-        <span class="audiencias-photo__icon">🏆</span>
+      <!-- Galería: las fotos rotan solas (js/galeria.js) y muestran los
+           distintos tipos de competencia que cubre la plataforma. -->
+      <div class="galeria" data-reveal role="group" aria-roledescription="carrusel" aria-label="Tipos de competencia">
+        <div class="galeria__slides">
+          <figure class="galeria__slide is-active">
+            <!-- La primera se carga de inmediato para que no quede un hueco
+                 al llegar a la sección; el resto van en diferido. -->
+            <img src="../assets/galeria/futbol.jpg" alt="Jugador de fútbol rematando al arco" />
+            <figcaption>Deportes de equipo</figcaption>
+          </figure>
+          <figure class="galeria__slide">
+            <img src="../assets/galeria/futbol-copa.jpg" alt="Futbolista celebrando con el trofeo del campeonato" loading="lazy" />
+            <figcaption>Campeonatos y copas</figcaption>
+          </figure>
+          <figure class="galeria__slide">
+            <img src="../assets/galeria/ajedrez.jpg" alt="Dos ajedrecistas saludándose antes de una partida" loading="lazy" />
+            <figcaption>Deportes de la mente</figcaption>
+          </figure>
+          <figure class="galeria__slide">
+            <img src="../assets/galeria/juegos-de-mesa.jpg" alt="Mesa de juego de cartas vista desde arriba" loading="lazy" />
+            <figcaption>Juegos de mesa y cartas</figcaption>
+          </figure>
+          <figure class="galeria__slide">
+            <img src="../assets/galeria/esports.jpg" alt="Equipo de esports entrando al escenario" loading="lazy" />
+            <figcaption>Equipos de esports</figcaption>
+          </figure>
+          <figure class="galeria__slide">
+            <img src="../assets/galeria/esports-arena.jpg" alt="Estadio lleno durante una final de esports" loading="lazy" />
+            <figcaption>Grandes finales</figcaption>
+          </figure>
+        </div>
+        <div class="galeria__puntos" role="tablist" aria-label="Elegir foto"></div>
       </div>
       <div class="audiencias-text">
         <p class="eyebrow" data-reveal>Para cada organización</p>
@@ -109,7 +137,7 @@
           <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
           Tornalyx
         </a>
-        <p>La plataforma que organiza todo. Torneos de deporte, mente y esports.</p>
+        <p>Torneos de deporte, mente y esports en una sola plataforma.</p>
       </div>
       <div class="foot-col">
         <h5>Producto</h5>
@@ -138,6 +166,7 @@
 </footer>
 
 <script src="../js/main.js"></script>
+<script src="../js/galeria.js"></script>
 </body>
 </html>
 

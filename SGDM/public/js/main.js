@@ -562,10 +562,9 @@ function initAccessibility() {
     });
   });
 
-  /* Respetar la preferencia del sistema si el usuario no eligió nada. */
-  if (prefs.motion === undefined && matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    prefs.motion = true;
-  }
+  /* Todas las opciones arrancan desactivadas: el sitio se ve como está
+     diseñado hasta que el usuario elija lo contrario, y su elección queda
+     guardada para las próximas visitas. */
   aplicar();
 }
 

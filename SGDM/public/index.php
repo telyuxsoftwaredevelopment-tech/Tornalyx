@@ -61,7 +61,7 @@ $router = new Router();
 $view   = new View();
 
 // ─── Páginas públicas (vistas renderizadas en servidor) ────────
-$router->get('/',               static fn() => $view->render('publico/index',          ['title' => 'Tornalyx · La plataforma que organiza todo']));
+$router->get('/',               static fn() => $view->render('publico/index',          ['title' => 'Tornalyx · Torneos de deporte, mente y esports']));
 $router->get('/registro',       static fn() => $view->render('publico/registro',       ['title' => 'Tornalyx | Crear cuenta']));
 $router->get('/torneos',        static fn() => $view->render('publico/torneos',        ['title' => 'Tornalyx | Buscar Torneos']));
 $router->get('/torneo-detalle', static fn() => $view->render('publico/torneo-detalle', ['title' => 'Tornalyx | Torneo']));

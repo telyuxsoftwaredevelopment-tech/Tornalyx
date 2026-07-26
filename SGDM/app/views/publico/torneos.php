@@ -21,7 +21,6 @@
   <div class="page-hero">
     <div class="grid-lines-sm"></div>
     <div class="wrap page-hero-in">
-      <p class="eyebrow">Torneos · deporte · mente · esports</p>
       <h1 style="font-size:clamp(28px,4vw,48px);margin-bottom:10px">Buscar torneos</h1>
       <p class="lead" style="max-width:52ch">Encontrá el torneo ideal entre todas las disciplinas disponibles.</p>
     </div>
