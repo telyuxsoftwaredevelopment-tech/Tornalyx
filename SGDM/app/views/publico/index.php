@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Tornalyx · La plataforma que organiza todo. Torneos deportivos, mentales y esports." />
+  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <title><?= e($title ?? 'Tornalyx · La plataforma que organiza todo') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
@@ -22,6 +23,15 @@
   <a href="/documentacion">Documentación</a>
   <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
   <a class="btn btn-primary mobile-cta" href="/torneos">Ver torneos</a>
+  <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro" style="margin-top:8px">
+    <input type="checkbox" class="theme-toggle__input" />
+    <span class="theme-toggle__track">
+      <span class="theme-toggle__thumb">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+      </span>
+    </span>
+  </label>
 </div>
 
 <!-- ?? NAV ??????????????????????????????????????????????? -->
@@ -38,6 +48,15 @@
     <div class="nav-right">
       <a class="ghost-link" href="/login">Entrar</a>
       <a class="btn btn-primary btn-sm" href="/torneos">Ver torneos</a>
+      <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
+        <input type="checkbox" class="theme-toggle__input" />
+        <span class="theme-toggle__track">
+          <span class="theme-toggle__thumb">
+            <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+            <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+          </span>
+        </span>
+      </label>
     </div>
     <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
       <span></span><span></span><span></span>
@@ -60,11 +79,6 @@
         <div class="hero-cta">
           <a class="btn btn-primary btn-lg" href="/registro">Crear cuenta</a>
         </div>
-      </div>
-      <div class="chips">
-        <span class="chip chip-solid"><span class="dot"></span>Liga</span>
-        <span class="chip">Eliminación directa</span>
-        <span class="chip">Sistema suizo</span>
       </div>
       <p class="tagline">La plataforma que organiza todo</p>
     </div>

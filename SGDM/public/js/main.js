@@ -350,6 +350,35 @@ function initTabShortcuts() {
   });
 }
 
+/* ─── Toggle claro/oscuro ─────────────────────────────── */
+/* El tema ya se aplica antes del primer paint (script inline en el
+   <head> de cada página); acá solo sincronizamos los switches visibles
+   y persistimos el cambio cuando el usuario lo toca. */
+const THEME_KEY = 'tornalyx-theme';
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-toggle__input').forEach(input => {
+    input.checked = theme === 'light';
+  });
+}
+
+function initThemeToggle() {
+  const inputs = document.querySelectorAll('.theme-toggle__input');
+  if (!inputs.length) return;
+
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current);
+
+  inputs.forEach(input => {
+    input.addEventListener('change', () => {
+      const theme = input.checked ? 'light' : 'dark';
+      try { localStorage.setItem(THEME_KEY, theme); } catch { /* privado / bloqueado */ }
+      applyTheme(theme);
+    });
+  });
+}
+
 /* ─── Usuario actual en paneles privados ─────────────── */
 /* Rellena los datos del usuario logueado en los elementos marcados con
    data-user-*. Solo hace la petición si la página tiene esos hooks (así las
@@ -397,6 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initImageFallbacks();
   initTabShortcuts();
+  initThemeToggle();
   Toast.init();
   Modal.init();
   initCurrentUser();

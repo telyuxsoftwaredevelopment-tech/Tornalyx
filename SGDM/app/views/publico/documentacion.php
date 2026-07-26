@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Documentación del proyecto Tornalyx · SGDM, organizada por materia." />
+  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <title><?= e($title ?? 'Tornalyx | Documentación') ?></title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />

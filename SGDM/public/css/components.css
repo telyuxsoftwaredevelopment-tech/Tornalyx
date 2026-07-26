@@ -4,44 +4,12 @@
    Importado después de variables.css y main.css
    ===================================================== */
 
-/* ─── Botones ────────────────────────────────────────── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 10px 20px;
+/* Los estilos de .btn viven en main.css (neumorfismo); acá sólo lo que
+   no está definido ahí. */
+.btn-icon {
+  padding: 8px;
   border-radius: 10px;
-  font-family: var(--head);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-  text-decoration: none;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
 }
-.btn-primary {
-  background: var(--red);
-  color: #fff;
-  border-color: var(--red);
-}
-.btn-primary:hover {
-  background: var(--red-bright);
-  border-color: var(--red-bright);
-  transform: translateY(-1px);
-}
-.btn-ghost {
-  background: transparent;
-  color: var(--ink);
-  border-color: var(--line);
-}
-.btn-ghost:hover {
-  background: rgba(255,255,255,.05);
-  border-color: var(--muted);
-}
-.btn-sm  { padding: 7px 16px; font-size: 13px; }
-.btn-lg  { padding: 14px 28px; font-size: var(--font-size-base); }
-.btn-icon { padding: 8px; border-radius: 8px; }
 
 /* ─── Cards ──────────────────────────────────────────── */
 .card {

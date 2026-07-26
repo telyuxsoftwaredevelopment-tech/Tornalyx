@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <title><?= e($title ?? 'Tornalyx | Crear cuenta') ?></title>
   
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
@@ -48,8 +49,7 @@
 <body>
 
   <?= $partial('partials/nav-auth', ['links' => [
-      ['class' => 'ghost-link',          'href' => '/login', 'text' => 'Iniciar sesión'],
-      ['class' => 'btn btn-ghost btn-sm', 'href' => '/login', 'text' => 'Entrar'],
+      ['class' => 'ghost-link', 'href' => '/login', 'text' => 'Iniciar sesión'],
   ]]) ?>
 
   <main class="auth-page">

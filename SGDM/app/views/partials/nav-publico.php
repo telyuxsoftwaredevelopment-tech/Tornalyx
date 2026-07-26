@@ -10,6 +10,15 @@
   <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
   <a href="/">Inicio</a>
   <a href="/torneos">Torneos</a>
+  <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro" style="margin-top:8px">
+    <input type="checkbox" class="theme-toggle__input" />
+    <span class="theme-toggle__track">
+      <span class="theme-toggle__thumb">
+        <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+        <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+      </span>
+    </span>
+  </label>
 </div>
 
 <header class="nav">
@@ -22,6 +31,17 @@
       <a href="/">Inicio</a>
       <a href="/torneos" style="color:var(--ink)">Torneos</a>
     </nav>
+    <div class="nav-right">
+      <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
+        <input type="checkbox" class="theme-toggle__input" />
+        <span class="theme-toggle__track">
+          <span class="theme-toggle__thumb">
+            <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+            <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+          </span>
+        </span>
+      </label>
+    </div>
     <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
       <span></span><span></span><span></span>
     </button>

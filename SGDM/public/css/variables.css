@@ -21,6 +21,7 @@
 
   /* ── Fondos ───────────────────────────────────────── */
   --bg:            #0b0708;
+  --bg-rgb:        11,7,8;   /* mismo tono que --bg, para rgba() (navbar esmerilado) */
   --bg-2:          #130c0d;
   --bg-3:          #1a1012;
   --bg-card:       #160d0e;
@@ -124,4 +125,48 @@
   /* md:  768px  */
   /* lg:  1024px */
   /* xl:  1280px */
+}
+
+/* =====================================================
+   Tema claro (neumorfismo sobre gris claro)
+   Se activa con [data-theme="light"] en <html>, seteado
+   por js/main.js antes del primer paint.
+   ===================================================== */
+:root[data-theme="light"] {
+  /* ── Fondos ───────────────────────────────────────── */
+  --bg:            #e8e9ec;
+  --bg-rgb:        232,233,236;
+  --bg-2:          #eef0f2;
+  --bg-3:          #f5f6f8;
+  --bg-card:       #eef0f2;
+  --color-bg:          #e8e9ec;
+  --color-bg-alt:      #eef0f2;
+  --color-bg-dark:     #dcdde1;
+  --color-bg-sidebar:  #e8e9ec;
+
+  /* ── Bordes / líneas ──────────────────────────────── */
+  --line:       #d3d5da;
+  --line-soft:  #e0e2e6;
+  --border-color:       #d3d5da;
+
+  /* ── Texto ────────────────────────────────────────── */
+  --ink:     #1c1a1a;
+  --muted:   #5a5654;
+  --muted-2: #857f7d;
+  --color-text-primary:   #1c1a1a;
+  --color-text-secondary: #5a5654;
+  --color-text-muted:     #857f7d;
+  --color-text-inverse:   #ffffff;
+
+  /* ── Escala de grises (clara) ─────────────────────── */
+  --color-gray-50:  #f5f6f8;
+  --color-gray-100: #eef0f2;
+  --color-gray-200: #d3d5da;
+  --color-gray-300: #b8bac0;
+  --color-gray-400: #8c8e94;
+  --color-gray-500: #6c6e74;
+  --color-gray-600: #55575c;
+  --color-gray-700: #3c3e42;
+  --color-gray-800: #26282b;
+  --color-gray-900: #17181a;
 }

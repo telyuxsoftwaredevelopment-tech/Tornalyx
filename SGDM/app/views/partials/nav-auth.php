@@ -18,6 +18,15 @@
       <?php foreach (($links ?? []) as $lnk): ?>
         <a class="<?= e($lnk['class'] ?? '') ?>" href="<?= e($lnk['href'] ?? '#') ?>"><?= e($lnk['text'] ?? '') ?></a>
       <?php endforeach; ?>
+      <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
+        <input type="checkbox" class="theme-toggle__input" />
+        <span class="theme-toggle__track">
+          <span class="theme-toggle__thumb">
+            <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+            <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+          </span>
+        </span>
+      </label>
     </div>
   </div>
 </header>
