@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <title><?= e($title ?? 'Tornalyx | Mi Perfil') ?></title>
-  
+
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../../css/variables.css" />
@@ -27,9 +28,12 @@
       display:flex; align-items:center; justify-content:center;
       font-family:var(--head); font-weight:900; font-size:2rem; color:#fff;
       box-shadow:0 0 0 3px var(--bg-2), 0 0 0 5px var(--red-deep);
+      background-size:cover; background-position:center;
+      overflow:hidden;
     }
     .profile-info { flex:1; min-width:0; }
     .profile-name { font-size:var(--font-size-2xl); font-family:var(--head); font-weight:800; color:var(--ink); margin-bottom:4px; }
+    .profile-bio  { color:var(--muted); font-size:var(--font-size-sm); line-height:1.6; max-width:64ch; margin-top:var(--space-2); white-space:pre-line; }
     .profile-meta { font-size:var(--font-size-sm); color:var(--muted); display:flex; flex-wrap:wrap; gap:var(--space-4); margin-top:var(--space-2); }
 
     /* Stat cards */
@@ -49,16 +53,6 @@
       margin-bottom:6px;
     }
     .stat-card__label { font-size:12px; color:var(--muted); }
-
-    /* Progress bars for sports */
-    .sport-row {
-      display:flex; align-items:center; gap:var(--space-4);
-      margin-bottom:var(--space-4);
-    }
-    .sport-row__name { width:100px; flex:none; font-size:var(--font-size-sm); color:var(--ink); font-weight:500; }
-    .sport-row__bar  { flex:1; height:6px; background:var(--line); border-radius:3px; overflow:hidden; }
-    .sport-row__fill { height:100%; border-radius:3px; background:var(--red); transition:width .6s ease; }
-    .sport-row__pct  { width:40px; text-align:right; font-size:12px; font-family:var(--mono); color:var(--muted-2); flex:none; }
 
     /* Data table */
     .data-table { width:100%; border-collapse:collapse; }
@@ -82,9 +76,25 @@
       transition:border-color .2s;
     }
     .team-card:hover { border-color:var(--red-deep); }
-    .team-card__icon  { font-size:2rem; margin-bottom:var(--space-2); }
     .team-card__name  { font-family:var(--head); font-weight:700; color:var(--ink); margin-bottom:4px; }
     .team-card__meta  { font-size:12px; color:var(--muted-2); }
+
+    /* Empty states */
+    .empty-block {
+      text-align:center; padding:var(--space-10) var(--space-4);
+      color:var(--muted); font-size:var(--font-size-sm);
+    }
+    .empty-block .icon { font-size:2rem; margin-bottom:var(--space-3); opacity:.6; }
+    .empty-block a { color:var(--red-bright); font-weight:600; }
+
+    /* Avatar uploader (tab Mis datos) */
+    .avatar-edit { display:flex; align-items:center; gap:var(--space-5); margin-bottom:var(--space-6); flex-wrap:wrap; }
+    .avatar-edit .avatar { width:72px; height:72px; font-size:1.5rem; }
+    .avatar-edit__hint { font-size:12px; color:var(--muted-2); margin-top:6px; }
+
+    /* Bio counter */
+    .bio-counter { font-size:12px; color:var(--muted-2); text-align:right; margin-top:4px; }
+    .bio-counter.limit { color:var(--red-bright); }
 
     /* Form */
     .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); }
@@ -98,7 +108,17 @@
     <button class="mobile-close" id="mobileClose" aria-label="Cerrar">✕</button>
     <a href="/">Inicio</a>
     <a href="/torneos">Torneos</a>
+    <a href="/perfil">Mi perfil</a>
     <a class="btn btn-ghost mobile-cta" href="/logout">Cerrar sesión</a>
+    <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro" style="margin-top:8px">
+      <input type="checkbox" class="theme-toggle__input" />
+      <span class="theme-toggle__track">
+        <span class="theme-toggle__thumb">
+          <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+        </span>
+      </span>
+    </label>
   </div>
 
   <header class="nav">
@@ -107,14 +127,23 @@
         <span class="badge badge-crop" style="background-image:url(../../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
         Tornalyx
       </a>
-      <nav class="nav-links">
+      <nav class="nav-links" aria-label="Navegación principal">
         <a href="/torneos">Torneos</a>
-        <a href="#" style="color:var(--ink)">Mi perfil</a>
+        <a href="/perfil" style="color:var(--ink)">Mi perfil</a>
       </nav>
       <div class="nav-right">
         <a class="ghost-link" href="/logout">Cerrar sesión</a>
+        <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
+          <input type="checkbox" class="theme-toggle__input" />
+          <span class="theme-toggle__track">
+            <span class="theme-toggle__thumb">
+              <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+            </span>
+          </span>
+        </label>
       </div>
-      <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false">
+      <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -124,17 +153,14 @@
   <div class="profile-hero">
     <div class="wrap profile-hero-in">
       <div class="profile-grid">
-        <div class="avatar" data-user-avatar>CG</div>
+        <div class="avatar" id="heroAvatar" role="img" aria-label="Foto de perfil"></div>
         <div class="profile-info">
-          <div class="profile-name" data-user-name>Carlos García</div>
+          <div class="profile-name" id="heroNombre">…</div>
           <div style="margin-bottom:var(--space-2)">
-            <span class="badge badge-blue">Participante</span>
+            <span class="badge badge-blue" id="heroRol">…</span>
           </div>
-          <div class="profile-meta">
-            <span>📅 Miembro desde mar 2026</span>
-            <span>📍 Montevideo, Uruguay</span>
-            <span>⚽ Fútbol · 🎾 Tenis</span>
-          </div>
+          <p class="profile-bio hidden" id="heroBio"></p>
+          <div class="profile-meta" id="heroMeta"></div>
         </div>
         <div style="align-self:flex-end">
           <button class="btn btn-ghost btn-sm" data-goto-tab="datos">Editar perfil</button>
@@ -146,23 +172,23 @@
   <main class="section" style="padding-top:clamp(28px,4vw,48px)">
     <div class="wrap">
 
-      <!-- Stats -->
+      <!-- Stats (datos reales, cargados por perfil.js) -->
       <div class="stat-grid" data-reveal>
         <div class="stat-card">
-          <div class="stat-card__value">7</div>
-          <div class="stat-card__label">Torneos jugados</div>
+          <div class="stat-card__value" id="statTorneos">—</div>
+          <div class="stat-card__label">Torneos inscriptos</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card__value">3</div>
-          <div class="stat-card__label">Equipos activos</div>
+          <div class="stat-card__value" id="statEquipos">—</div>
+          <div class="stat-card__label">Equipos</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card__value">24</div>
-          <div class="stat-card__label">Partidos disputados</div>
+          <div class="stat-card__value" id="statActivos">—</div>
+          <div class="stat-card__label">Torneos activos</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card__value">2</div>
-          <div class="stat-card__label">Títulos ganados</div>
+          <div class="stat-card__value" id="statFinalizados">—</div>
+          <div class="stat-card__label">Finalizados</div>
         </div>
       </div>
 
@@ -170,7 +196,6 @@
       <div class="tab-list" role="tablist">
         <button class="tab active" role="tab" data-tab="torneos">Mis torneos</button>
         <button class="tab" role="tab" data-tab="equipos">Mis equipos</button>
-        <button class="tab" role="tab" data-tab="stats">Estadísticas</button>
         <button class="tab" role="tab" data-tab="datos">Mis datos</button>
       </div>
 
@@ -181,173 +206,102 @@
           <div style="overflow-x:auto">
             <table class="data-table">
               <thead>
-                <tr><th>Torneo</th><th>Deporte</th><th>Equipo</th><th>Posición</th><th>Estado</th></tr>
+                <tr><th>Torneo</th><th>Disciplina</th><th>Equipo</th><th>Inscripción</th><th>Estado</th></tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>Copa Regional Fútbol 2026</td>
-                  <td>⚽ Fútbol</td>
-                  <td>Atlético Norte</td>
-                  <td><span style="font-family:var(--head);color:var(--red-bright);font-weight:700">1°</span></td>
-                  <td><span class="badge badge-green">Activo</span></td>
-                </tr>
-                <tr>
-                  <td>Copa Tenis Rápido 2026</td>
-                  <td>🎾 Tenis</td>
-                  <td>Individual</td>
-                  <td>3°</td>
-                  <td><span class="badge badge-green">Activo</span></td>
-                </tr>
-                <tr>
-                  <td>Liga Fútbol Invierno 2025</td>
-                  <td>⚽ Fútbol</td>
-                  <td>Atlético Norte</td>
-                  <td><span style="font-family:var(--head);color:var(--red-bright);font-weight:700">1°</span></td>
-                  <td><span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Finalizado</span></td>
-                </tr>
-                <tr>
-                  <td>Torneo Basket Amateur 2025</td>
-                  <td>🏀 Básquetbol</td>
-                  <td>Norte United</td>
-                  <td>4°</td>
-                  <td><span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted)">Finalizado</span></td>
-                </tr>
-              </tbody>
+              <tbody id="torneosBody"></tbody>
             </table>
+          </div>
+          <div class="empty-block hidden" id="torneosEmpty">
+            <div class="icon">🏆</div>
+            <p>Todavía no estás inscripto en ningún torneo.</p>
+            <p style="margin-top:6px"><a href="/torneos">Explorá los torneos disponibles</a></p>
           </div>
         </div>
       </div>
 
       <!-- MIS EQUIPOS -->
       <div class="tab-content" id="tab-equipos" role="tabpanel">
-        <div class="cards-grid">
-          <div class="team-card">
-            <div class="team-card__icon">⚽</div>
-            <div class="team-card__name">Atlético Norte</div>
-            <div class="team-card__meta">Fútbol · 15 jugadores · Capitán: Carlos García</div>
-            <div style="margin-top:var(--space-3)">
-              <span class="badge badge-green" style="font-size:11px">Activo en Copa Regional</span>
-            </div>
-          </div>
-          <div class="team-card">
-            <div class="team-card__icon">🏀</div>
-            <div class="team-card__name">Norte United</div>
-            <div class="team-card__meta">Básquetbol · 10 jugadores · Miembro</div>
-            <div style="margin-top:var(--space-3)">
-              <span class="badge" style="background:rgba(255,255,255,.06);color:var(--muted);font-size:11px">Sin torneo activo</span>
-            </div>
-          </div>
-          <div class="team-card">
-            <div class="team-card__icon">🎾</div>
-            <div class="team-card__name">Individual · Tenis</div>
-            <div class="team-card__meta">Inscripción individual · Copa Tenis Rápido</div>
-            <div style="margin-top:var(--space-3)">
-              <span class="badge badge-green" style="font-size:11px">Activo</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ESTADÍSTICAS -->
-      <div class="tab-content" id="tab-stats" role="tabpanel">
-        <div style="display:grid;grid-template-columns:1fr;gap:var(--space-5)">
-          <div class="card">
-            <div class="card__header"><h3>Actividad por deporte</h3></div>
-            <div class="card__body">
-              <div class="sport-row">
-                <span class="sport-row__name">⚽ Fútbol</span>
-                <div class="sport-row__bar"><div class="sport-row__fill" style="width:78%"></div></div>
-                <span class="sport-row__pct">78%</span>
-              </div>
-              <div class="sport-row">
-                <span class="sport-row__name">🎾 Tenis</span>
-                <div class="sport-row__bar"><div class="sport-row__fill" style="width:15%;background:var(--red-bright)"></div></div>
-                <span class="sport-row__pct">15%</span>
-              </div>
-              <div class="sport-row">
-                <span class="sport-row__name">🏀 Basket</span>
-                <div class="sport-row__bar"><div class="sport-row__fill" style="width:7%;background:var(--muted-2)"></div></div>
-                <span class="sport-row__pct">7%</span>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card__header"><h3>Rendimiento en torneos</h3></div>
-            <div class="card__body">
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--space-4)">
-                <div style="text-align:center">
-                  <div style="font-family:var(--head);font-size:1.75rem;font-weight:800;color:var(--red-bright)">14</div>
-                  <div style="font-size:12px;color:var(--muted)">Victorias</div>
-                </div>
-                <div style="text-align:center">
-                  <div style="font-family:var(--head);font-size:1.75rem;font-weight:800;color:var(--ink)">6</div>
-                  <div style="font-size:12px;color:var(--muted)">Empates</div>
-                </div>
-                <div style="text-align:center">
-                  <div style="font-family:var(--head);font-size:1.75rem;font-weight:800;color:var(--muted-2)">4</div>
-                  <div style="font-size:12px;color:var(--muted)">Derrotas</div>
-                </div>
-                <div style="text-align:center">
-                  <div style="font-family:var(--head);font-size:1.75rem;font-weight:800;color:var(--red-bright)">58%</div>
-                  <div style="font-size:12px;color:var(--muted)">% victorias</div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="cards-grid" id="equiposGrid"></div>
+        <div class="empty-block hidden" id="equiposEmpty">
+          <div class="icon">👥</div>
+          <p>Todavía no formás parte de ningún equipo.</p>
         </div>
       </div>
 
       <!-- MIS DATOS -->
       <div class="tab-content" id="tab-datos" role="tabpanel">
         <div class="card" style="max-width:640px">
+          <div class="card__header"><h3>Foto de perfil</h3></div>
+          <div class="card__body">
+            <div class="avatar-edit">
+              <div class="avatar" id="editAvatar" role="img" aria-label="Foto de perfil actual"></div>
+              <div>
+                <input type="file" id="avatarInput" accept="image/jpeg,image/png,image/webp" class="hidden" />
+                <button type="button" class="btn btn-ghost btn-sm" id="avatarBtn">Cambiar foto</button>
+                <div class="avatar-edit__hint">JPG, PNG o WebP · máx. 2 MB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:640px;margin-top:var(--space-5)">
           <div class="card__header"><h3>Datos personales</h3></div>
           <div class="card__body">
             <form id="perfilForm" novalidate>
               <div class="form-grid-2">
                 <div class="form-group">
                   <label class="form-label" for="pNombre">Nombre</label>
-                  <input class="form-control" type="text" id="pNombre" value="Carlos" data-user-nombre />
+                  <input class="form-control" type="text" id="pNombre" name="nombre" required />
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="pApellido">Apellido</label>
-                  <input class="form-control" type="text" id="pApellido" value="García" data-user-apellido />
+                  <input class="form-control" type="text" id="pApellido" name="apellido" required />
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="pEmail">Correo electrónico</label>
-                <input class="form-control" type="email" id="pEmail" value="cgarcia@email.com" data-user-email />
+                <input class="form-control" type="email" id="pEmail" name="email" required />
               </div>
               <div class="form-group">
                 <label class="form-label" for="pFecha">Fecha de nacimiento</label>
-                <input class="form-control" type="date" id="pFecha" value="2000-05-14" />
+                <input class="form-control" type="date" id="pFecha" name="fecha_nac" required />
               </div>
               <div class="form-group">
                 <label class="form-label" for="pUbicacion">Ubicación</label>
-                <input class="form-control" type="text" id="pUbicacion" value="Montevideo, Uruguay" />
+                <input class="form-control" type="text" id="pUbicacion" name="ubicacion" maxlength="120" placeholder="ej: Montevideo, Uruguay" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="pBio">Descripción breve</label>
+                <textarea class="form-control" id="pBio" name="bio" rows="5"
+                          placeholder="Contá quién sos, qué jugás, tus logros… (máx. 500 palabras)"></textarea>
+                <div class="bio-counter" id="bioCounter" aria-live="polite">0 / 500 palabras</div>
               </div>
               <div style="display:flex;gap:var(--space-3);margin-top:var(--space-2)">
                 <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                <button type="reset" class="btn btn-ghost">Restablecer</button>
+                <button type="reset" class="btn btn-ghost" id="perfilReset">Restablecer</button>
               </div>
             </form>
           </div>
         </div>
+
         <div class="card" style="max-width:640px;margin-top:var(--space-5)">
           <div class="card__header"><h3>Cambiar contraseña</h3></div>
           <div class="card__body">
-            <div class="form-group">
-              <label class="form-label">Contraseña actual</label>
-              <input class="form-control" type="password" placeholder="••••••••" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Nueva contraseña</label>
-              <input class="form-control" type="password" placeholder="Mínimo 8 caracteres" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Confirmar nueva contraseña</label>
-              <input class="form-control" type="password" placeholder="Repite la contraseña" />
-            </div>
-            <button class="btn btn-primary">Actualizar contraseña</button>
+            <form id="passForm" novalidate>
+              <div class="form-group">
+                <label class="form-label" for="passActual">Contraseña actual</label>
+                <input class="form-control" type="password" id="passActual" autocomplete="current-password" placeholder="••••••••" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="passNueva">Nueva contraseña</label>
+                <input class="form-control" type="password" id="passNueva" autocomplete="new-password" placeholder="Mínimo 8 caracteres" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="passConfirma">Confirmar nueva contraseña</label>
+                <input class="form-control" type="password" id="passConfirma" autocomplete="new-password" placeholder="Repite la contraseña" required />
+              </div>
+              <button type="submit" class="btn btn-primary">Actualizar contraseña</button>
+            </form>
           </div>
         </div>
       </div>
@@ -358,7 +312,6 @@
   <?= $partial('partials/footer') ?>
 
   <script src="../../js/main.js"></script>
+  <script src="../../js/perfil.js"></script>
 </body>
 </html>
-
-

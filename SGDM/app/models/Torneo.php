@@ -191,4 +191,48 @@ class Torneo extends Model {
         $stmt->execute([$torneoId]);
         return $stmt->fetchAll();
     }
+
+    /**
+     * Torneos en los que un usuario está inscripto (historial del perfil),
+     * con el equipo con el que participa cuando corresponde.
+     *
+     * @param int $usuarioId
+     * @return array
+     */
+    public function listarDeParticipante(int $usuarioId): array {
+        $stmt = $this->db->prepare(
+            'SELECT t.id, t.nombre, t.disciplina, t.formato, t.estado,
+                    i.estado AS inscripcion_estado, i.fecha_inscripcion,
+                    e.nombre AS equipo
+               FROM inscripciones i
+               INNER JOIN torneos t ON t.id = i.torneo_id
+               LEFT JOIN equipos  e ON e.id = i.equipo_id
+              WHERE i.usuario_id = ?
+              ORDER BY i.fecha_inscripcion DESC'
+        );
+        $stmt->execute([$usuarioId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Equipos de un usuario: los que capitanea y aquellos con los que está
+     * inscripto en algún torneo. Incluye el torneo al que pertenece cada uno.
+     *
+     * @param int $usuarioId
+     * @return array
+     */
+    public function equiposDeUsuario(int $usuarioId): array {
+        $stmt = $this->db->prepare(
+            'SELECT DISTINCT e.id, e.nombre, e.estado, e.created_at,
+                    t.nombre AS torneo, t.disciplina, t.estado AS torneo_estado,
+                    (e.capitan_id = ?) AS es_capitan
+               FROM equipos e
+               INNER JOIN torneos t ON t.id = e.torneo_id
+               LEFT JOIN inscripciones i ON i.equipo_id = e.id
+              WHERE e.capitan_id = ? OR i.usuario_id = ?
+              ORDER BY e.created_at DESC'
+        );
+        $stmt->execute([$usuarioId, $usuarioId, $usuarioId]);
+        return $stmt->fetchAll();
+    }
 }

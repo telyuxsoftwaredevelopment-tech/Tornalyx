@@ -8,6 +8,9 @@ SGDM/database/.secrets/
 # Throttle / archivos temporales de la app
 SGDM/storage/
 
+# Archivos subidos por usuarios (avatares, etc.); la app crea la carpeta
+SGDM/public/uploads/
+
 # Vista previa estática local (sin backend), no forma parte de la app
 SGDM/public/_preview/
 

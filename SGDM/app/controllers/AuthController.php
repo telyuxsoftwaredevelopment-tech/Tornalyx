@@ -252,11 +252,12 @@ class AuthController extends Controller {
             return;
         }
         $this->jsonSuccess([
-            'id'       => (int) $u['id'],
-            'nombre'   => $u['nombre'],
-            'apellido' => $u['apellido'],
-            'email'    => $u['email'],
-            'rol'      => $u['rol'],
+            'id'         => (int) $u['id'],
+            'nombre'     => $u['nombre'],
+            'apellido'   => $u['apellido'],
+            'email'      => $u['email'],
+            'rol'        => $u['rol'],
+            'avatar_url' => $u['avatar_url'] ?? null,
         ]);
     }
 

@@ -23,6 +23,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     rol          ENUM('participante','organizador','administrador') NOT NULL DEFAULT 'participante',
     estado       ENUM('activo','suspendido','pendiente') NOT NULL DEFAULT 'activo',
     avatar_url   VARCHAR(255) DEFAULT NULL,
+    -- Perfil público (ver add_perfil.sql; mantener en sincronía)
+    bio          TEXT         DEFAULT NULL,
+    ubicacion    VARCHAR(120) DEFAULT NULL,
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email  (email),

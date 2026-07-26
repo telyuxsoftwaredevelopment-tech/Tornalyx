@@ -28,6 +28,7 @@ require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/TorneoController.php';
 require_once __DIR__ . '/../app/controllers/AdminController.php';
 require_once __DIR__ . '/../app/controllers/DocsController.php';
+require_once __DIR__ . '/../app/controllers/PerfilController.php';
 
 Session::start();
 
@@ -93,6 +94,12 @@ $router->get('/admin/dashboard', static function () use ($view) {
     Session::requireRole('administrador');
     $view->render('admin/dashboard', ['title' => 'Tornalyx | Panel de Administración']);
 });
+
+// ─── PERFIL (API JSON) ─────────────────────────────────────────
+$router->get('/api/perfil',             static fn() => (new PerfilController())->datos());
+$router->post('/api/perfil/actualizar', static fn() => (new PerfilController())->actualizar());
+$router->post('/api/perfil/password',   static fn() => (new PerfilController())->password());
+$router->post('/api/perfil/avatar',     static fn() => (new PerfilController())->avatar());
 
 // ─── TORNEOS (API JSON) ────────────────────────────────────────
 $router->get('/api/torneos',           static fn() => (new TorneoController())->index());

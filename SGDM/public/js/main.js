@@ -350,6 +350,171 @@ function initTabShortcuts() {
   });
 }
 
+/* ─── Nav según sesión ────────────────────────────────── */
+/* En las páginas públicas, si hay una sesión activa se reemplazan los
+   accesos "Entrar / Crear cuenta" por "Mi perfil (o panel) / Cerrar
+   sesión", y en los navs que no tienen accesos de cuenta (p. ej.
+   /torneos) se insertan. Así siempre se puede volver al perfil. */
+async function initAuthNav() {
+  // Las páginas privadas ya traen su propio nav con "Cerrar sesión".
+  if (document.querySelector('.nav a[href="/logout"]')) return;
+
+  let me;
+  try {
+    const res = await fetch('/api/me', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    if (!res.ok) return;                 // 401: no hay sesión, nav queda igual
+    me = await res.json();
+  } catch { return; }
+  if (!me || !me.success) return;
+
+  const panelUrl = {
+    administrador: '/admin/dashboard',
+    organizador:   '/organizador/dashboard',
+  }[me.rol] || '/perfil';
+  const panelTxt = me.rol === 'participante' ? 'Mi perfil' : 'Mi panel';
+
+  // Enlaces de auth existentes → panel / logout.
+  document.querySelectorAll('a[href="/login"]').forEach(a => {
+    a.href = panelUrl;
+    a.textContent = panelTxt;
+  });
+  document.querySelectorAll('a[href="/registro"]').forEach(a => {
+    a.href = '/logout';
+    a.textContent = 'Cerrar sesión';
+    a.classList.remove('btn-primary');
+    if (a.classList.contains('btn')) a.classList.add('btn-ghost');
+  });
+
+  // Navs sin accesos de cuenta: insertar el acceso antes del toggle de tema.
+  const mk = (href, text, cls) => {
+    const a = document.createElement('a');
+    a.href = href; a.textContent = text; a.className = cls;
+    return a;
+  };
+  document.querySelectorAll('.nav .nav-right, .mobile-nav').forEach(cont => {
+    if (cont.querySelector(`a[href="${panelUrl}"], a[href="/logout"]`)) return;
+    const toggle = cont.querySelector('.theme-toggle');
+    cont.insertBefore(mk(panelUrl, panelTxt, 'ghost-link'), toggle);
+    cont.insertBefore(mk('/logout', 'Cerrar sesión', 'ghost-link'), toggle);
+  });
+}
+
+/* ─── Panel de accesibilidad ──────────────────────────── */
+/* Botón flotante presente en todas las páginas que cargan main.js.
+   Preferencias: tamaño de texto, alto contraste, reducir animaciones y
+   subrayar enlaces. Persisten en localStorage y se aplican como clases
+   sobre <html> (los estilos viven en main.css). */
+const A11Y_KEY = 'tornalyx-a11y';
+
+function initAccessibility() {
+  const root = document.documentElement;
+  let prefs = {};
+  try { prefs = JSON.parse(localStorage.getItem(A11Y_KEY) || '{}') || {}; } catch { /* corrupto */ }
+
+  /* Skip-link para navegación por teclado. */
+  const main = document.querySelector('main');
+  if (main) {
+    if (!main.id) main.id = 'contenido';
+    if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+    const skip = document.createElement('a');
+    skip.className = 'skip-link';
+    skip.href = '#' + main.id;
+    skip.textContent = 'Saltar al contenido principal';
+    document.body.prepend(skip);
+  }
+
+  /* Botón flotante + panel. */
+  const widget = document.createElement('div');
+  widget.className = 'a11y-widget';
+  widget.innerHTML = `
+    <button type="button" class="a11y-btn" id="a11yBtn" aria-expanded="false"
+            aria-controls="a11yPanel" aria-label="Opciones de accesibilidad" title="Accesibilidad">
+      <span aria-hidden="true">♿</span>
+    </button>
+    <div class="a11y-panel hidden" id="a11yPanel" role="dialog" aria-label="Opciones de accesibilidad">
+      <h4>Accesibilidad</h4>
+      <div class="a11y-row">
+        <span id="a11yFontLabel">Tamaño del texto</span>
+        <div class="a11y-fonts" role="group" aria-labelledby="a11yFontLabel">
+          <button type="button" data-font=""   aria-label="Tamaño normal">A</button>
+          <button type="button" data-font="lg" aria-label="Tamaño grande">A+</button>
+          <button type="button" data-font="xl" aria-label="Tamaño muy grande">A++</button>
+        </div>
+      </div>
+      <label class="a11y-row">
+        <span>Alto contraste</span>
+        <input type="checkbox" data-pref="contrast" />
+      </label>
+      <label class="a11y-row">
+        <span>Reducir animaciones</span>
+        <input type="checkbox" data-pref="motion" />
+      </label>
+      <label class="a11y-row">
+        <span>Subrayar enlaces</span>
+        <input type="checkbox" data-pref="links" />
+      </label>
+    </div>`;
+  document.body.appendChild(widget);
+
+  const btn   = widget.querySelector('#a11yBtn');
+  const panel = widget.querySelector('#a11yPanel');
+
+  const aplicar = () => {
+    root.classList.toggle('a11y-font-lg',  prefs.font === 'lg');
+    root.classList.toggle('a11y-font-xl',  prefs.font === 'xl');
+    root.classList.toggle('a11y-contrast', !!prefs.contrast);
+    root.classList.toggle('a11y-motion',   !!prefs.motion);
+    root.classList.toggle('a11y-links',    !!prefs.links);
+    widget.querySelectorAll('[data-font]').forEach(b => {
+      b.classList.toggle('active', (prefs.font || '') === b.dataset.font);
+    });
+    widget.querySelectorAll('[data-pref]').forEach(chk => {
+      chk.checked = !!prefs[chk.dataset.pref];
+    });
+  };
+  const guardar = () => {
+    try { localStorage.setItem(A11Y_KEY, JSON.stringify(prefs)); } catch { /* modo privado */ }
+  };
+
+  btn.addEventListener('click', () => {
+    const abierto = !panel.classList.contains('hidden');
+    panel.classList.toggle('hidden', abierto);
+    btn.setAttribute('aria-expanded', String(!abierto));
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !panel.classList.contains('hidden')) {
+      panel.classList.add('hidden');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.focus();
+    }
+  });
+  document.addEventListener('click', e => {
+    if (!widget.contains(e.target) && !panel.classList.contains('hidden')) {
+      panel.classList.add('hidden');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  widget.querySelectorAll('[data-font]').forEach(b => {
+    b.addEventListener('click', () => {
+      prefs.font = b.dataset.font || undefined;
+      guardar(); aplicar();
+    });
+  });
+  widget.querySelectorAll('[data-pref]').forEach(chk => {
+    chk.addEventListener('change', () => {
+      prefs[chk.dataset.pref] = chk.checked || undefined;
+      guardar(); aplicar();
+    });
+  });
+
+  /* Respetar la preferencia del sistema si el usuario no eligió nada. */
+  if (prefs.motion === undefined && matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    prefs.motion = true;
+  }
+  aplicar();
+}
+
 /* ─── Toggle claro/oscuro ─────────────────────────────── */
 /* El tema ya se aplica antes del primer paint (script inline en el
    <head> de cada página); acá solo sincronizamos los switches visibles
@@ -427,6 +592,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initImageFallbacks();
   initTabShortcuts();
   initThemeToggle();
+  initAccessibility();
+  initAuthNav();
   Toast.init();
   Modal.init();
   initCurrentUser();
