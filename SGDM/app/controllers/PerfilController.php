@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../models/Torneo.php';
+require_once __DIR__ . '/../models/Partido.php';
+require_once __DIR__ . '/../models/Posicion.php';
 require_once __DIR__ . '/../shared/Session.php';
 
 /**
@@ -227,6 +229,50 @@ class PerfilController extends Controller {
         $url = self::AVATAR_URL . '/' . $nombre;
         $this->usuarioModel->actualizar($userId, ['avatar_url' => $url]);
         $this->jsonSuccess(['avatar_url' => $url]);
+    }
+
+    /**
+     * Busca jugadores por nombre o apellido (GET /api/jugadores?q=).
+     * Público y acotado: solo datos básicos, nunca el correo ni la fecha de
+     * nacimiento de terceros.
+     */
+    public function buscar(): void {
+        $q = trim((string) (filter_input(INPUT_GET, 'q', FILTER_DEFAULT) ?? ''));
+        if (mb_strlen($q) < 2) {
+            $this->jsonSuccess(['jugadores' => []]);
+            return;
+        }
+        $this->jsonSuccess(['jugadores' => $this->usuarioModel->buscar($q)]);
+    }
+
+    /**
+     * Ficha pública de un jugador (GET /api/jugador/{id}): su perfil visible,
+     * los torneos en los que participa, su rendimiento acumulado y sus
+     * próximos enfrentamientos con rival, fecha y lugar.
+     */
+    public function publico(int $id): void {
+        $u = $this->usuarioModel->findById($id);
+        if (!$u || $u['estado'] === 'suspendido') {
+            $this->jsonError('Jugador no encontrado.', [], 404);
+            return;
+        }
+
+        $this->jsonSuccess([
+            'jugador' => [
+                'id'         => (int) $u['id'],
+                'nombre'     => $u['nombre'],
+                'apellido'   => $u['apellido'],
+                'rol'        => $u['rol'],
+                'bio'        => $u['bio']        ?? null,
+                'ubicacion'  => $u['ubicacion']  ?? null,
+                'avatar_url' => $u['avatar_url'] ?? null,
+                'created_at' => $u['created_at'] ?? null,
+            ],
+            'torneos'   => $this->torneoModel->listarDeParticipante($id),
+            'equipos'   => $this->torneoModel->equiposDeUsuario($id),
+            'resumen'   => (new Posicion())->resumenDeContendiente($id),
+            'proximos'  => (new Partido())->proximosDeUsuario($id),
+        ]);
     }
 
     /**

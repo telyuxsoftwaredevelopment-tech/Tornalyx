@@ -19,7 +19,7 @@
 <!-- ?? MOBILE NAV ???????????????????????????????????????? -->
 <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú de navegación">
   <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
-  <a href="#audiencias">Soluciones</a>
+  <a href="/torneos">Torneos</a>
   <a href="/documentacion">Documentación</a>
   <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
   <a class="btn btn-primary mobile-cta" href="/torneos">Ver torneos</a>
@@ -42,7 +42,7 @@
       Tornalyx
     </a>
     <nav class="nav-links" aria-label="Navegación principal">
-      <a href="#audiencias">Soluciones</a>
+      <a href="/torneos">Torneos</a>
       <a href="/documentacion">Documentación</a>
     </nav>
     <div class="nav-right">
@@ -113,7 +113,8 @@
       </div>
       <div class="foot-col">
         <h5>Producto</h5>
-        <a href="#audiencias">Soluciones</a>
+        <a href="/torneos">Torneos</a>
+        <a href="/jugadores">Jugadores</a>
         <a href="/documentacion">Documentación</a>
       </div>
       <div class="foot-col">

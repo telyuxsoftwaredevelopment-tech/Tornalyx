@@ -29,6 +29,9 @@ require_once __DIR__ . '/../app/controllers/TorneoController.php';
 require_once __DIR__ . '/../app/controllers/AdminController.php';
 require_once __DIR__ . '/../app/controllers/DocsController.php';
 require_once __DIR__ . '/../app/controllers/PerfilController.php';
+require_once __DIR__ . '/../app/controllers/InscripcionController.php';
+require_once __DIR__ . '/../app/controllers/PartidoController.php';
+require_once __DIR__ . '/../app/controllers/AvisoController.php';
 
 Session::start();
 
@@ -62,6 +65,7 @@ $router->get('/',               static fn() => $view->render('publico/index',   
 $router->get('/registro',       static fn() => $view->render('publico/registro',       ['title' => 'Tornalyx | Crear cuenta']));
 $router->get('/torneos',        static fn() => $view->render('publico/torneos',        ['title' => 'Tornalyx | Buscar Torneos']));
 $router->get('/torneo-detalle', static fn() => $view->render('publico/torneo-detalle', ['title' => 'Tornalyx | Torneo']));
+$router->get('/jugadores',      static fn() => $view->render('publico/jugadores',      ['title' => 'Tornalyx | Buscar jugadores']));
 $router->get('/terminos',       static fn() => $view->render('publico/terminos',       ['title' => 'Tornalyx | Términos y Condiciones']));
 $router->get('/documentacion',  static fn() => (new DocsController())->show());
 $router->post('/documentacion/solicitar', static fn() => (new DocsController())->solicitarAcceso());
@@ -108,7 +112,32 @@ $router->post('/api/torneo/crear',     static fn() => (new TorneoController())->
 $router->post('/api/torneo/resultado', static fn() => (new TorneoController())->cargarResultado());
 
 // Torneo por ID: /api/torneo/42 (la restricción \d+ evita que "abc" matchee).
-$router->get('#^/api/torneo/(\d+)$#', static fn($id) => (new TorneoController())->show((int) $id));
+$router->get('#^/api/torneo/(\d+)$#',               static fn($id) => (new TorneoController())->show((int) $id));
+$router->get('#^/api/torneo/(\d+)/partidos$#',      static fn($id) => (new PartidoController())->listar((int) $id));
+$router->get('#^/api/torneo/(\d+)/equipos$#',       static fn($id) => (new InscripcionController())->equipos((int) $id));
+$router->get('#^/api/torneo/(\d+)/inscripciones$#', static fn($id) => (new InscripcionController())->listar((int) $id));
+$router->get('#^/api/torneo/(\d+)/avisos$#',        static fn($id) => (new AvisoController())->deTorneo((int) $id));
+
+// ─── INSCRIPCIONES Y EQUIPOS (API JSON) ────────────────────────
+$router->post('/api/inscripcion',          static fn() => (new InscripcionController())->inscribirse());
+$router->post('/api/inscripcion/cancelar', static fn() => (new InscripcionController())->cancelar());
+$router->post('/api/inscripcion/resolver', static fn() => (new InscripcionController())->resolver());
+
+// ─── ENFRENTAMIENTOS (API JSON) ────────────────────────────────
+$router->post('/api/torneo/fixture',      static fn() => (new PartidoController())->generar());
+$router->post('/api/partido/programar',   static fn() => (new PartidoController())->programar());
+$router->post('/api/partido/estado',      static fn() => (new PartidoController())->estado());
+$router->post('/api/partido/resultado',   static fn() => (new PartidoController())->resultado());
+$router->post('/api/partido/asistencia',  static fn() => (new PartidoController())->asistencia());
+
+// ─── AVISOS / NOTIFICACIONES (API JSON) ────────────────────────
+$router->get('/api/avisos',          static fn() => (new AvisoController())->mios());
+$router->post('/api/avisos/leer',    static fn() => (new AvisoController())->marcarLeidos());
+$router->post('/api/aviso/publicar', static fn() => (new AvisoController())->publicar());
+
+// ─── JUGADORES (API JSON pública) ──────────────────────────────
+$router->get('/api/jugadores',            static fn() => (new PerfilController())->buscar());
+$router->get('#^/api/jugador/(\d+)$#',    static fn($id) => (new PerfilController())->publico((int) $id));
 
 // ─── ADMIN (API JSON) ──────────────────────────────────────────
 $router->get('/api/admin/stats',    static fn() => (new AdminController())->stats());

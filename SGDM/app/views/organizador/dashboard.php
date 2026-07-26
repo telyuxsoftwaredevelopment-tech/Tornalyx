@@ -187,18 +187,21 @@
       <a class="sidebar__item" data-section="participantes" data-title="Participantes">
         <span class="icon"><img src="../../assets/icon-participantes.svg" width="22" height="22" alt=""></span> Participantes
       </a>
-      <a class="sidebar__item" data-section="resultados" data-title="Resultados">
-        <span class="icon"><img src="../../assets/icon-resultados.svg" width="22" height="22" alt=""></span> Resultados
+      <a class="sidebar__item" data-section="fixture" data-title="Fixture">
+        <span class="icon"><img src="../../assets/icon-resultados.svg" width="22" height="22" alt=""></span> Fixture
       </a>
       <a class="sidebar__item" data-section="posiciones" data-title="Posiciones">
         <span class="icon"><img src="../../assets/icon-posiciones.svg" width="22" height="22" alt=""></span> Posiciones
+      </a>
+      <a class="sidebar__item" data-section="avisos" data-title="Avisos">
+        <span class="icon"><img src="../../assets/icon-inicio.svg" width="22" height="22" alt=""></span> Avisos
       </a>
     </nav>
     <div class="sidebar__footer">
       <div class="user-row">
         <div class="user-avatar" data-user-avatar>ML</div>
         <div>
-          <div class="user-name" data-user-name>María López</div>
+          <div class="user-name" data-user-name>…</div>
           <div class="user-role" data-user-role>organizador</div>
         </div>
         <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">🚪</a>
@@ -313,14 +316,40 @@
               <div class="form-group">
                 <label class="form-label" for="descripcion">Descripción del torneo</label>
                 <textarea class="form-control" id="descripcion" name="descripcion" rows="3" maxlength="2000"
-                  placeholder="Describe el torneo, reglas especiales, premios, etc." style="resize:vertical"></textarea>
+                  placeholder="Contá de qué se trata el torneo" style="resize:vertical"></textarea>
               </div>
               <div class="form-group">
-                <label class="form-label" for="publicar">Al crearlo</label>
-                <select class="form-control" id="publicar" name="publicar">
-                  <option value="1">Publicar y abrir inscripciones</option>
-                  <option value="0">Guardar como borrador (no visible al público)</option>
-                </select>
+                <label class="form-label" for="reglamento">Reglamento oficial</label>
+                <textarea class="form-control" id="reglamento" name="reglamento" rows="4" maxlength="8000"
+                  placeholder="Reglas de juego, sanciones, criterios de desempate…" style="resize:vertical"></textarea>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="premios">Premios</label>
+                  <textarea class="form-control" id="premios" name="premios" rows="2" maxlength="2000"
+                    placeholder="ej: 1° copa + $10.000 · 2° medalla" style="resize:vertical"></textarea>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="discordUrl">Canal oficial (Discord, WhatsApp…)</label>
+                  <input class="form-control" type="url" id="discordUrl" name="discord_url"
+                         placeholder="https://discord.gg/…" />
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="requiereEquipos">Modalidad</label>
+                  <select class="form-control" id="requiereEquipos" name="requiere_equipos">
+                    <option value="0">Individual (cada jugador compite solo)</option>
+                    <option value="1">Por equipos (los jugadores arman equipo)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="publicar">Al crearlo</label>
+                  <select class="form-control" id="publicar" name="publicar">
+                    <option value="1">Publicar y abrir inscripciones</option>
+                    <option value="0">Guardar como borrador (no visible al público)</option>
+                  </select>
+                </div>
               </div>
               <div style="display:flex;gap:var(--space-3)">
                 <button type="submit" class="btn btn-primary">Crear torneo</button>
@@ -336,85 +365,49 @@
         <div class="page-header">
           <div>
             <h1>Participantes</h1>
-            <p>Equipos y jugadores inscritos en tus torneos</p>
+            <p>Aprobá o rechazá las inscripciones de tus torneos</p>
           </div>
-          <button class="btn btn-primary btn-sm">+ Inscribir equipo</button>
+          <select class="form-control" style="max-width:240px;padding:8px 14px" data-torneos-select></select>
         </div>
         <div class="card">
-          <div class="card__header" style="display:flex;justify-content:space-between;align-items:center">
-            <h3>Inscripciones</h3>
-            <select class="form-control" style="max-width:220px;padding:7px 12px" data-torneos-select></select>
-          </div>
+          <div class="card__header"><h3>Inscripciones</h3></div>
           <div style="overflow-x:auto">
             <table class="data-table">
               <thead>
-                <tr><th>#</th><th>Equipo</th><th>Capitán</th><th>Jugadores</th><th>Inscrito el</th><th>Estado</th></tr>
+                <tr><th>Participante</th><th>Equipo</th><th>Inscripto el</th><th>Estado</th><th>Acciones</th></tr>
               </thead>
-              <tbody>
-                <tr><td>1</td><td>Atlético Norte</td><td>Carlos García</td><td>15</td><td style="font-family:var(--mono);font-size:12px">10/03/2026</td><td><span class="badge badge-green">Confirmado</span></td></tr>
-                <tr><td>2</td><td>Deportivo Sur</td><td>Juan Méndez</td><td>14</td><td style="font-family:var(--mono);font-size:12px">11/03/2026</td><td><span class="badge badge-green">Confirmado</span></td></tr>
-                <tr><td>3</td><td>Club Rivera FC</td><td>Ana Suárez</td><td>16</td><td style="font-family:var(--mono);font-size:12px">12/03/2026</td><td><span class="badge badge-green">Confirmado</span></td></tr>
-                <tr><td>4</td><td>FC Este</td><td>Pablo Rodríguez</td><td>13</td><td style="font-family:var(--mono);font-size:12px">14/03/2026</td><td><span class="badge badge-yellow">Pendiente</span></td></tr>
-              </tbody>
+              <tbody id="inscripcionesBody"></tbody>
             </table>
+          </div>
+          <div class="card__body hidden" id="inscripcionesEmpty" style="color:var(--muted);text-align:center">
+            Todavía no hay inscripciones en este torneo.
           </div>
         </div>
       </div>
 
-      <!-- RESULTADOS -->
-      <div class="section-panel" id="panel-resultados">
+      <!-- FIXTURE -->
+      <div class="section-panel" id="panel-fixture">
         <div class="page-header">
           <div>
-            <h1>Cargar resultados</h1>
-            <p>Registra los marcadores de los partidos jugados</p>
+            <h1>Fixture y resultados</h1>
+            <p>Generá los emparejamientos, programá los partidos y cargá los marcadores</p>
+          </div>
+          <select class="form-control" style="max-width:240px;padding:8px 14px" data-torneos-select></select>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <div class="card__body" style="display:flex;gap:var(--space-4);align-items:center;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px">
+              <strong style="color:var(--ink);display:block">Generar emparejamientos</strong>
+              <span style="font-size:12px;color:var(--muted-2)" id="fixtureAyuda">
+                En liga se crea el calendario completo; en eliminación y suizo, una ronda por vez.
+              </span>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnFixture">Generar siguiente ronda</button>
           </div>
         </div>
-        <div class="card" style="max-width:640px">
-          <div class="card__header"><h3>Nuevo resultado</h3></div>
-          <div class="card__body">
-            <form id="resultadoForm" novalidate>
-              <div class="form-group">
-                <label class="form-label">Torneo</label>
-                <select class="form-control" data-torneos-select></select>
-              </div>
-              <div class="form-grid-2">
-                <div class="form-group">
-                  <label class="form-label">Equipo local</label>
-                  <select class="form-control">
-                    <option>Atlético Norte</option>
-                    <option>Deportivo Sur</option>
-                    <option>Club Rivera FC</option>
-                    <option>FC Este</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Equipo visitante</label>
-                  <select class="form-control">
-                    <option>FC Este</option>
-                    <option>Atlético Norte</option>
-                    <option>Deportivo Sur</option>
-                    <option>Club Rivera FC</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-grid-2">
-                <div class="form-group">
-                  <label class="form-label">Goles local</label>
-                  <input class="form-control" type="number" min="0" placeholder="0" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Goles visitante</label>
-                  <input class="form-control" type="number" min="0" placeholder="0" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Fecha del partido</label>
-                <input class="form-control" type="date" />
-              </div>
-              <button type="submit" class="btn btn-primary">Guardar resultado</button>
-            </form>
-          </div>
-        </div>
+
+        <div id="fixtureLista"></div>
       </div>
 
       <!-- POSICIONES -->
@@ -422,7 +415,7 @@
         <div class="page-header">
           <div>
             <h1>Tabla de posiciones</h1>
-            <p>Clasificación actualizada por torneo</p>
+            <p>Se recalcula sola cada vez que cargás un resultado</p>
           </div>
           <select class="form-control" style="max-width:240px;padding:8px 14px" data-torneos-select></select>
         </div>
@@ -430,32 +423,45 @@
           <div style="overflow-x:auto">
             <table class="data-table">
               <thead>
-                <tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr>
+                <tr><th>#</th><th>Equipo / Participante</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td><span class="pos-num gold">1</span></td>
-                  <td><strong style="color:var(--ink)">Atlético Norte</strong></td>
-                  <td>8</td><td>6</td><td>1</td><td>1</td><td>18</td><td>7</td><td>+11</td>
-                  <td><strong style="font-family:var(--head);color:var(--ink)">19</strong></td>
-                </tr>
-                <tr>
-                  <td><span class="pos-num silver">2</span></td>
-                  <td><strong style="color:var(--ink)">Deportivo Sur</strong></td>
-                  <td>8</td><td>5</td><td>2</td><td>1</td><td>14</td><td>8</td><td>+6</td>
-                  <td><strong style="font-family:var(--head);color:var(--ink)">17</strong></td>
-                </tr>
-                <tr>
-                  <td><span class="pos-num bronze">3</span></td>
-                  <td><strong style="color:var(--ink)">Club Rivera FC</strong></td>
-                  <td>8</td><td>5</td><td>1</td><td>2</td><td>12</td><td>9</td><td>+3</td>
-                  <td><strong style="font-family:var(--head);color:var(--ink)">16</strong></td>
-                </tr>
-                <tr><td><span class="pos-num">4</span></td><td>FC Este</td><td>8</td><td>4</td><td>1</td><td>3</td><td>11</td><td>10</td><td>+1</td><td>13</td></tr>
-              </tbody>
+              <tbody id="posicionesBody"></tbody>
             </table>
           </div>
+          <div class="card__body hidden" id="posicionesEmpty" style="color:var(--muted);text-align:center">
+            Todavía no hay posiciones: se calculan a medida que cargás resultados.
+          </div>
         </div>
+      </div>
+
+      <!-- AVISOS -->
+      <div class="section-panel" id="panel-avisos">
+        <div class="page-header">
+          <div>
+            <h1>Avisos del torneo</h1>
+            <p>Comunicá novedades a todos los participantes</p>
+          </div>
+          <select class="form-control" style="max-width:240px;padding:8px 14px" data-torneos-select></select>
+        </div>
+        <div class="card" style="max-width:640px;margin-bottom:var(--space-5)">
+          <div class="card__header"><h3>Publicar aviso</h3></div>
+          <div class="card__body">
+            <form id="avisoForm" novalidate>
+              <div class="form-group">
+                <label class="form-label" for="avisoTitulo">Título</label>
+                <input class="form-control" type="text" id="avisoTitulo" maxlength="140" required
+                       placeholder="ej: Se adelanta la fecha 3" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="avisoCuerpo">Mensaje</label>
+                <textarea class="form-control" id="avisoCuerpo" rows="3" maxlength="2000"
+                          placeholder="Contale a los participantes qué cambió" style="resize:vertical"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Publicar aviso</button>
+            </form>
+          </div>
+        </div>
+        <div id="avisosLista"></div>
       </div>
 
     </main>
@@ -465,6 +471,7 @@
   <script src="../../js/dashboard.js"></script>
   <script src="../../js/torneo-ui.js"></script>
   <script src="../../js/organizador.js"></script>
+  <script src="../../js/organizador-gestion.js"></script>
 </body>
 </html>
 

@@ -150,6 +150,28 @@ class Usuario extends Model {
     }
 
     /**
+     * Busca jugadores por nombre o apellido para el buscador público.
+     * Devuelve solo datos que es seguro mostrar de un tercero.
+     *
+     * @param string $q     Texto a buscar (mínimo 2 caracteres, valida el controlador).
+     * @param int    $limite
+     * @return array
+     */
+    public function buscar(string $q, int $limite = 20): array {
+        $stmt = $this->db->prepare(
+            "SELECT id, nombre, apellido, rol, avatar_url, ubicacion
+               FROM usuarios
+              WHERE estado = 'activo'
+                AND (nombre LIKE ? OR apellido LIKE ? OR CONCAT(nombre, ' ', apellido) LIKE ?)
+              ORDER BY nombre ASC
+              LIMIT " . (int) $limite
+        );
+        $patron = '%' . $q . '%';
+        $stmt->execute([$patron, $patron, $patron]);
+        return $stmt->fetchAll();
+    }
+
+    /**
      * Retorna lista de usuarios filtrada por rol (sin exponer passwords).
      *
      * @param string|null $rol

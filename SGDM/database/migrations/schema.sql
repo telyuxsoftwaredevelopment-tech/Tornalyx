@@ -41,8 +41,13 @@ CREATE TABLE IF NOT EXISTS torneos (
     organizador_id  INT UNSIGNED NOT NULL,
     nombre          VARCHAR(120) NOT NULL,
     descripcion     TEXT         DEFAULT NULL,
+    -- Gestión del torneo (ver add_torneo_gestion.sql; mantener en sincronía)
+    reglamento      TEXT         DEFAULT NULL,
+    premios         TEXT         DEFAULT NULL,
+    discord_url     VARCHAR(255) DEFAULT NULL,
     disciplina      VARCHAR(60)  NOT NULL,
     formato         ENUM('liga','eliminacion_directa','suizo','grupos_playoff') NOT NULL,
+    requiere_equipos TINYINT(1)  NOT NULL DEFAULT 0,
     estado          ENUM('borrador','inscripcion','en_curso','finalizado','cancelado') NOT NULL DEFAULT 'borrador',
     max_participantes INT UNSIGNED NOT NULL DEFAULT 16,
     publico         TINYINT(1)   NOT NULL DEFAULT 1,
@@ -233,6 +238,51 @@ CREATE TABLE IF NOT EXISTS doc_acceso (
 -- TABLA: doc_otps  (código OTP para ver un documento restringido)
 -- Separada de login_otps; un código activo por (usuario, materia).
 -- ──────────────────────────────────────────────────────────────
+-- ──────────────────────────────────────────────────────────────
+-- TABLA: asistencias  (confirmación previa a cada enfrentamiento)
+-- Ver add_torneo_gestion.sql; mantener en sincronía.
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS asistencias (
+    partido_id   INT UNSIGNED NOT NULL,
+    usuario_id   INT UNSIGNED NOT NULL,
+    estado       ENUM('confirmada','ausente') NOT NULL DEFAULT 'confirmada',
+    created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (partido_id, usuario_id),
+    CONSTRAINT fk_asistencia_partido
+        FOREIGN KEY (partido_id) REFERENCES partidos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_asistencia_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ──────────────────────────────────────────────────────────────
+-- TABLA: avisos  (novedades del torneo / notificaciones)
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS avisos (
+    id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    torneo_id   INT UNSIGNED NULL DEFAULT NULL,
+    autor_id    INT UNSIGNED NULL DEFAULT NULL,
+    tipo        ENUM('novedad','fixture','resultado','inscripcion','horario') NOT NULL DEFAULT 'novedad',
+    titulo      VARCHAR(140) NOT NULL,
+    cuerpo      TEXT         NULL DEFAULT NULL,
+    created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_aviso_torneo
+        FOREIGN KEY (torneo_id) REFERENCES torneos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_aviso_autor
+        FOREIGN KEY (autor_id)  REFERENCES usuarios(id) ON DELETE SET NULL,
+    INDEX idx_torneo_fecha (torneo_id, created_at DESC)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS avisos_leidos (
+    aviso_id   INT UNSIGNED NOT NULL,
+    usuario_id INT UNSIGNED NOT NULL,
+    leido_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (aviso_id, usuario_id),
+    CONSTRAINT fk_avisoleido_aviso
+        FOREIGN KEY (aviso_id)   REFERENCES avisos(id)   ON DELETE CASCADE,
+    CONSTRAINT fk_avisoleido_usuario
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS doc_otps (
     usuario_id   INT UNSIGNED NOT NULL,
     materia      VARCHAR(40)  NOT NULL,

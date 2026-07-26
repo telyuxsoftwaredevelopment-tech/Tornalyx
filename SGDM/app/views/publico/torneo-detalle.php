@@ -86,6 +86,28 @@
       text-align:center; min-width:64px; color:var(--ink);
     }
     .doc-empty { color:var(--muted); padding:var(--space-8) 0; text-align:center; }
+
+    /* Fila del fixture: rival, marcador, y debajo horario/lugar/estado */
+    .partido-row { flex-wrap:wrap; }
+    .partido-row__side { flex:1; min-width:110px; font-weight:600; color:var(--ink); }
+    .partido-row__meta {
+      flex-basis:100%; display:flex; flex-wrap:wrap; gap:var(--space-3);
+      margin-top:var(--space-2); padding-top:var(--space-2);
+      border-top:1px solid var(--line-soft);
+      font-size:12px; color:var(--muted-2);
+    }
+    .partido-row__meta .btn { margin-left:auto; }
+
+    /* Bloque de inscripción del hero */
+    .inscribir-box {
+      border:1px solid var(--line); border-radius:16px;
+      background:var(--bg-card); padding:var(--space-5);
+      min-width:260px;
+    }
+    .inscribir-box h4 { color:var(--ink); font-family:var(--head); margin-bottom:var(--space-3); }
+
+    /* Reglamento y premios */
+    .prosa { color:var(--muted); line-height:1.75; white-space:pre-line; }
   </style>
 </head>
 <body>
@@ -127,15 +149,17 @@
 
         <!-- Tabs -->
         <div class="tab-list" role="tablist">
-          <button class="tab active" role="tab" data-tab="posiciones">Posiciones</button>
-          <button class="tab" role="tab" data-tab="partidos">Resultados</button>
-          <button class="tab" role="tab" data-tab="equipos">Equipos</button>
+          <button class="tab active" role="tab" data-tab="fixture">Fixture</button>
+          <button class="tab" role="tab" data-tab="posiciones">Posiciones</button>
+          <button class="tab" role="tab" data-tab="equipos">Participantes</button>
+          <button class="tab" role="tab" data-tab="avisos">Novedades</button>
           <button class="tab" role="tab" data-tab="info">Información</button>
         </div>
 
-        <div class="tab-content active" id="tab-posiciones" role="tabpanel"></div>
-        <div class="tab-content" id="tab-partidos" role="tabpanel"></div>
+        <div class="tab-content active" id="tab-fixture" role="tabpanel"></div>
+        <div class="tab-content" id="tab-posiciones" role="tabpanel"></div>
         <div class="tab-content" id="tab-equipos" role="tabpanel"></div>
+        <div class="tab-content" id="tab-avisos" role="tabpanel"></div>
         <div class="tab-content" id="tab-info" role="tabpanel"></div>
 
       </div>

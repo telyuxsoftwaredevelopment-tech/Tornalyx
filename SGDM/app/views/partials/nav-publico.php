@@ -10,6 +10,8 @@
   <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
   <a href="/">Inicio</a>
   <a href="/torneos">Torneos</a>
+  <a href="/jugadores">Jugadores</a>
+  <a href="/documentacion">Documentación</a>
   <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro" style="margin-top:8px">
     <input type="checkbox" class="theme-toggle__input" />
     <span class="theme-toggle__track">
@@ -30,6 +32,8 @@
     <nav class="nav-links" aria-label="Navegación principal">
       <a href="/">Inicio</a>
       <a href="/torneos" style="color:var(--ink)">Torneos</a>
+      <a href="/jugadores">Jugadores</a>
+      <a href="/documentacion">Documentación</a>
     </nav>
     <div class="nav-right">
       <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">

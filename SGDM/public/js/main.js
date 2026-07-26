@@ -373,8 +373,26 @@ async function initAuthNav() {
   }[me.rol] || '/perfil';
   const panelTxt = me.rol === 'participante' ? 'Mi perfil' : 'Mi panel';
 
-  // Enlaces de auth existentes → panel / logout.
-  document.querySelectorAll('a[href="/login"]').forEach(a => {
+  /* Avatar del usuario: su foto de perfil o, si no subió ninguna, sus
+     iniciales sobre el rojo de marca. Reemplaza al botón "Entrar". */
+  const avatar = () => {
+    const a = document.createElement('a');
+    a.href = panelUrl;
+    a.className = 'nav-avatar';
+    a.title = panelTxt;
+    a.setAttribute('aria-label', panelTxt);
+    if (me.avatar_url) {
+      a.style.backgroundImage = `url(${encodeURI(me.avatar_url)})`;
+    } else {
+      a.textContent = ((me.nombre || '')[0] || '') + ((me.apellido || '')[0] || '');
+    }
+    return a;
+  };
+
+  /* En desktop el acceso a la cuenta pasa a ser la foto; en el menú móvil
+     conviene el texto, que es más claro con el menú desplegado. */
+  document.querySelectorAll('.nav-right a[href="/login"]').forEach(a => a.replaceWith(avatar()));
+  document.querySelectorAll('.mobile-nav a[href="/login"]').forEach(a => {
     a.href = panelUrl;
     a.textContent = panelTxt;
   });
@@ -385,17 +403,26 @@ async function initAuthNav() {
     if (a.classList.contains('btn')) a.classList.add('btn-ghost');
   });
 
-  // Navs sin accesos de cuenta: insertar el acceso antes del toggle de tema.
-  const mk = (href, text, cls) => {
-    const a = document.createElement('a');
-    a.href = href; a.textContent = text; a.className = cls;
-    return a;
-  };
-  document.querySelectorAll('.nav .nav-right, .mobile-nav').forEach(cont => {
+  // Navs sin accesos de cuenta (p. ej. /torneos): insertarlos.
+  document.querySelectorAll('.nav .nav-right').forEach(cont => {
+    if (cont.querySelector('.nav-avatar, a[href="/logout"]')) return;
+    const salir = document.createElement('a');
+    salir.href = '/logout';
+    salir.className = 'ghost-link';
+    salir.textContent = 'Cerrar sesión';
+    cont.insertBefore(salir, cont.querySelector('.theme-toggle'));
+    cont.insertBefore(avatar(), cont.querySelector('.theme-toggle'));
+  });
+  document.querySelectorAll('.mobile-nav').forEach(cont => {
     if (cont.querySelector(`a[href="${panelUrl}"], a[href="/logout"]`)) return;
     const toggle = cont.querySelector('.theme-toggle');
-    cont.insertBefore(mk(panelUrl, panelTxt, 'ghost-link'), toggle);
-    cont.insertBefore(mk('/logout', 'Cerrar sesión', 'ghost-link'), toggle);
+    const mk = (href, text) => {
+      const a = document.createElement('a');
+      a.href = href; a.textContent = text;
+      return a;
+    };
+    cont.insertBefore(mk(panelUrl, panelTxt), toggle);
+    cont.insertBefore(mk('/logout', 'Cerrar sesión'), toggle);
   });
 }
 
@@ -423,18 +450,24 @@ function initAccessibility() {
     document.body.prepend(skip);
   }
 
-  /* Botón + panel. Va dentro del navbar (antes del burger, así también se
-     ve en mobile); si la página no tiene navbar (p. ej. dashboards),
-     queda como botón flotante abajo a la izquierda. */
-  const navIn  = document.querySelector('.nav .nav-in');
-  const widget = document.createElement('div');
-  widget.className = navIn ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
+  /* El disparador es un enlace más del menú ("Accesibilidad", junto a
+     Documentación). El panel vive en <body> con posición fija para que no
+     lo recorte el navbar y sea el mismo en escritorio y en móvil. */
+  const navLinks = document.querySelector('.nav .nav-links');
+  const widget   = document.createElement('div');
+  widget.className = navLinks ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
   widget.innerHTML = `
     <button type="button" class="a11y-btn" id="a11yBtn" aria-expanded="false"
-            aria-controls="a11yPanel" aria-label="Opciones de accesibilidad" title="Accesibilidad">
-      <span aria-hidden="true">♿</span>
-    </button>
-    <div class="a11y-panel hidden" id="a11yPanel" role="dialog" aria-label="Opciones de accesibilidad">
+            aria-controls="a11yPanel" title="Opciones de accesibilidad">
+      Accesibilidad
+    </button>`;
+
+  const panel = document.createElement('div');
+  panel.className = 'a11y-panel hidden';
+  panel.id = 'a11yPanel';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-label', 'Opciones de accesibilidad');
+  panel.innerHTML = `
       <h4>Accesibilidad</h4>
       <div class="a11y-row">
         <span id="a11yFontLabel">Tamaño del texto</span>
@@ -455,16 +488,30 @@ function initAccessibility() {
       <label class="a11y-row">
         <span>Subrayar enlaces</span>
         <input type="checkbox" data-pref="links" />
-      </label>
-    </div>`;
-  if (navIn) {
-    navIn.insertBefore(widget, navIn.querySelector('.burger'));
+      </label>`;
+
+  document.body.appendChild(panel);
+  if (navLinks) {
+    navLinks.appendChild(widget);          // queda a continuación de Documentación
   } else {
-    document.body.appendChild(widget);
+    document.body.appendChild(widget);     // páginas sin menú: botón flotante
   }
 
-  const btn   = widget.querySelector('#a11yBtn');
-  const panel = widget.querySelector('#a11yPanel');
+  const btn = widget.querySelector('#a11yBtn');
+
+  /* Mismo panel desde el menú móvil, donde .nav-links está oculto. */
+  const abrirDesdeMobile = document.createElement('a');
+  abrirDesdeMobile.href = '#';
+  abrirDesdeMobile.textContent = 'Accesibilidad';
+  document.querySelectorAll('.mobile-nav').forEach(nav => {
+    const copia = abrirDesdeMobile.cloneNode(true);
+    copia.addEventListener('click', e => {
+      e.preventDefault();
+      document.getElementById('mobileClose')?.click();
+      togglePanel(true);
+    });
+    nav.insertBefore(copia, nav.querySelector('.theme-toggle'));
+  });
 
   const aplicar = () => {
     root.classList.toggle('a11y-font-lg',  prefs.font === 'lg');
@@ -472,43 +519,43 @@ function initAccessibility() {
     root.classList.toggle('a11y-contrast', !!prefs.contrast);
     root.classList.toggle('a11y-motion',   !!prefs.motion);
     root.classList.toggle('a11y-links',    !!prefs.links);
-    widget.querySelectorAll('[data-font]').forEach(b => {
+    panel.querySelectorAll('[data-font]').forEach(b => {
       b.classList.toggle('active', (prefs.font || '') === b.dataset.font);
     });
-    widget.querySelectorAll('[data-pref]').forEach(chk => {
+    panel.querySelectorAll('[data-pref]').forEach(chk => {
       chk.checked = !!prefs[chk.dataset.pref];
     });
   };
+
+  function togglePanel(abrir) {
+    panel.classList.toggle('hidden', !abrir);
+    btn.setAttribute('aria-expanded', String(abrir));
+  }
   const guardar = () => {
     try { localStorage.setItem(A11Y_KEY, JSON.stringify(prefs)); } catch { /* modo privado */ }
   };
 
-  btn.addEventListener('click', () => {
-    const abierto = !panel.classList.contains('hidden');
-    panel.classList.toggle('hidden', abierto);
-    btn.setAttribute('aria-expanded', String(!abierto));
-  });
+  btn.addEventListener('click', () => togglePanel(panel.classList.contains('hidden')));
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !panel.classList.contains('hidden')) {
-      panel.classList.add('hidden');
-      btn.setAttribute('aria-expanded', 'false');
+      togglePanel(false);
       btn.focus();
     }
   });
   document.addEventListener('click', e => {
-    if (!widget.contains(e.target) && !panel.classList.contains('hidden')) {
-      panel.classList.add('hidden');
-      btn.setAttribute('aria-expanded', 'false');
+    const dentro = widget.contains(e.target) || panel.contains(e.target);
+    if (!dentro && !panel.classList.contains('hidden')) {
+      togglePanel(false);
     }
   });
 
-  widget.querySelectorAll('[data-font]').forEach(b => {
+  panel.querySelectorAll('[data-font]').forEach(b => {
     b.addEventListener('click', () => {
       prefs.font = b.dataset.font || undefined;
       guardar(); aplicar();
     });
   });
-  widget.querySelectorAll('[data-pref]').forEach(chk => {
+  panel.querySelectorAll('[data-pref]').forEach(chk => {
     chk.addEventListener('change', () => {
       prefs[chk.dataset.pref] = chk.checked || undefined;
       guardar(); aplicar();

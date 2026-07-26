@@ -381,56 +381,61 @@
         <div id="misTorneos"></div>
       </div>
 
-      <!-- EQUIPOS -->
+      <!-- PARTICIPANTES / EQUIPOS -->
       <div class="section-panel" id="panel-equipos">
         <div class="page-header">
-          <div><h1>Equipos</h1><p>Todos los equipos registrados</p></div>
+          <div><h1>Participantes</h1><p>Inscripciones y equipos por torneo</p></div>
+          <select class="form-control" style="max-width:240px;padding:8px 14px" data-torneos-select></select>
         </div>
         <div class="card">
+          <div class="card__header"><h3>Inscripciones</h3></div>
           <div style="overflow-x:auto">
             <table class="data-table">
               <thead>
-                <tr><th>Nombre</th><th>Deporte</th><th>Capitán</th><th>Jugadores</th><th>Torneos</th></tr>
+                <tr><th>Participante</th><th>Equipo</th><th>Inscripto el</th><th>Estado</th><th>Acciones</th></tr>
               </thead>
-              <tbody>
-                <tr><td>Atlético Norte</td><td>Fútbol</td><td>Carlos García</td><td>15</td><td>2</td></tr>
-                <tr><td>Deportivo Sur</td><td>Fútbol</td><td>Juan Méndez</td><td>14</td><td>1</td></tr>
-                <tr><td>Club Basket CE</td><td>Básquetbol</td><td>Laura Sosa</td><td>10</td><td>1</td></tr>
-              </tbody>
+              <tbody id="inscripcionesBody"></tbody>
             </table>
+          </div>
+          <div class="card__body hidden" id="inscripcionesEmpty" style="color:var(--muted);text-align:center">
+            Todavía no hay inscripciones en este torneo.
           </div>
         </div>
       </div>
 
-      <!-- RESULTADOS -->
+      <!-- FIXTURE Y RESULTADOS -->
       <div class="section-panel" id="panel-resultados">
         <div class="page-header">
-          <div><h1>Resultados</h1><p>Gestión de resultados de partidos</p></div>
-          <button class="btn btn-primary btn-sm">+ Cargar resultado</button>
+          <div><h1>Fixture y resultados</h1><p>Emparejamientos, horarios y marcadores</p></div>
+          <select class="form-control" style="max-width:240px;padding:8px 14px" data-torneos-select></select>
         </div>
-        <div class="card">
+
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <div class="card__body" style="display:flex;gap:var(--space-4);align-items:center;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px">
+              <strong style="color:var(--ink);display:block">Generar emparejamientos</strong>
+              <span style="font-size:12px;color:var(--muted-2)">
+                En liga se crea el calendario completo; en eliminación y suizo, una ronda por vez.
+              </span>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btnFixture">Generar siguiente ronda</button>
+          </div>
+        </div>
+
+        <div id="fixtureLista"></div>
+
+        <div class="card" style="margin-top:var(--space-5)">
+          <div class="card__header"><h3>Tabla de posiciones</h3></div>
           <div style="overflow-x:auto">
             <table class="data-table">
               <thead>
-                <tr><th>Torneo</th><th>Local</th><th>Marcador</th><th>Visitante</th><th>Fecha</th><th>Estado</th></tr>
+                <tr><th>#</th><th>Equipo / Participante</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th><th>Pts</th></tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>Copa Regional</td><td>Atlético Norte</td>
-                  <td style="text-align:center;font-family:var(--head);font-weight:700;color:var(--ink)">3 · 1</td>
-                  <td>Los Guerreros</td>
-                  <td style="font-family:var(--mono);font-size:12px">14/06/2026</td>
-                  <td><span class="badge badge-green">Confirmado</span></td>
-                </tr>
-                <tr>
-                  <td>Copa Regional</td><td>Deportivo Sur</td>
-                  <td style="text-align:center;font-family:var(--head);font-weight:700;color:var(--ink)">2 · 2</td>
-                  <td>Club Rivera FC</td>
-                  <td style="font-family:var(--mono);font-size:12px">14/06/2026</td>
-                  <td><span class="badge badge-green">Confirmado</span></td>
-                </tr>
-              </tbody>
+              <tbody id="posicionesBody"></tbody>
             </table>
+          </div>
+          <div class="card__body hidden" id="posicionesEmpty" style="color:var(--muted);text-align:center">
+            Todavía no hay posiciones: se calculan a medida que se cargan resultados.
           </div>
         </div>
       </div>
@@ -574,6 +579,7 @@
   <script src="../../js/dashboard.js"></script>
   <script src="../../js/torneo-ui.js"></script>
   <script src="../../js/organizador.js"></script>
+  <script src="../../js/organizador-gestion.js"></script>
   <script src="../../js/admin.js"></script>
 </body>
 </html>

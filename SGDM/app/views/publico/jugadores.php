@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <title><?= e($title ?? 'Tornalyx | Buscar jugadores') ?></title>
+
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="../assets/favicon.ico" />
+  <link rel="stylesheet" href="../css/variables.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/torneos.css" />
+  <style>
+    .jugador-card {
+      display:flex; align-items:center; gap:var(--space-4);
+      background:var(--bg-card); border:1px solid var(--line);
+      border-radius:14px; padding:var(--space-4);
+      cursor:pointer; transition:border-color .2s;
+      width:100%; text-align:left;
+    }
+    .jugador-card:hover { border-color:var(--red-deep); }
+    .jugador-card.active { border-color:var(--red); }
+    .jugador-avatar {
+      width:48px; height:48px; border-radius:50%; flex:none;
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--head); font-weight:700; color:#fff;
+      background:var(--red); background-size:cover; background-position:center;
+    }
+    .jugador-card__nombre { font-family:var(--head); font-weight:600; color:var(--ink); }
+    .jugador-card__meta { font-size:12px; color:var(--muted-2); }
+
+    .buscador-grid { display:grid; grid-template-columns:1fr; gap:var(--space-5); }
+    @media(min-width:900px) { .buscador-grid { grid-template-columns:340px 1fr; align-items:start; } }
+
+    .ficha-stat { text-align:center; }
+    .ficha-stat__valor { font-family:var(--head); font-size:1.5rem; font-weight:800; color:var(--red-bright); }
+    .ficha-stat__label { font-size:11px; color:var(--muted); }
+    .prosa { color:var(--muted); line-height:1.7; white-space:pre-line; }
+  </style>
+</head>
+<body>
+
+  <?= $partial('partials/nav-publico') ?>
+
+  <div class="page-hero">
+    <div class="grid-lines-sm"></div>
+    <div class="wrap page-hero-in">
+      <p class="eyebrow">Jugadores · equipos · rendimiento</p>
+      <h1 style="font-size:clamp(28px,4vw,48px);margin-bottom:10px">Buscar jugadores</h1>
+      <p class="lead" style="max-width:56ch">
+        Encontrá a cualquier participante y consultá su rival, su posición,
+        sus resultados y sus próximos enfrentamientos.
+      </p>
+    </div>
+  </div>
+
+  <main class="section" style="padding-top:clamp(32px,5vw,56px)">
+    <div class="wrap buscador-grid">
+
+      <!-- Buscador y resultados -->
+      <div>
+        <div class="form-group">
+          <label class="form-label" for="buscarJugador">Nombre del jugador</label>
+          <input class="form-control" type="search" id="buscarJugador"
+                 placeholder="ej: Kratos…" autocomplete="off" />
+        </div>
+        <div id="resultados" style="display:flex;flex-direction:column;gap:var(--space-3)"></div>
+      </div>
+
+      <!-- Ficha del jugador seleccionado -->
+      <div id="ficha"></div>
+
+    </div>
+  </main>
+
+  <?= $partial('partials/footer') ?>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/torneo-ui.js"></script>
+  <script src="../js/jugadores.js"></script>
+</body>
+</html>

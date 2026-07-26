@@ -9,14 +9,19 @@ class Resultado extends Model {
     protected string $table = 'resultados';
 
     /**
-     * Carga el resultado de un partido y actualiza posiciones.
+     * Carga el resultado de un partido y lo marca como finalizado.
+     *
+     * Cada partido tiene un único resultado (clave única en la BD), así que
+     * volver a cargarlo corrige el marcador en vez de fallar: el organizador
+     * puede enmendar un error de carga. Quien recalcula la tabla de
+     * posiciones es Posicion::recalcular(), que se ejecuta después.
      *
      * @param int      $partidoId
      * @param int      $golesLocal
      * @param int      $golesVisitante
      * @param int|null $ganadorId    NULL = empate
      * @param int      $cargadoPor   usuario_id
-     * @return int ID del resultado insertado.
+     * @return int ID del resultado.
      */
     public function cargar(
         int $partidoId,
@@ -25,20 +30,25 @@ class Resultado extends Model {
         ?int $ganadorId,
         int $cargadoPor
     ): int {
-        $id = $this->insert([
-            'partido_id'      => $partidoId,
-            'goles_local'     => $golesLocal,
-            'goles_visitante' => $golesVisitante,
-            'ganador_id'      => $ganadorId,
-            'cargado_por'     => $cargadoPor,
-        ]);
+        $stmt = $this->db->prepare(
+            'INSERT INTO resultados
+                (partido_id, goles_local, goles_visitante, ganador_id, cargado_por)
+             VALUES (?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE
+                goles_local     = VALUES(goles_local),
+                goles_visitante = VALUES(goles_visitante),
+                ganador_id      = VALUES(ganador_id),
+                cargado_por     = VALUES(cargado_por)'
+        );
+        $stmt->execute([$partidoId, $golesLocal, $golesVisitante, $ganadorId, $cargadoPor]);
 
-        // Marcar partido como finalizado
         $this->db->prepare(
             "UPDATE partidos SET estado = 'finalizado' WHERE id = ?"
         )->execute([$partidoId]);
 
-        return $id;
+        $stmt = $this->db->prepare('SELECT id FROM resultados WHERE partido_id = ?');
+        $stmt->execute([$partidoId]);
+        return (int) $stmt->fetchColumn();
     }
 
     /**
