@@ -16,12 +16,11 @@
 </head>
 <body>
 
-<!-- ?? MOBILE NAV ???????????????????????????????????????? -->
+<!-- ── MOBILE NAV ─────────────────────────────────────── -->
 <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú de navegación">
   <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
   <a href="/torneos">Torneos</a>
   <a href="/documentacion">Documentación</a>
-  <a href="/login" class="ghost-link" style="font-size:1rem">Entrar</a>
   <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro" style="margin-top:8px">
     <input type="checkbox" class="theme-toggle__input" />
     <span class="theme-toggle__track">
@@ -33,7 +32,7 @@
   </label>
 </div>
 
-<!-- ?? NAV ??????????????????????????????????????????????? -->
+<!-- ── NAV ────────────────────────────────────────────── -->
 <header class="nav">
   <div class="wrap nav-in">
     <a class="brand" href="/">
@@ -45,7 +44,6 @@
       <a href="/documentacion">Documentación</a>
     </nav>
     <div class="nav-right">
-      <a class="ghost-link" href="/login">Entrar</a>
       <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
         <input type="checkbox" class="theme-toggle__input" />
         <span class="theme-toggle__track">
@@ -64,7 +62,7 @@
 
 <main id="top">
 
-  <!-- ?? HERO ??????????????????????????????????????????? -->
+  <!-- ── HERO ─────────────────────────────────────────── -->
   <section class="hero">
     <div class="grid-lines"></div>
     <div class="wrap hero-in">
@@ -74,7 +72,8 @@
           <p class="lead">Liga, eliminación directa o sistema suizo. Del club de barrio a la liga online · participantes, calendarios, llaves y resultados en una sola plataforma modular.</p>
           <div class="btn-row hero-cta">
             <a class="btn btn-primary btn-lg" href="/registro">Crear cuenta</a>
-            <a class="btn btn-ghost btn-lg" href="/torneos">Ver torneos</a>
+            <a class="btn btn-primary btn-lg" href="/login">Entrar</a>
+            <a class="btn btn-primary btn-lg" href="/torneos">Ver torneos</a>
           </div>
         </div>
 
@@ -128,7 +127,7 @@
     </div>
   </section>
 
-  <!-- ?? AUDIENCIAS ??????????????????????????????????????? -->
+  <!-- ── AUDIENCIAS ───────────────────────────────────── -->
   <section class="section section--alt" id="audiencias">
     <div class="wrap audiencias-grid">
       <!-- Galería: las fotos rotan solas (js/galeria.js) y muestran los
@@ -174,7 +173,7 @@
 
 </main>
 
-<!-- ?? FOOTER ???????????????????????????????????????????? -->
+<!-- ── FOOTER ─────────────────────────────────────────── -->
 <footer class="footer-wrap">
   <div class="wrap">
     <div class="foot-grid">
