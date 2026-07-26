@@ -10,6 +10,7 @@
 #   3) Cambiar propietario y grupo (chown)
 #   4) Aplicar los permisos recomendados a la aplicación web
 #   5) Auditar permisos peligrosos (777 y SUID)
+#   6) Ver y corregir el contexto de SELinux
 #
 # Uso: sudo bash gestion_permisos.sh
 # ============================================================
@@ -26,9 +27,16 @@ LOG_FILE="/var/log/tornalyx/gestion_permisos.log"
 # Directorio donde queda publicada la aplicación en el servidor.
 DIR_APP="/var/www/tornalyx"
 
-# Usuario y grupo con los que corre Apache en Debian y Ubuntu.
-USUARIO_WEB="www-data"
-GRUPO_WEB="www-data"
+# Usuario y grupo con los que corre Apache en AlmaLinux y en el resto de la
+# familia RHEL. En Debian y Ubuntu serían www-data en ambos casos.
+USUARIO_WEB="apache"
+GRUPO_WEB="apache"
+
+# Contexto de SELinux que deben tener los archivos para que httpd pueda
+# leerlos. En AlmaLinux, SELinux viene activo: si el contexto no es el
+# correcto, Apache devuelve 403 aunque los permisos de Unix estén bien.
+CONTEXTO_WEB="httpd_sys_content_t"
+CONTEXTO_ESCRITURA="httpd_sys_rw_content_t"
 
 # ──────────────────────────────────────────────────────────────
 # FUNCIONES AUXILIARES
@@ -283,6 +291,84 @@ aplicar_permisos_app() {
 
     log_accion "PERMISOS_APP: aplicados sobre $DIR_APP"
     echo -e "\n${GREEN}Permisos aplicados correctamente.${NC}"
+    echo -e "${YELLOW}   Si SELinux está activo, revisá además el contexto con la opción 6.${NC}"
+}
+
+# Opción 6 · Revisa y corrige las etiquetas de SELinux de la aplicación.
+gestionar_selinux() {
+    imprimir_titulo "Contexto de SELinux"
+
+    if ! command -v getenforce &>/dev/null; then
+        echo -e "${YELLOW}SELinux no está instalado en este sistema.${NC}"
+        return 0
+    fi
+
+    # getenforce devuelve Enforcing, Permissive o Disabled.
+    local estado
+    estado=$(getenforce)
+    echo -e "${CYAN}Estado de SELinux:${NC} $estado\n"
+
+    if [[ "$estado" == "Disabled" ]]; then
+        echo -e "${YELLOW}SELinux está desactivado: los contextos no se aplican.${NC}"
+        return 0
+    fi
+
+    if [[ ! -d "$DIR_APP" ]]; then
+        echo -e "${RED}No encontré el directorio de la aplicación: $DIR_APP${NC}"
+        return 1
+    fi
+
+    # ls -Z agrega la columna de contexto: usuario:rol:tipo:nivel.
+    # El tipo es el que decide si httpd puede leer el archivo.
+    echo -e "${CYAN}Contexto actual de $DIR_APP:${NC}"
+    ls -Zd "$DIR_APP"
+
+    echo ""
+    echo "  1) Aplicar el contexto correcto a la aplicación"
+    echo "  2) Ver los booleanos de SELinux relacionados con httpd"
+    echo ""
+    read -p "$(echo -e "${CYAN}Opción [1-2]:${NC} ")" opcion
+
+    case "$opcion" in
+        1)
+            if ! command -v semanage &>/dev/null; then
+                echo -e "${RED}Falta semanage. Instalalo con: dnf install policycoreutils-python-utils${NC}"
+                return 1
+            fi
+
+            # semanage graba la regla en la política, de modo que el contexto
+            # sobreviva a un relabel del sistema; restorecon la aplica ahora.
+            # El "-a" agrega y el "-m" modifica si la regla ya existía.
+            echo -e "${CYAN}Registrando el contexto en la política...${NC}"
+            semanage fcontext -a -t "$CONTEXTO_WEB" "${DIR_APP}(/.*)?" 2>/dev/null \
+                || semanage fcontext -m -t "$CONTEXTO_WEB" "${DIR_APP}(/.*)?"
+
+            local dir_subidas="${DIR_APP}/public/uploads"
+            if [[ -d "$dir_subidas" ]]; then
+                # Las subidas necesitan escritura, que es un tipo distinto.
+                semanage fcontext -a -t "$CONTEXTO_ESCRITURA" "${dir_subidas}(/.*)?" 2>/dev/null \
+                    || semanage fcontext -m -t "$CONTEXTO_ESCRITURA" "${dir_subidas}(/.*)?"
+            fi
+
+            echo -e "${CYAN}Aplicando las etiquetas...${NC}"
+            restorecon -Rv "$DIR_APP" | tail -20
+
+            log_accion "SELINUX: contexto aplicado sobre $DIR_APP"
+            echo -e "\n${GREEN}Contexto aplicado.${NC}"
+            ;;
+        2)
+            # Los booleanos habilitan comportamientos puntuales de httpd,
+            # como salir a la red o conectarse a una base de datos remota.
+            echo -e "\n${CYAN}Booleanos de httpd:${NC}"
+            getsebool -a 2>/dev/null | grep '^httpd_' | head -20
+            echo -e "\n${YELLOW}Si la aplicación se conecta a una base de datos remota,${NC}"
+            echo -e "${YELLOW}httpd_can_network_connect_db tiene que estar en on.${NC}"
+            ;;
+        *)
+            echo -e "${RED}Opción inválida.${NC}"
+            return 1
+            ;;
+    esac
 }
 
 # Opción 5 · Busca permisos que suelen ser un problema de seguridad.
@@ -349,10 +435,11 @@ mostrar_menu() {
         echo -e "  ${CYAN}3.${NC} Cambiar propietario y grupo (chown)"
         echo -e "  ${CYAN}4.${NC} Aplicar permisos recomendados a la aplicación"
         echo -e "  ${CYAN}5.${NC} Auditar permisos peligrosos"
+        echo -e "  ${CYAN}6.${NC} Contexto de SELinux"
         echo -e "  ${RED}0.${NC} Salir"
         echo ""
 
-        read -p "$(echo -e "${YELLOW}Seleccioná una opción [0-5]:${NC} ")" opcion
+        read -p "$(echo -e "${YELLOW}Seleccioná una opción [0-6]:${NC} ")" opcion
 
         case "$opcion" in
             1) ver_permisos ;;
@@ -360,13 +447,14 @@ mostrar_menu() {
             3) cambiar_propietario ;;
             4) aplicar_permisos_app ;;
             5) auditar_permisos ;;
+            6) gestionar_selinux ;;
             0)
                 echo -e "\n${GREEN}Saliendo de la gestión de permisos.${NC}\n"
                 log_accion "FIN_SESION"
                 exit 0
                 ;;
             *)
-                echo -e "${RED}Opción inválida: elegí un número entre 0 y 5.${NC}"
+                echo -e "${RED}Opción inválida: elegí un número entre 0 y 6.${NC}"
                 ;;
         esac
 

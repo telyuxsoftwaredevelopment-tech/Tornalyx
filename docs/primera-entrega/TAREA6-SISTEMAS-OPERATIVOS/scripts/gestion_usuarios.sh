@@ -141,9 +141,9 @@ crear_usuario() {
 
     # Solicita la selección del rol para asignar grupos apropiados
     echo -e "\n${CYAN}Selecciona el rol del usuario:${NC}"
-    echo "  1) Administrador del sistema (sudo + www-data)"
-    echo "  2) Operador web (www-data)"
-    echo "  3) Desarrollador (www-data)"
+    echo "  1) Administrador del sistema (wheel + apache)"
+    echo "  2) Operador web (apache)"
+    echo "  3) Desarrollador (apache)"
     echo "  4) Usuario de respaldo (sin login)"
     read -p "Rol [1-4]: " rol
 
@@ -153,16 +153,18 @@ crear_usuario() {
     # -s: shell asignada al usuario
     case "$rol" in
         1)
-            # Administrador: shell completa, grupos sudo y www-data
-            useradd -m -c "$nombre_completo" -s /bin/bash -G sudo,www-data "$nombre_usuario"
+            # Administrador: shell completa, grupos wheel y apache.
+            # En AlmaLinux el grupo de administradores es "wheel"; el grupo
+            # "sudo" de Debian no existe y useradd fallaría al indicarlo.
+            useradd -m -c "$nombre_completo" -s /bin/bash -G wheel,apache "$nombre_usuario"
             ;;
         2)
-            # Operador web: shell completa, grupo www-data (acceso a archivos web)
-            useradd -m -c "$nombre_completo" -s /bin/bash -G www-data "$nombre_usuario"
+            # Operador web: shell completa, grupo apache (acceso a archivos web)
+            useradd -m -c "$nombre_completo" -s /bin/bash -G apache "$nombre_usuario"
             ;;
         3)
-            # Desarrollador: shell completa, grupo www-data
-            useradd -m -c "$nombre_completo" -s /bin/bash -G www-data "$nombre_usuario"
+            # Desarrollador: shell completa, grupo apache
+            useradd -m -c "$nombre_completo" -s /bin/bash -G apache "$nombre_usuario"
             ;;
         4)
             # Usuario de respaldo: SIN shell interactiva (no puede hacer login)
@@ -334,7 +336,7 @@ listar_usuarios() {
     # "IFS=:" establece ":" como separador de campos para el bucle while read
     while IFS=: read -r usuario password uid gid gecos home shell; do
 
-        # Solo muestra usuarios con UID >= 1000 (usuarios humanos en Ubuntu)
+        # Solo muestra usuarios con UID >= 1000 (las cuentas de personas)
         # o los usuarios especiales de Tornalyx (UID 1001-1004)
         # Los usuarios del sistema tienen UID < 1000
         if [[ $uid -ge 1000 ]]; then

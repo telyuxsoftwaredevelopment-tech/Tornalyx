@@ -27,18 +27,23 @@ LOG_FILE="/var/log/tornalyx/gestion_servicios.log"
 # Lista blanca de servicios que este script puede tocar. Trabajar sobre una
 # lista cerrada evita que un error de tipeo detenga algo que no corresponde,
 # como el propio servicio de SSH y quedarse sin acceso al servidor.
-SERVICIOS=(apache2 mysql ssh cron ufw fail2ban)
+#
+# Los nombres son los de AlmaLinux y el resto de la familia RHEL, que no
+# coinciden con los de Debian: acá el servidor web es httpd (no apache2),
+# el demonio de SSH es sshd (no ssh), el de tareas programadas es crond
+# (no cron) y el firewall es firewalld (no ufw).
+SERVICIOS=(httpd mysqld sshd crond firewalld fail2ban)
 
 # Descripción de cada servicio, para que el menú se entienda sin buscar afuera.
 descripcion_servicio() {
     case "$1" in
-        apache2)  echo "Servidor web que publica la aplicación" ;;
-        mysql)    echo "Base de datos del sistema" ;;
-        ssh)      echo "Acceso remoto al servidor" ;;
-        cron)     echo "Tareas programadas (respaldos, limpieza)" ;;
-        ufw)      echo "Firewall del servidor" ;;
-        fail2ban) echo "Bloqueo de intentos de acceso repetidos" ;;
-        *)        echo "-" ;;
+        httpd)     echo "Servidor web que publica la aplicación" ;;
+        mysqld)    echo "Base de datos del sistema" ;;
+        sshd)      echo "Acceso remoto al servidor" ;;
+        crond)     echo "Tareas programadas (respaldos, limpieza)" ;;
+        firewalld) echo "Firewall del servidor" ;;
+        fail2ban)  echo "Bloqueo de intentos de acceso repetidos" ;;
+        *)         echo "-" ;;
     esac
 }
 
@@ -180,9 +185,9 @@ operar_servicio() {
 
     echo -e "\n${CYAN}Estado actual:${NC} $(systemctl is-active "$servicio" 2>/dev/null || echo desconocido)"
 
-    # Detener SSH deja al administrador sin forma de volver a entrar si está
+    # Detener sshd deja al administrador sin forma de volver a entrar si está
     # trabajando de forma remota, así que se avisa antes.
-    if [[ "$accion" == "stop" && "$servicio" == "ssh" ]]; then
+    if [[ "$accion" == "stop" && "$servicio" == "sshd" ]]; then
         echo -e "\n${RED}ATENCIÓN: si estás conectado por SSH, detener este servicio${NC}"
         echo -e "${RED}te va a dejar afuera del servidor.${NC}"
     fi
@@ -245,7 +250,7 @@ configurar_arranque() {
             ;;
     esac
 
-    if [[ "$accion" == "disable" && "$servicio" == "ssh" ]]; then
+    if [[ "$accion" == "disable" && "$servicio" == "sshd" ]]; then
         echo -e "\n${RED}ATENCIÓN: sin SSH al arranque, tras un reinicio no vas a poder${NC}"
         echo -e "${RED}entrar de forma remota al servidor.${NC}"
         read -p "$(echo -e "${YELLOW}¿Seguro? (escribí CONFIRMAR):${NC} ")" seguro

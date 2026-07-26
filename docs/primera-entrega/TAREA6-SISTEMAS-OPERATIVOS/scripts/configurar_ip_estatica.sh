@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 # TORNALYX – SGDM
-# Script de configuración de IP estática (netplan)
+# Script de configuración de IP estática (NetworkManager)
 # Tarea 6 – Sistemas Operativos | Primera Entrega
 #
 # Un servidor necesita una dirección fija: si el router le fuera cambiando
@@ -15,7 +15,8 @@
 #   3) Volver a DHCP
 #   4) Restaurar el último respaldo
 #
-# Probado sobre Ubuntu Server 22.04 / 24.04 (netplan).
+# Pensado para AlmaLinux 8, que administra la red con NetworkManager y la
+# herramienta nmcli. En Debian y Ubuntu el equivalente sería netplan.
 # Uso: sudo bash configurar_ip_estatica.sh
 # ============================================================
 
@@ -28,10 +29,8 @@ NC='\033[0m'
 
 LOG_FILE="/var/log/tornalyx/configurar_red.log"
 
-# Archivo de netplan que administra este script. Se usa un nombre propio
-# para no pisar el que trae el sistema; el número alto del prefijo hace que
-# se aplique después de los demás.
-ARCHIVO_NETPLAN="/etc/netplan/99-tornalyx.yaml"
+# NetworkManager guarda cada conexión en un archivo de este directorio.
+DIR_CONEXIONES="/etc/sysconfig/network-scripts"
 
 # Directorio donde se guardan las copias antes de cada cambio.
 DIR_RESPALDOS="/var/backups/tornalyx/red"
@@ -58,11 +57,17 @@ verificar_root() {
     fi
 }
 
-verificar_netplan() {
-    if ! command -v netplan &>/dev/null; then
-        echo -e "${RED}Este script necesita netplan, que no está instalado.${NC}"
-        echo -e "${YELLOW}   En sistemas con ifupdown la configuración va en${NC}"
-        echo -e "${YELLOW}   /etc/network/interfaces en lugar de /etc/netplan.${NC}"
+verificar_nmcli() {
+    if ! command -v nmcli &>/dev/null; then
+        echo -e "${RED}Este script necesita NetworkManager, que no está instalado.${NC}"
+        echo -e "${YELLOW}   Instalalo con: dnf install NetworkManager${NC}"
+        exit 1
+    fi
+
+    # NetworkManager tiene que estar corriendo para que nmcli haga algo.
+    if ! systemctl is-active --quiet NetworkManager; then
+        echo -e "${RED}El servicio NetworkManager no está activo.${NC}"
+        echo -e "${YELLOW}   Arrancalo con: systemctl start NetworkManager${NC}"
         exit 1
     fi
 }
@@ -110,55 +115,70 @@ validar_prefijo() {
     return 0
 }
 
-# Devuelve en INTERFAZ_ELEGIDA la placa de red que seleccione el operador.
-elegir_interfaz() {
-    INTERFAZ_ELEGIDA=""
+# Devuelve en CONEXION_ELEGIDA el nombre de la conexión que seleccione el
+# operador, y en DISPOSITIVO_ELEGIDO la placa a la que corresponde.
+elegir_conexion() {
+    CONEXION_ELEGIDA=""
+    DISPOSITIVO_ELEGIDO=""
 
-    # ip -o link muestra una placa por línea. Se descarta "lo", que es la
-    # interfaz de loopback interna y no se configura.
-    local interfaces
-    mapfile -t interfaces < <(ip -o link show | awk -F': ' '{print $2}' | grep -v '^lo$')
+    # -t saca la salida separada por ":" (fácil de recorrer) y -f elige las
+    # columnas. Se filtran las conexiones de tipo ethernet y wifi: las
+    # interfaces virtuales de Docker o del loopback no se tocan.
+    local lineas
+    mapfile -t lineas < <(nmcli -t -f NAME,TYPE,DEVICE connection show \
+                          | grep -E ':(802-3-ethernet|802-11-wireless|ethernet|wifi):')
 
-    if [[ ${#interfaces[@]} -eq 0 ]]; then
-        echo -e "${RED}No encontré ninguna placa de red.${NC}"
+    if [[ ${#lineas[@]} -eq 0 ]]; then
+        echo -e "${RED}No encontré conexiones de red administradas por NetworkManager.${NC}"
         return 1
     fi
 
-    echo -e "${CYAN}Placas de red disponibles:${NC}"
+    echo -e "${CYAN}Conexiones disponibles:${NC}"
 
     local i
-    for i in "${!interfaces[@]}"; do
-        local nombre="${interfaces[$i]}"
-        # La IP actual sirve para reconocer cuál es la placa en uso.
+    for i in "${!lineas[@]}"; do
+        local nombre dispositivo
+        nombre=$(echo "${lineas[$i]}" | cut -d: -f1)
+        dispositivo=$(echo "${lineas[$i]}" | cut -d: -f3)
+
+        # La dirección actual ayuda a reconocer cuál es la conexión en uso.
         local ip_actual
-        ip_actual=$(ip -4 -o addr show "$nombre" 2>/dev/null | awk '{print $4}' | head -1)
-        printf "  %d) %-12s %s\n" "$((i + 1))" "$nombre" "${ip_actual:-sin dirección}"
+        ip_actual=$(nmcli -g IP4.ADDRESS connection show "$nombre" 2>/dev/null | head -1)
+
+        printf "  %d) %-22s placa: %-10s %s\n" \
+               "$((i + 1))" "$nombre" "${dispositivo:-sin placa}" "${ip_actual:-sin dirección}"
     done
     echo ""
 
-    read -p "$(echo -e "${CYAN}Número de placa:${NC} ")" numero
+    read -p "$(echo -e "${CYAN}Número de conexión:${NC} ")" numero
 
-    if [[ ! "$numero" =~ ^[0-9]+$ ]] || [[ "$numero" -lt 1 || "$numero" -gt ${#interfaces[@]} ]]; then
+    if [[ ! "$numero" =~ ^[0-9]+$ ]] || [[ "$numero" -lt 1 || "$numero" -gt ${#lineas[@]} ]]; then
         echo -e "${RED}Selección inválida.${NC}"
         return 1
     fi
 
-    INTERFAZ_ELEGIDA="${interfaces[$((numero - 1))]}"
+    CONEXION_ELEGIDA=$(echo "${lineas[$((numero - 1))]}" | cut -d: -f1)
+    DISPOSITIVO_ELEGIDO=$(echo "${lineas[$((numero - 1))]}" | cut -d: -f3)
     return 0
 }
 
-# Guarda una copia de la configuración de red antes de modificarla.
+# Guarda una copia de los archivos de conexión antes de modificarlos.
 respaldar_configuracion() {
     mkdir -p "$DIR_RESPALDOS"
 
     local marca
     marca=$(date '+%Y%m%d-%H%M%S')
 
-    local respaldo="${DIR_RESPALDOS}/netplan-${marca}.tar.gz"
+    local respaldo="${DIR_RESPALDOS}/network-scripts-${marca}.tar.gz"
 
-    # Se guarda todo /etc/netplan porque puede haber más de un archivo y el
-    # orden entre ellos afecta el resultado final.
-    if tar -czf "$respaldo" -C /etc netplan 2>/dev/null; then
+    if [[ ! -d "$DIR_CONEXIONES" ]]; then
+        echo -e "${YELLOW}No existe $DIR_CONEXIONES; no hay nada que respaldar.${NC}"
+        return 1
+    fi
+
+    # Se guarda el directorio completo porque una conexión puede depender de
+    # archivos vecinos (rutas estáticas, reglas por interfaz).
+    if tar -czf "$respaldo" -C /etc/sysconfig network-scripts 2>/dev/null; then
         echo -e "${GREEN}Respaldo guardado en:${NC} $respaldo"
         log_accion "RESPALDO: $respaldo"
         return 0
@@ -176,7 +196,10 @@ respaldar_configuracion() {
 ver_configuracion() {
     imprimir_titulo "Configuración de red actual"
 
-    echo -e "${CYAN}Direcciones por placa:${NC}"
+    echo -e "${CYAN}Estado de los dispositivos:${NC}"
+    nmcli device status
+
+    echo -e "\n${CYAN}Direcciones por placa:${NC}"
     # -4 limita la salida a IPv4 y -br la muestra en formato breve.
     ip -4 -br addr show
 
@@ -185,29 +208,20 @@ ver_configuracion() {
     ip route show default || echo "  Sin puerta de enlace configurada."
 
     echo -e "\n${CYAN}Servidores DNS:${NC}"
-    if command -v resolvectl &>/dev/null; then
-        resolvectl status 2>/dev/null | grep -i 'DNS Servers' | head -5
-    else
-        grep -i '^nameserver' /etc/resolv.conf 2>/dev/null || echo "  No pude leerlos."
-    fi
+    grep -i '^nameserver' /etc/resolv.conf 2>/dev/null || echo "  No pude leerlos."
 
-    echo -e "\n${CYAN}Archivos de netplan:${NC}"
-    ls -1 /etc/netplan/*.yaml 2>/dev/null || echo "  Ninguno."
-
-    if [[ -f "$ARCHIVO_NETPLAN" ]]; then
-        echo -e "\n${CYAN}Configuración escrita por este script:${NC}"
-        cat "$ARCHIVO_NETPLAN"
-    fi
+    echo -e "\n${CYAN}Detalle de las conexiones:${NC}"
+    nmcli -f NAME,TYPE,DEVICE,STATE connection show
 
     log_accion "VER_CONFIGURACION"
 }
 
-# Opción 2 · Pide los datos y deja la placa con dirección fija.
+# Opción 2 · Pide los datos y deja la conexión con dirección fija.
 configurar_estatica() {
     imprimir_titulo "Configurar IP estática"
 
-    elegir_interfaz || return 1
-    local interfaz="$INTERFAZ_ELEGIDA"
+    elegir_conexion || return 1
+    local conexion="$CONEXION_ELEGIDA"
 
     echo ""
     read -p "$(echo -e "${CYAN}Dirección IP (ej. 192.168.1.50):${NC} ")" ip
@@ -244,7 +258,8 @@ configurar_estatica() {
     fi
 
     echo -e "\n${YELLOW}Resumen de lo que se va a aplicar:${NC}"
-    echo "  Placa:            $interfaz"
+    echo "  Conexión:         $conexion"
+    echo "  Placa:            ${DISPOSITIVO_ELEGIDO:-sin asignar}"
     echo "  Dirección:        ${ip}/${prefijo}"
     echo "  Puerta de enlace: $gateway"
     echo "  DNS:              $dns1, $dns2"
@@ -261,69 +276,44 @@ configurar_estatica() {
 
     respaldar_configuracion
 
-    # cat con "<< EOF" escribe todo el bloque hasta la marca EOF.
-    # El formato es YAML: la indentación con espacios es obligatoria y no
-    # se pueden usar tabulaciones.
-    cat > "$ARCHIVO_NETPLAN" << EOF
-# Configuración de red generada por configurar_ip_estatica.sh
-# Tornalyx (SGDM) · $(date '+%Y-%m-%d %H:%M:%S')
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    ${interfaz}:
-      dhcp4: false
-      addresses:
-        - ${ip}/${prefijo}
-      routes:
-        - to: default
-          via: ${gateway}
-      nameservers:
-        addresses: [${dns1}, ${dns2}]
-EOF
+    # nmcli modifica la conexión guardada. El método "manual" desactiva DHCP.
+    # ipv4.addresses acepta la dirección en notación CIDR y ipv4.dns una
+    # lista separada por espacios.
+    echo -e "\n${CYAN}Aplicando la configuración...${NC}"
 
-    # netplan exige que solo root pueda leer el archivo; si queda con
-    # permisos más abiertos, avisa en cada ejecución.
-    chmod 600 "$ARCHIVO_NETPLAN"
-
-    echo -e "\n${CYAN}Archivo escrito:${NC} $ARCHIVO_NETPLAN"
-    echo -e "${CYAN}Verificando la sintaxis...${NC}"
-
-    # generate traduce el YAML a la configuración interna sin activarla:
-    # sirve para detectar errores de escritura antes de aplicar el cambio.
-    if ! netplan generate 2>&1; then
-        echo -e "${RED}El archivo tiene errores. No se aplicó nada.${NC}"
-        echo -e "${YELLOW}   Usá la opción 4 para restaurar el respaldo.${NC}"
-        log_accion "ERROR_SINTAXIS: $ARCHIVO_NETPLAN"
+    if ! nmcli connection modify "$conexion" \
+            ipv4.method manual \
+            ipv4.addresses "${ip}/${prefijo}" \
+            ipv4.gateway "$gateway" \
+            ipv4.dns "${dns1} ${dns2}"; then
+        echo -e "${RED}No se pudo modificar la conexión.${NC}"
+        log_accion "ERROR_IP_ESTATICA: $conexion"
         return 1
     fi
 
-    echo -e "${GREEN}Sintaxis correcta.${NC}\n"
-    echo -e "${CYAN}Aplicando con 'netplan try'...${NC}"
-    echo -e "${YELLOW}Si la conexión se corta, el sistema vuelve solo a la${NC}"
-    echo -e "${YELLOW}configuración anterior a los 120 segundos.${NC}\n"
-
-    # try aplica la configuración y espera confirmación por teclado. Si el
-    # operador pierde el acceso y no confirma, revierte solo: es la forma
-    # segura de cambiar la red de un servidor remoto.
-    if netplan try --timeout 120; then
-        log_accion "IP_ESTATICA: $interfaz -> ${ip}/${prefijo} gw=$gateway dns=$dns1,$dns2"
-        echo -e "\n${GREEN}Configuración aplicada.${NC}"
-        echo -e "${CYAN}Dirección actual:${NC} $(ip -4 -br addr show "$interfaz")"
-    else
-        echo -e "\n${YELLOW}La configuración no se confirmó y el sistema volvió atrás.${NC}"
-        log_accion "IP_ESTATICA_REVERTIDA: $interfaz"
+    # Los cambios recién toman efecto cuando la conexión se reactiva.
+    echo -e "${CYAN}Reactivando la conexión...${NC}"
+    if ! nmcli connection up "$conexion"; then
+        echo -e "${RED}La conexión no levantó con la configuración nueva.${NC}"
+        echo -e "${YELLOW}   Usá la opción 4 para restaurar el respaldo.${NC}"
+        log_accion "ERROR_ACTIVAR: $conexion"
+        return 1
     fi
+
+    log_accion "IP_ESTATICA: $conexion -> ${ip}/${prefijo} gw=$gateway dns=$dns1,$dns2"
+    echo -e "\n${GREEN}Configuración aplicada.${NC}"
+    echo -e "${CYAN}Dirección actual:${NC}"
+    ip -4 -br addr show "${DISPOSITIVO_ELEGIDO:-lo}" 2>/dev/null || ip -4 -br addr show
 }
 
-# Opción 3 · Devuelve la placa a DHCP.
+# Opción 3 · Devuelve la conexión a DHCP.
 volver_a_dhcp() {
     imprimir_titulo "Volver a DHCP"
 
-    elegir_interfaz || return 1
-    local interfaz="$INTERFAZ_ELEGIDA"
+    elegir_conexion || return 1
+    local conexion="$CONEXION_ELEGIDA"
 
-    echo -e "\n${YELLOW}La placa '$interfaz' va a pedirle la dirección al router.${NC}"
+    echo -e "\n${YELLOW}La conexión '$conexion' va a pedirle la dirección al router.${NC}"
     echo -e "${RED}La dirección puede cambiar, así que no es lo apropiado para${NC}"
     echo -e "${RED}un servidor en producción.${NC}\n"
 
@@ -335,31 +325,25 @@ volver_a_dhcp() {
 
     respaldar_configuracion
 
-    cat > "$ARCHIVO_NETPLAN" << EOF
-# Configuración de red generada por configurar_ip_estatica.sh
-# Tornalyx (SGDM) · $(date '+%Y-%m-%d %H:%M:%S')
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    ${interfaz}:
-      dhcp4: true
-EOF
-
-    chmod 600 "$ARCHIVO_NETPLAN"
-
-    if ! netplan generate 2>&1; then
-        echo -e "${RED}El archivo tiene errores. No se aplicó nada.${NC}"
+    # Al volver a "auto" hay que limpiar los valores fijos: si quedaran
+    # cargados, NetworkManager los sumaría a los que entregue el DHCP.
+    if ! nmcli connection modify "$conexion" \
+            ipv4.method auto \
+            ipv4.addresses "" \
+            ipv4.gateway "" \
+            ipv4.dns ""; then
+        echo -e "${RED}No se pudo modificar la conexión.${NC}"
         return 1
     fi
 
-    if netplan try --timeout 120; then
-        log_accion "DHCP: $interfaz"
-        echo -e "\n${GREEN}La placa '$interfaz' quedó en DHCP.${NC}"
-        echo -e "${CYAN}Dirección actual:${NC} $(ip -4 -br addr show "$interfaz")"
-    else
-        echo -e "\n${YELLOW}La configuración no se confirmó y el sistema volvió atrás.${NC}"
+    if ! nmcli connection up "$conexion"; then
+        echo -e "${RED}La conexión no levantó.${NC}"
+        return 1
     fi
+
+    log_accion "DHCP: $conexion"
+    echo -e "\n${GREEN}La conexión '$conexion' quedó en DHCP.${NC}"
+    ip -4 -br addr show "${DISPOSITIVO_ELEGIDO:-lo}" 2>/dev/null || ip -4 -br addr show
 }
 
 # Opción 4 · Restaura una copia guardada antes de un cambio.
@@ -374,7 +358,7 @@ restaurar_respaldo() {
     # Los nombres llevan la fecha, así que el orden alfabético inverso deja
     # los más recientes arriba.
     local respaldos
-    mapfile -t respaldos < <(ls -1 "$DIR_RESPALDOS"/netplan-*.tar.gz 2>/dev/null | sort -r)
+    mapfile -t respaldos < <(ls -1 "$DIR_RESPALDOS"/network-scripts-*.tar.gz 2>/dev/null | sort -r)
 
     if [[ ${#respaldos[@]} -eq 0 ]]; then
         echo -e "${YELLOW}Todavía no hay respaldos guardados.${NC}"
@@ -408,24 +392,21 @@ restaurar_respaldo() {
         return 0
     fi
 
-    # -C /etc extrae el contenido dentro de /etc, reponiendo /etc/netplan
-    # tal como estaba cuando se hizo la copia.
-    if ! tar -xzf "$elegido" -C /etc; then
+    # -C /etc/sysconfig extrae el contenido dentro de ese directorio,
+    # reponiendo network-scripts tal como estaba cuando se hizo la copia.
+    if ! tar -xzf "$elegido" -C /etc/sysconfig; then
         echo -e "${RED}No se pudo extraer el respaldo.${NC}"
         return 1
     fi
 
-    if ! netplan generate 2>&1; then
-        echo -e "${RED}El respaldo restaurado tiene errores de sintaxis.${NC}"
-        return 1
-    fi
+    # NetworkManager mantiene las conexiones en memoria: sin recargar,
+    # seguiría trabajando con las de antes de restaurar.
+    echo -e "${CYAN}Recargando las conexiones...${NC}"
+    nmcli connection reload
 
-    if netplan try --timeout 120; then
-        log_accion "RESTAURAR_RESPALDO: $elegido"
-        echo -e "\n${GREEN}Configuración restaurada.${NC}"
-    else
-        echo -e "\n${YELLOW}La configuración no se confirmó y el sistema volvió atrás.${NC}"
-    fi
+    log_accion "RESTAURAR_RESPALDO: $elegido"
+    echo -e "\n${GREEN}Configuración restaurada.${NC}"
+    echo -e "${YELLOW}   Reactivá la conexión con la opción 2 o 3, o reiniciá el servidor.${NC}"
 }
 
 # ──────────────────────────────────────────────────────────────
@@ -471,7 +452,7 @@ mostrar_menu() {
 }
 
 verificar_root
-verificar_netplan
+verificar_nmcli
 mkdir -p "$(dirname "$LOG_FILE")"
 log_accion "INICIO_SESION"
 mostrar_menu

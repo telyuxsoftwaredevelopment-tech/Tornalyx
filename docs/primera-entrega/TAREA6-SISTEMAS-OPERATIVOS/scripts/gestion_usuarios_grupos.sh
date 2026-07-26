@@ -28,7 +28,7 @@ NC='\033[0m'          # NC = No Color: vuelve al color por defecto
 # Archivo donde queda registrada cada acción, con fecha y responsable
 LOG_FILE="/var/log/tornalyx/gestion_usuarios_grupos.log"
 
-# UID/GID a partir del cual Debian y Ubuntu numeran las cuentas y grupos
+# UID/GID a partir del cual AlmaLinux numera las cuentas y los grupos
 # creados por personas. Por debajo de 1000 están los del propio sistema.
 UID_MINIMO=1000
 
@@ -256,7 +256,7 @@ listar_usuarios_y_grupos() {
     while IFS=: read -r usuario _ uid gid _ _ shell; do
 
         # Deja afuera las cuentas internas del sistema (UID < 1000) y a
-        # "nobody", que en Ubuntu usa el UID 65534.
+        # "nobody", que usa el UID 65534.
         if [[ "$uid" -ge "$UID_MINIMO" && "$uid" -ne 65534 ]]; then
 
             # El GID del cuarto campo identifica al grupo principal;
