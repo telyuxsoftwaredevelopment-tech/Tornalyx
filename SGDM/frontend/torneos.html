@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <title>Tornalyx | Buscar Torneos</title>
+
+  <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
+  <link rel="shortcut icon" href="../assets/favicon.ico" />
+  <link rel="stylesheet" href="../css/variables.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/torneos.css" />
+</head>
+<body>
+
+  <div class="mobile-nav" id="mobileNav" role="dialog" aria-modal="true" aria-label="Menú">
+    <button class="mobile-close" id="mobileClose" aria-label="Cerrar menú">✕</button>
+    <a href="/">Inicio</a>
+    <a href="/torneos" style="color:var(--ink)" aria-current="page">Torneos</a>
+    <a href="/jugadores">Jugadores</a>
+    <a href="/documentacion">Documentación</a>
+    <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro" style="margin-top:8px">
+      <input type="checkbox" class="theme-toggle__input" />
+      <span class="theme-toggle__track">
+        <span class="theme-toggle__thumb">
+          <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+          <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+        </span>
+      </span>
+    </label>
+  </div>
+
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="/">
+        <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
+        Tornalyx
+      </a>
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="/">Inicio</a>
+        <a href="/torneos" style="color:var(--ink)" aria-current="page">Torneos</a>
+        <a href="/jugadores">Jugadores</a>
+        <a href="/documentacion">Documentación</a>
+      </nav>
+      <div class="nav-right">
+        <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
+          <input type="checkbox" class="theme-toggle__input" />
+          <span class="theme-toggle__track">
+            <span class="theme-toggle__thumb">
+              <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+            </span>
+          </span>
+        </label>
+      </div>
+      <button class="burger" id="burgerBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileNav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Page hero -->
+  <div class="page-hero">
+    <div class="grid-lines-sm"></div>
+    <div class="wrap page-hero-in">
+      <h1 style="font-size:clamp(28px,4vw,48px);margin-bottom:10px">Buscar torneos</h1>
+      <p class="lead" style="max-width:52ch">Encontrá el torneo ideal entre todas las disciplinas disponibles.</p>
+    </div>
+  </div>
+
+  <main class="section" style="padding-top:clamp(32px,5vw,56px)">
+    <div class="wrap">
+
+      <!-- Filtros -->
+      <div class="filters" aria-label="Filtros de búsqueda">
+        <div class="filters__grid">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="searchQ">Buscar por nombre</label>
+            <input class="form-control" type="search" id="searchQ" placeholder="ej: Copa Fútbol..." />
+          </div>
+          <div class="form-group" style="margin:0">
+            <!-- Las opciones las carga torneos.js con las disciplinas que existen -->
+            <label class="form-label" for="filterDeporte">Disciplina</label>
+            <select class="form-control" id="filterDeporte">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="filterEstado">Estado</label>
+            <select class="form-control" id="filterEstado">
+              <option value="">Todos</option>
+              <option value="inscripcion">Inscripciones abiertas</option>
+              <option value="en_curso">En curso</option>
+              <option value="finalizado">Finalizado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="filterSistema">Sistema</label>
+            <select class="form-control" id="filterSistema">
+              <option value="">Todos</option>
+              <option value="liga">Liga</option>
+              <option value="eliminacion_directa">Eliminación directa</option>
+              <option value="suizo">Sistema suizo</option>
+              <option value="grupos_playoff">Grupos + playoffs</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="btnFiltrar" style="align-self:flex-end;white-space:nowrap">Filtrar</button>
+        </div>
+      </div>
+
+      <!-- Resultados -->
+      <div class="results-bar">
+        <span id="resultsCount">Mostrando <strong style="color:var(--ink)">0</strong> torneos</span>
+        <select class="form-control" style="width:auto;font-size:var(--font-size-sm)" id="sortBy" aria-label="Ordenar por">
+          <option value="recientes">Más recientes</option>
+          <option value="nombre">Nombre A-Z</option>
+          <option value="fecha">Fecha de inicio</option>
+        </select>
+      </div>
+
+      <!-- Grid de torneos -->
+      <div class="cards-grid" id="torneosGrid">
+
+        <!-- Las cards las inserta torneos.js con GET /api/torneos -->
+
+      </div><!-- /torneosGrid -->
+
+      <div class="empty-state hidden" id="emptyState">
+        <div class="icon">🔍</div>
+        <h3 style="color:var(--ink);margin-bottom:8px">No se encontraron torneos</h3>
+        <p>Probá con otros filtros o buscá otro nombre.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer-wrap">
+    <div class="wrap">
+      <div class="foot-bottom" style="border:none;margin:0">
+        <span>© 2026 Tornalyx · Bachillerato Tecnológico en TI · Telyux Software Development</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+  <script src="../js/torneo-ui.js"></script>
+  <script src="../js/torneos.js"></script>
+</body>
+</html>

@@ -188,19 +188,19 @@ El proyecto sigue el patrón de diseño **MVC (Modelo - Vista - Controlador)**.
 ```text
 SGDM/
 │
-├── app/
-│   ├── Controllers/
-│   ├── Models/
-│   ├── Views/
-│   └── Core/
+├── backend/              # PHP: MVC + API JSON (no expuesto por Apache)
+│   ├── controllers/
+│   ├── core/              # Router, Controller base, View (motor de plantillas)
+│   ├── models/
+│   ├── shared/             # Session, Mailer, LoginThrottle, Fixture
+│   ├── vistas/             # Plantillas server-side (documentación, OTP)
+│   ├── config/
+│   └── database/
+│       └── migrations/
 │
-├── config/
-│
-├── database/
-│   ├── migrations/
-│   └── seeds/
-│
-├── public/
+├── frontend/              # DocumentRoot de Apache
+│   ├── index.php           # Front controller (API + guardia de sesión)
+│   ├── *.html               # Vistas estáticas (home, login, torneos, etc.)
 │   ├── css/
 │   ├── js/
 │   └── assets/
@@ -208,8 +208,6 @@ SGDM/
 ├── docker/
 │
 ├── docs/
-│
-├── scripts/
 │
 ├── tests/
 │

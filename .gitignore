@@ -3,16 +3,16 @@
 .env.*
 !.env.example
 *.local.php
-SGDM/database/.secrets/
+SGDM/backend/database/.secrets/
 
 # Throttle / archivos temporales de la app
-SGDM/storage/
+SGDM/backend/storage/
 
 # Archivos subidos por usuarios (avatares, etc.); la app crea la carpeta
-SGDM/public/uploads/
+SGDM/frontend/uploads/
 
 # Vista previa estática local (sin backend), no forma parte de la app
-SGDM/public/_preview/
+SGDM/frontend/_preview/
 
 # Dependencias
 /vendor/
