@@ -59,6 +59,15 @@ if ($method === 'POST' && $uri !== '/logout') {
 // páginas públicas (home, registro, listado) se sirven aunque la BD esté caída.
 $router = new Router();
 
+// ─── Home ───────────────────────────────────────────────────────
+// La raíz (/) sirve el index.html estático del frontend. Se registra de forma
+// explícita porque Apache está priorizando index.php sobre index.html como
+// DirectoryIndex; sin esta ruta, / no matcheaba ninguna y caía en el fallback
+// (404 "Ruta no encontrada.").
+$router->get('/', static function () {
+    readfile(__DIR__ . '/index.html');
+});
+
 // ─── Páginas públicas ───────────────────────────────────────────
 // Todas las vistas simples (sin lógica server-side propia) son archivos
 // .html estáticos servidos directamente por Apache (ver .htaccess); acá
@@ -153,4 +162,4 @@ $router->fallback(static function (): void {
     echo json_encode(['error' => 'Ruta no encontrada.']);
 });
 
-$router->dispatch($uri, $method);
+$router->dispatch($uri, strtoupper($method));
