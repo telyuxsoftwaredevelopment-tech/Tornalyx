@@ -37,7 +37,7 @@ Session::start();
 
 // Obtener la ruta y el método HTTP
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$method = $_SERVER['REQUEST_METHOD'];
+$method = strtoupper($_SERVER['REQUEST_METHOD']);
 
 // Eliminar trailing slash
 $uri = rtrim($uri, '/') ?: '/';
@@ -162,4 +162,4 @@ $router->fallback(static function (): void {
     echo json_encode(['error' => 'Ruta no encontrada.']);
 });
 
-$router->dispatch($uri, strtoupper($method));
+$router->dispatch($uri, $method);
