@@ -17,10 +17,10 @@
 --                   DELETE). Es el usuario que usa la app en runtime.
 --
 -- Corresponde al SERVIDOR REAL (bare-metal / VM administrado por
--- admin_tornalyx), no al docker-compose.local.yml de desarrollo: ahí
+-- admin_tornalyx), no al docker-compose.yml de desarrollo: ahí
 -- MYSQL_USER/MYSQL_PASSWORD reciben privilegios completos sobre la base
 -- por defecto de la imagen oficial de MySQL, y eso es intencional
--- únicamente para desarrollo local (ver comentario en docker-compose.local.yml).
+-- únicamente para desarrollo local (ver comentario en docker-compose.yml).
 --
 -- Uso:
 --   1. Reemplazar los placeholders CAMBIAR_* por contraseñas fuertes

@@ -2,7 +2,7 @@
 # Tornalyx — entorno de DESARROLLO local con Docker Compose.
 #
 # Levanta dos servicios juntos:
-#   - db  : MySQL 8 (efímero para pruebas, con esquema + datos semilla).
+#   - db  : MySQL 8 (efímero para pruebas, con el esquema ya cargado).
 #   - app : la app PHP/Apache construida desde el Dockerfile del repo.
 #
 # Uso:
