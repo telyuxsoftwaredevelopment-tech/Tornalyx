@@ -1,0 +1,12 @@
+# Normalización de fin de línea.
+#
+# Los archivos que se copian dentro de la imagen Docker (scripts de shell y
+# configuración de Apache) DEBEN quedar con LF aunque se editen desde Windows:
+# `docker build` toma los archivos del working tree, y un script con CRLF falla
+# al arrancar con un "no such file or directory" que apunta al intérprete
+# (#!/bin/sh\r) y no al archivo, muy difícil de diagnosticar.
+* text=auto
+
+*.sh   text eol=lf
+*.conf text eol=lf
+Dockerfile text eol=lf
