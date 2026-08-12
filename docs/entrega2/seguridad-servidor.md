@@ -17,11 +17,12 @@ Implementaciones de seguridad a nivel de sistema operativo para el VPS real
 
 - El firewall reduce la superficie de ataque desde el día uno (nadie llega
   a MySQL o a Grafana desde afuera).
-- `fail2ban` cubre el caso de fuerza bruta contra SSH y contra el login de
-  Apache a nivel de red/IP — complementa, no reemplaza, al
-  `LoginThrottle.php` de la aplicación (que actúa por email, no por IP, y
-  sigue funcionando aunque `fail2ban` no esté disponible, ej. detrás de un
-  proxy que oculte la IP real).
+- `fail2ban` cubre brute force contra SSH y escaneo de bots maliciosos a nivel
+  de red/IP (jails `apache-badbots`, `sshd`, etc.); *no* intercepta el login
+  de la aplicación Tornalyx (que es un endpoint JSON que retorna HTTP 200 con
+  error en el body, no HTTP 401). El control real de la app es
+  `LoginThrottle.php`, que actúa por email/IP a nivel de aplicación y
+  funciona independientemente de `fail2ban`.
 - AIDE cubre el escenario en que un atacante ya entró (por una credencial
   filtrada, por ejemplo) y modificó archivos: sin un IDS de integridad, ese
   cambio pasaría desapercibido hasta el próximo síntoma visible.

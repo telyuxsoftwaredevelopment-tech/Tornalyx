@@ -12,27 +12,28 @@ flowchart TB
     Internet(("Internet"))
 
     subgraph VPS["VPS (Debian/Ubuntu) — admin_tornalyx"]
-        FW["Firewall: ufw\n(deny incoming por defecto)"]
+        FW["Firewall: ufw<br/>(deny incoming por defecto)"]
         subgraph Borde["Zona expuesta"]
-            Apache["Apache 2 :80/:443\n(php:8.2-apache)"]
+            Apache["Apache 2 :80/:443<br/>(php:8.2-apache)"]
         end
         subgraph Interno["Zona interna (solo localhost)"]
-            App["App PHP\n(SGDM/backend + frontend)"]
-            MySQL["MySQL 8\nbind-address 127.0.0.1"]
-            Grafana["Grafana :3000\n(solo IP admin)"]
+            App["App PHP<br/>(SGDM/backend + frontend)"]
+            MySQL["MySQL 8<br/>bind-address 127.0.0.1"]
+            Grafana["Grafana :3000<br/>(solo IP admin)"]
         end
-        F2B["fail2ban\n(banea IPs vía iptables)"]
-        AIDE["AIDE\n(integridad de archivos)"]
+        F2B["fail2ban<br/>(banea IPs vía iptables)"]
+        AIDE["AIDE<br/>(integridad de archivos)"]
     end
 
-    Admin(("Admin\nIP fija"))
+    Admin(("Admin<br/>IP fija"))
 
     Internet -->|":80/:443"| FW
     Admin -->|":22 SSH restringido"| FW
     Admin -->|":3000 Grafana"| FW
     FW --> Apache
+    FW --> Grafana
     Apache --> App
-    App -->|"tornalyx_dml\nlocalhost:3306"| MySQL
+    App -->|"tornalyx_dml<br/>localhost:3306"| MySQL
     F2B -.->|"lee logs, banea"| Apache
     F2B -.->|"lee logs, banea"| FW
     AIDE -.->|"verifica integridad"| App
