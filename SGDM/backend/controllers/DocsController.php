@@ -69,6 +69,21 @@ class DocsController extends Controller {
         ],
     ];
 
+    /**
+     * Materias cuya documentación vive en un sitio externo (no un Google Doc
+     * publicado), por ejemplo una presentación. A diferencia de MATERIAS, acá
+     * el enlace abre directo el sitio externo en una pestaña nueva: no pasan
+     * por el fetch/saneado ni por el gate de acceso restringido (esRestringida
+     * solo mira MATERIAS).
+     */
+    private const ENLACES_EXTERNOS = [
+        'sistemas' => [
+            'nombre' => 'Sistemas',
+            'desc'   => 'Presentación del proyecto para la materia Sistemas.',
+            'url'    => 'https://sistemas-presentacion.onrender.com/#1',
+        ],
+    ];
+
     /** Etiquetas HTML permitidas en el contenido saneado. */
     private const TAGS_OK = [
         'p', 'br', 'hr', 'span', 'div', 'a', 'img',
@@ -104,6 +119,7 @@ class DocsController extends Controller {
             $this->render('documentacion', [
                 'title'    => 'Tornalyx | Documentación',
                 'materias' => self::MATERIAS,
+                'enlaces'  => self::ENLACES_EXTERNOS,
                 'materia'  => null,
             ]);
             return;
