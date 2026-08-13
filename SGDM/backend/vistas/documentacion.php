@@ -124,7 +124,7 @@
           </a>
         <?php endforeach; ?>
         <?php foreach (($enlaces ?? []) as $slug => $en): ?>
-          <a class="doc-materia" href="<?= e($en['url']) ?>" target="_blank" rel="noopener" data-reveal>
+          <a class="doc-materia" href="/documentacion?enlace=<?= e($slug) ?>" target="_blank" rel="noopener" data-reveal>
             <span class="doc-materia__ic"><?= $iconos[$slug] ?? '<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>' ?></span>
             <span class="doc-materia__nombre"><?= e($en['nombre']) ?></span>
             <span class="doc-materia__desc"><?= e($en['desc']) ?></span>

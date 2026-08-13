@@ -21,11 +21,13 @@
     .password-wrapper { position:relative; }
     .password-toggle {
       position:absolute; right:14px; top:50%; transform:translateY(-50%);
+      display:flex; align-items:center; justify-content:center;
       background:none; border:none; cursor:pointer;
-      color:var(--muted-2); font-size:1rem; padding:0;
+      color:var(--muted-2); padding:0;
       transition:color .15s;
     }
     .password-toggle:hover { color:var(--ink); }
+    .password-toggle svg { width:18px; height:18px; }
     .link-red { color:var(--red-bright); }
     .link-red:hover { color:var(--red); }
     .check-label {
@@ -223,7 +225,12 @@
                       <input class="form-control" type="password" id="password" name="password"
                              placeholder="••••••••" autocomplete="current-password" required
                              aria-required="true" style="padding-right:44px" />
-                      <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar contraseña">👁</button>
+                      <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar contraseña">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      </button>
                     </div>
                     <span class="form-error hidden" id="passwordError">La contraseña es obligatoria.</span>
                   </div>
