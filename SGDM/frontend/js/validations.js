@@ -549,11 +549,18 @@ function initRegistroSubmit() {
       return;
     }
 
-    /* Los campos viven fuera del <form>; se recogen por name. */
+    /* Los campos viven fuera del <form>; se recogen por name, buscando
+       dentro de la cara de registro. Buscar en document sin acotar agarraba
+       el campo equivocado: "email" y "password" existen en las DOS caras
+       de la tarjeta (login y registro), y al estar el login primero en el
+       DOM, document.querySelector devolvía sus inputs vacíos en vez de los
+       que el usuario completó acá, mandando el registro con email/password
+       en blanco (de ahí el "Todos los campos son obligatorios"). */
+    const scope = document.getElementById('authFaceSignup') || document;
     const data = new FormData();
     ['nombre', 'apellido', 'email', 'password', 'fecha_nacimiento', 'rol']
       .forEach(name => {
-        const el = document.querySelector(`[name="${name}"]`);
+        const el = scope.querySelector(`[name="${name}"]`);
         if (el) data.append(name, el.value);
       });
 
