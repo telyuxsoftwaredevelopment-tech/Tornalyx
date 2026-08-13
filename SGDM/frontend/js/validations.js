@@ -535,6 +535,15 @@ function initRegistroSubmit() {
       fecha?.focus();
       return;
     }
+    // El año de <input type="date"> no está acotado en todos los navegadores
+    // (se puede escribir "20001-07-13" a mano): sin este chequeo el backend
+    // lo rechaza recién después del viaje al servidor.
+    const anioNac = Number(fecha.value.slice(0, 4));
+    if (anioNac < 1900 || fecha.value > new Date().toISOString().slice(0, 10)) {
+      authError('La fecha de nacimiento no es válida.');
+      fecha.focus();
+      return;
+    }
     /* Validaciones de cliente que el backend no puede inferir */
     if ((pass?.value || '') !== (passConfirm?.value || '')) {
       authError('Las contraseñas no coinciden.');
