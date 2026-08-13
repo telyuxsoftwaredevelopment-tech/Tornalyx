@@ -316,19 +316,25 @@
 .status-dot--red    { background: var(--red-bright); box-shadow: 0 0 6px var(--red-bright); }
 
 /* ─── Auth flip card (login / registro) ──────────────── */
-.auth-flip-wrap { width: 100%; max-width: 920px; margin: 0 auto; }
-.auth-flip-wrap .auth-logo { text-align: center; margin-bottom: var(--space-6); }
-.auth-flip-wrap .auth-logo .logo-mark {
-  width: 72px; height: 72px; border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--red-deep);
-  margin: 0 auto;
+/* Ocupa toda la pantalla disponible bajo el navbar (sin tarjeta flotando
+   en un recuadro chico): cada cara tiene la altura completa del viewport,
+   así que no depende de medir el contenido con JS para no cortarlo. */
+.auth-card-flip {
+  perspective: 1600px;
+  width: 100%;
+  height: 100%;
+  animation: auth-fade-in .6s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes auth-fade-in {
+  from { opacity: 0; transform: translateY(14px) scale(.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.auth-card-flip { perspective: 1600px; }
 .auth-flip {
   position: relative;
+  width: 100%; height: 100%;
   transform-style: preserve-3d;
-  transition: transform .8s cubic-bezier(.4,0,.2,1), height .8s cubic-bezier(.4,0,.2,1);
+  transition: transform .8s cubic-bezier(.4,0,.2,1);
 }
 .auth-flip.is-flipped { transform: rotateY(180deg); }
 .auth-flip.no-anim { transition: none; }
@@ -336,10 +342,7 @@
 .auth-face {
   display: grid;
   grid-template-columns: 1.35fr 1fr;
-  background: var(--bg-card);
-  border: 1px solid var(--line-soft);
-  border-radius: 20px;
-  overflow: hidden;
+  width: 100%; height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -350,8 +353,24 @@
   transform: rotateY(180deg);
 }
 
-.auth-face__form  { padding: var(--space-8); overflow: auto; }
+/* El formulario centra una columna de ancho fijo dentro del panel; si el
+   contenido (p. ej. el registro completo) no entra en la altura de
+   pantalla, ese panel scrollea de forma independiente del panel promo.
+   El centrado vertical usa margin:auto en .auth-face__inner (no
+   justify-content:center en el contenedor con scroll): así, cuando el
+   contenido no entra, los márgenes colapsan a 0 en vez de dejar el
+   principio del formulario recortado e imposible de scrollear. */
+.auth-face__form {
+  height: 100%;
+  overflow-y: auto;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  padding: var(--space-10) clamp(var(--space-6), 6vw, var(--space-16));
+}
+.auth-face__inner { width: 100%; max-width: 440px; margin: auto; }
+
 .auth-face__promo {
+  height: 100%;
   background: linear-gradient(135deg, var(--red-deep), var(--red));
   color: #fff;
   padding: var(--space-8);
@@ -371,6 +390,7 @@
 .btn-promo:active { box-shadow: none; background: rgba(255,255,255,.25); }
 
 @media (prefers-reduced-motion: reduce) {
+  .auth-card-flip { animation: none; }
   .auth-flip { transition: none; }
 }
 
@@ -378,16 +398,18 @@
    de partir la pantalla en dos; el flip 3D se reemplaza por un toggle
    simple entre las dos caras (sin rotateY, que no tiene sentido apiladas). */
 @media (max-width: 768px) {
-  .auth-card-flip { perspective: none; }
-  .auth-flip { transform: none !important; height: auto !important; transition: none; }
+  .auth-card-flip { perspective: none; height: auto; min-height: 100%; }
+  .auth-flip { transform: none !important; height: auto; transition: none; }
   .auth-face {
     position: relative !important;
     grid-template-columns: 1fr !important;
+    grid-auto-rows: auto 1fr;
+    height: auto; min-height: 100%;
     transform: none !important;
     display: none;
   }
   .auth-face.is-active { display: grid; }
-  .auth-face__form  { order: 2; padding: var(--space-6); }
-  .auth-face__promo { order: 1; padding: var(--space-5) var(--space-6); }
+  .auth-face__form  { order: 2; height: auto; padding: var(--space-6); }
+  .auth-face__promo { order: 1; height: auto; padding: var(--space-5) var(--space-6); }
   .auth-face__promo p { display: none; }
 }

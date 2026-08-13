@@ -13,10 +13,7 @@
   <link rel="stylesheet" href="../css/components.css" />
   <style>
     body { display:flex; flex-direction:column; min-height:100vh; }
-    .auth-page {
-      flex:1; display:flex; align-items:center; justify-content:center;
-      padding:var(--space-8) var(--space-4);
-    }
+    .auth-page { flex:1; display:flex; min-height:0; }
     .auth-face__heading { text-align:center; margin-bottom:var(--space-6); }
     .auth-face__heading h1 { font-family:var(--head); font-size:var(--font-size-2xl); color:var(--ink); }
     .auth-face__heading p  { font-size:var(--font-size-sm); color:var(--muted); margin-top:4px; }
@@ -82,17 +79,13 @@
   </header>
 
   <main class="auth-page">
-    <div class="auth-flip-wrap">
-      <div class="auth-logo">
-        <span class="logo-mark badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
-      </div>
-
       <div class="auth-card-flip">
         <div class="auth-flip" id="authFlip">
 
           <!-- Cara frontal: Iniciar sesión -->
           <div class="auth-face auth-face--front" id="authFaceLogin">
             <div class="auth-face__form">
+             <div class="auth-face__inner">
               <div class="auth-face__heading">
                 <h1>Iniciar sesión</h1>
                 <p>Ingresa tus credenciales para acceder al sistema</p>
@@ -179,6 +172,7 @@
                   <a href="#" class="link-red" id="backToLogin" style="font-size:12px">Volver al inicio de sesión</a>
                 </p>
               </div>
+             </div>
             </div>
 
             <div class="auth-face__promo">
@@ -197,6 +191,7 @@
             </div>
 
             <div class="auth-face__form">
+             <div class="auth-face__inner">
               <div class="auth-face__heading">
                 <h1>Crear cuenta</h1>
                 <p>Completá tus datos para unirte a Tornalyx</p>
@@ -249,12 +244,12 @@
               <button type="submit" class="btn btn-primary btn-full" form="registroForm">Crear cuenta</button>
 
               <form id="registroForm" action="/registro" method="POST" style="display:none"></form>
+             </div>
             </div>
           </div>
 
         </div>
       </div>
-    </div>
   </main>
 
   <script src="../js/main.js"></script>

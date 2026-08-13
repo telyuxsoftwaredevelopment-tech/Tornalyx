@@ -27,20 +27,11 @@
     if (field) field.focus({ preventScroll: true });
   }
 
-  function activeFace(flipped) {
-    return flipped ? backEl : frontEl;
-  }
-
-  function syncHeight(flipped) {
-    flipEl.style.height = activeFace(flipped).scrollHeight + 'px';
-  }
-
   function applyMode(mode, { animate = true, focus = false, push = false } = {}) {
     const flipped = mode === 'signup';
 
     if (!animate) flipEl.classList.add('no-anim');
 
-    syncHeight(flipped);
     flipEl.classList.toggle('is-flipped', flipped);
     frontEl.classList.toggle('is-active', !flipped);
     backEl.classList.toggle('is-active', flipped);
@@ -60,7 +51,7 @@
     }
 
     if (focus) {
-      setTimeout(() => focusFirstField(activeFace(flipped)), animate ? 420 : 0);
+      setTimeout(() => focusFirstField(flipped ? backEl : frontEl), animate ? 420 : 0);
     }
   }
 
@@ -73,16 +64,6 @@
   window.addEventListener('popstate', () => {
     applyMode(modeFromPath(location.pathname), { animate: true, focus: true, push: false });
   });
-
-  window.addEventListener('resize', () => {
-    syncHeight(flipEl.classList.contains('is-flipped'));
-  });
-
-  /* Recalcula el alto si cambia el contenido del lado activo (p. ej. aparece
-     un error o el paso de verificación 2FA reemplaza al formulario). */
-  new MutationObserver(() => {
-    syncHeight(flipEl.classList.contains('is-flipped'));
-  }).observe(flipEl, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'hidden'] });
 
   applyMode(modeFromPath(location.pathname), { animate: false });
 })();
