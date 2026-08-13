@@ -4,6 +4,11 @@ RewriteEngine On
 
 # /registro y /login sirven el mismo login.html (tarjeta fusionada con flip
 # 3D entre Iniciar sesión / Crear cuenta); no existe un registro.html propio.
+# Solo en GET: un POST /login o POST /registro es un envío de formulario que
+# tiene que llegar a AuthController vía index.php, no el HTML estático (si no,
+# el navegador recibe la página de vuelta en lugar de JSON y postForm() explota
+# con "Error de conexión" al intentar parsearla).
+RewriteCond %{REQUEST_METHOD} =GET
 RewriteRule ^registro/?$ login.html [L]
 
 # URLs "bonitas" -> archivo .html estático correspondiente (p. ej. /login
@@ -11,6 +16,9 @@ RewriteRule ^registro/?$ login.html [L]
 # simples ya no pasan por PHP; solo lo hacen las rutas de guardia de sesión
 # (/perfil, /admin/dashboard, /organizador/dashboard, definidas en
 # index.php) y el flujo de Documentación, que siguen siendo PHP.
+# Igual que arriba: solo GET, para que los POST (login, registro, etc.)
+# siempre lleguen al front controller aunque exista un .html con ese nombre.
+RewriteCond %{REQUEST_METHOD} =GET
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.html -f
