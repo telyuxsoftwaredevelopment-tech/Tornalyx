@@ -9,6 +9,13 @@
 
 'use strict';
 
+/* Envuelto en IIFE (como el resto de los scripts de página): un
+   `const Api` de nivel superior en dos <script> clásicos que comparten
+   el scope global choca con el `const Api` de main.js y tira
+   "Identifier 'Api' has already been declared", abortando todo el
+   archivo antes de que corra initDetalle. */
+(function () {
+
 const { Api, Toast, Utils } = window.Tornalyx;
 const esc = Utils.escapeHtml;
 
@@ -417,3 +424,5 @@ async function initDetalle() {
 }
 
 document.addEventListener('DOMContentLoaded', initDetalle);
+
+})();

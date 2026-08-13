@@ -6,6 +6,13 @@
 
 'use strict';
 
+/* Envuelto en IIFE (como el resto de los scripts de página): un
+   `const Api` de nivel superior en dos <script> clásicos que comparten
+   el scope global choca con el `const Api` de main.js y tira
+   "Identifier 'Api' has already been declared", abortando todo el
+   archivo antes de que corra initTorneos. */
+(function () {
+
 const { Api, Utils } = window.Tornalyx;
 
 /* Todos los torneos públicos traídos del API. */
@@ -80,12 +87,44 @@ function cardHtml(t) {
     </article>`;
 }
 
+/** Placeholder de una card mientras se espera al API. */
+function skeletonCardHtml() {
+  return `
+    <article class="torneo-card" aria-hidden="true">
+      <div class="skeleton" style="height:80px;border-radius:0"></div>
+      <div class="torneo-card__body">
+        <div class="skeleton" style="height:20px;width:60%;margin-bottom:10px"></div>
+        <div class="skeleton" style="height:14px;width:90%;margin-bottom:6px"></div>
+        <div class="skeleton" style="height:14px;width:70%"></div>
+      </div>
+    </article>`;
+}
+
 /** Dibuja el grid completo a partir del catálogo cargado. */
 function renderGrid() {
   const grid = document.getElementById('torneosGrid');
   if (!grid) return;
   grid.innerHTML = catalogo.map(cardHtml).join('');
   aplicarFiltros();
+  initTilt(grid);
+}
+
+/** Tilt 3D sutil que sigue al cursor sobre cada card (se salta si el
+    usuario pidió menos movimiento). */
+function initTilt(grid) {
+  const reducir = document.documentElement.classList.contains('a11y-motion')
+    || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (reducir) return;
+
+  grid.querySelectorAll('.torneo-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `translateY(-4px) rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+  });
 }
 
 /** Rellena el select de disciplinas con las que existen realmente. */
@@ -153,7 +192,7 @@ async function initTorneos() {
   const grid = document.getElementById('torneosGrid');
   if (!grid) return;
 
-  grid.innerHTML = '<p style="color:var(--muted)">Cargando torneos…</p>';
+  grid.innerHTML = Array.from({ length: 6 }, skeletonCardHtml).join('');
 
   try {
     const data = await Api.get('/api/torneos');
@@ -180,3 +219,5 @@ async function initTorneos() {
 }
 
 document.addEventListener('DOMContentLoaded', initTorneos);
+
+})();
