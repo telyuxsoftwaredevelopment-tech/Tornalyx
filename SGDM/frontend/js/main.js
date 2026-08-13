@@ -76,6 +76,15 @@ const Toast = {
       zIndex: '9999', maxWidth: '360px'
     });
     document.body.appendChild(this.container);
+
+    /* Los estilos inline no pueden declarar @keyframes; se inyecta una vez
+       para la barra de cuenta regresiva de cada toast. */
+    if (!document.getElementById('toast-keyframes')) {
+      const style = document.createElement('style');
+      style.id = 'toast-keyframes';
+      style.textContent = '@keyframes toast-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }';
+      document.head.appendChild(style);
+    }
   },
 
   show(message, type = 'info', duration = 4000) {
@@ -90,6 +99,7 @@ const Toast = {
     const toast = document.createElement('div');
     toast.setAttribute('role', 'alert');
     Object.assign(toast.style, {
+      position: 'relative', overflow: 'hidden',
       padding: '0.75rem 1rem', borderRadius: '10px',
       border: `1px solid ${c.border}`, background: c.bg, color: c.text,
       fontSize: '0.875rem', fontWeight: '500',
@@ -98,18 +108,51 @@ const Toast = {
       transition: 'all 250ms ease', cursor: 'pointer'
     });
     toast.textContent = message;
+
+    /* Barra de vigencia: se pausa (visual y realmente) si el mouse está
+       encima, para no perderse un mensaje largo a mitad de lectura. */
+    const bar = document.createElement('div');
+    Object.assign(bar.style, {
+      position: 'absolute', left: '0', bottom: '0', width: '100%', height: '2px',
+      background: c.border, transformOrigin: 'left',
+    });
+    toast.appendChild(bar);
+
     this.container.appendChild(toast);
     requestAnimationFrame(() => {
       toast.style.opacity = '1';
       toast.style.transform = 'translateX(0)';
     });
+
     const remove = () => {
       toast.style.opacity = '0';
       toast.style.transform = 'translateX(1rem)';
       setTimeout(() => toast.remove(), 300);
     };
+
+    let restante = duration;
+    let inicio = Date.now();
+    let timer = null;
+    const programar = (ms) => {
+      inicio = Date.now();
+      restante = ms;
+      timer = setTimeout(remove, ms);
+    };
+    const pausar = () => {
+      clearTimeout(timer);
+      restante -= Date.now() - inicio;
+      bar.style.animationPlayState = 'paused';
+    };
+    const reanudar = () => {
+      bar.style.animationPlayState = 'running';
+      programar(restante);
+    };
+
+    bar.style.animation = `toast-countdown ${duration}ms linear forwards`;
+    toast.addEventListener('mouseenter', pausar);
+    toast.addEventListener('mouseleave', reanudar);
     toast.addEventListener('click', remove);
-    setTimeout(remove, duration);
+    programar(duration);
   },
 
   success: (msg) => Toast.show(msg, 'success'),

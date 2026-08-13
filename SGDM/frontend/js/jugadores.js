@@ -71,7 +71,12 @@ function skeletonFicha() {
 function renderResultados(jugadores) {
   const cont = $('resultados');
   if (!jugadores.length) {
-    cont.innerHTML = '<p style="color:var(--muted);font-size:var(--font-size-sm)">No se encontraron jugadores con ese nombre.</p>';
+    cont.innerHTML = `
+      <div class="empty-state" style="padding:var(--space-8) var(--space-4)">
+        <div class="icon">🔍</div>
+        <h3 style="color:var(--ink);margin-bottom:8px;font-size:var(--font-size-base)">Sin resultados</h3>
+        <p style="font-size:var(--font-size-sm)">No se encontraron jugadores con ese nombre.</p>
+      </div>`;
     return;
   }
   cont.innerHTML = jugadores.map(j => `

@@ -93,6 +93,20 @@ function torneoItemHtml(t) {
     </div>`;
 }
 
+/** Placeholder de una card de torneo mientras se espera al API. */
+function skeletonTorneoItem() {
+  return `
+    <div class="torneo-item" aria-hidden="true">
+      <div class="torneo-item__head">
+        <div style="flex:1">
+          <span class="skeleton" style="display:block;height:16px;width:55%;margin-bottom:8px"></span>
+          <span class="skeleton" style="display:block;height:12px;width:35%"></span>
+        </div>
+      </div>
+      <span class="skeleton" style="display:block;height:8px;width:100%;margin-top:12px"></span>
+    </div>`;
+}
+
 /** Vuelve a dibujar la lista de torneos y los KPIs. */
 function renderTorneos() {
   const cont = document.getElementById('misTorneos');
@@ -151,7 +165,7 @@ function renderSelectores() {
 async function cargarTorneos() {
   const cont = document.getElementById('misTorneos');
   if (cont) {
-    cont.innerHTML = '<div class="torneo-item" style="color:var(--muted)">Cargando torneos…</div>';
+    cont.innerHTML = Array.from({ length: 3 }, skeletonTorneoItem).join('');
   }
   try {
     const data = await Api.get('/api/torneos/mios');

@@ -100,6 +100,17 @@ function renderActividad(actividad) {
 }
 
 /**
+ * Filas placeholder para una tabla mientras se espera al API.
+ * @param {number} cols Cantidad de columnas (debe matchear el colspan real).
+ * @param {number} [filas]
+ * @returns {string}
+ */
+function skeletonRowsHtml(cols, filas = 4) {
+  const celda = '<td><span class="skeleton" style="display:block;height:14px;width:70%"></span></td>';
+  return Array.from({ length: filas }, () => `<tr aria-hidden="true">${celda.repeat(cols)}</tr>`).join('');
+}
+
+/**
  * Formatea la fecha de registro (created_at SQL) como dd/mm/aaaa.
  * @param {string} fechaSql
  * @returns {string}
@@ -174,7 +185,7 @@ async function cargarUsuarios() {
   const body = document.getElementById('usuariosBody');
   if (!body) return;
 
-  body.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">Cargando usuarios…</td></tr>';
+  body.innerHTML = skeletonRowsHtml(6);
   try {
     const data = await Api.get('/api/admin/usuarios');
     usuarios = data.usuarios || [];
@@ -353,7 +364,7 @@ async function cargarSolicitudes() {
   const body = document.getElementById('solicitudesBody');
   if (!body) return;
 
-  body.innerHTML = '<tr><td colspan="6" style="color:var(--muted)">Cargando…</td></tr>';
+  body.innerHTML = skeletonRowsHtml(6);
   try {
     const data = await Api.get('/api/admin/doc-solicitudes');
     solicitudes = data.solicitudes || [];
