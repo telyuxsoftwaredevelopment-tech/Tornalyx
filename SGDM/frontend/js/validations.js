@@ -363,20 +363,6 @@ function initPasswordRequirements() {
   evaluate(); // estado inicial
 }
 
-/* ─── Login social (Google / GitHub) ─────────────────── */
-/* Todavía no hay backend de OAuth: los botones avisan que está en camino
-   en vez de simular un inicio de sesión que no existe. */
-function initSocialButtons() {
-  document.querySelectorAll('[data-social]').forEach(btn => {
-    btn.addEventListener('click', function () {
-      const nombre = this.dataset.social === 'google' ? 'Google' : 'GitHub';
-      const msg = `Inicio de sesión con ${nombre}: próximamente.`;
-      if (window.Tornalyx?.Toast) window.Tornalyx.Toast.info(msg);
-      else alert(msg);
-    });
-  });
-}
-
 /* ─── Envío del formulario de Registro (AJAX) ────────── */
 function initRegistroSubmit() {
   const form = document.getElementById('registroForm');
@@ -478,7 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initOtpFlow();
   initPasswordStrength();
   initPasswordRequirements();
-  initSocialButtons();
   initRegistroSubmit();
   initRealtimeValidation();
 });
