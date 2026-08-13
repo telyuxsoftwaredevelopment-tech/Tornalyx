@@ -23,8 +23,10 @@
 
 | Respaldo | Frecuencia | Horario | Retención |
 |----------|------------|---------|-----------|
-| Base de datos | Diario | 03:00 (hora del servidor, baja carga) | 7 diarios + 4 semanales (domingo) + 3 mensuales (día 1) |
-| Avatares | Diario | 03:05 (después de la base, mismo cron) | Igual que la base: 7 diarios + 4 semanales + 3 mensuales |
+| Base de datos | Diario | 03:05 (hora del servidor, baja carga) | 7 diarios + 4 semanales (domingo) + 3 mensuales (día 1) |
+| Avatares | Diario | 03:05 (secuencial, mismo cron) | Igual que la base: 7 diarios + 4 semanales + 3 mensuales |
+
+Ambos respaldos se ejecutan en el mismo job de cron (`scripts/servidor/cron-tornalyx`): primero la base de datos, luego los avatares, secuencialmente dentro de la misma ejecución a las 03:05.
 
 La retención escalonada (diario/semanal/mensual) evita que un error
 detectado tarde (ej.: una semana después) ya no tenga respaldo disponible,
