@@ -156,7 +156,7 @@ function showOtpStep(targetMasked) {
   otp.classList.remove('hidden');
   const t = document.getElementById('otpTarget');
   if (t && targetMasked) t.textContent = targetMasked;
-  document.getElementById('codigo')?.focus();
+  document.querySelector('.otp-box')?.focus();
 }
 
 function initOtpFlow() {
@@ -169,6 +169,45 @@ function initOtpFlow() {
     else authError(m);
   };
   const hideErr = () => errEl?.classList.add('hidden');
+
+  /* ── Casilleros del código: cada dígito en su propia caja, con
+     autoavance/retroceso/pegado. El valor combinado vive en el input
+     oculto #codigo, que es lo único que lee el resto del flujo. */
+  const boxes  = Array.from(document.querySelectorAll('.otp-box'));
+  const hidden = document.getElementById('codigo');
+  const track  = Array.from(document.getElementById('otpTrack')?.children || []);
+
+  function syncOtpBoxes() {
+    if (!hidden) return;
+    const value = boxes.map(b => b.value).join('');
+    hidden.value = value;
+    boxes.forEach(b => b.classList.toggle('is-filled', !!b.value));
+    track.forEach((seg, i) => seg.classList.toggle('is-lit', i < value.length));
+  }
+
+  function clearOtpBoxes() {
+    boxes.forEach(b => b.value = '');
+    syncOtpBoxes();
+  }
+
+  boxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/[^0-9]/g, '').slice(-1);
+      if (box.value && boxes[i + 1]) boxes[i + 1].focus();
+      syncOtpBoxes();
+    });
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && boxes[i - 1]) boxes[i - 1].focus();
+    });
+    box.addEventListener('paste', (e) => {
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+      if (!text) return;
+      e.preventDefault();
+      text.slice(0, boxes.length).split('').forEach((d, j) => { if (boxes[j]) boxes[j].value = d; });
+      syncOtpBoxes();
+      (boxes[Math.min(text.length, boxes.length - 1)])?.focus();
+    });
+  });
 
   /* Al cargar, consultar si hay un desafío MFA pendiente (p. ej. tras
      registrarse y ser redirigido). Reemplaza al script inline que la CSP
@@ -195,8 +234,13 @@ function initOtpFlow() {
     data.append('codigo', codigo);
     try {
       const json = await postForm('/login/verificar', data);
-      if (json.success) redirectByRole(json.rol);
-      else showErr(json.error || 'Código incorrecto.');
+      if (json.success) {
+        redirectByRole(json.rol);
+      } else {
+        showErr(json.error || 'Código incorrecto.');
+        clearOtpBoxes();
+        boxes[0]?.focus();
+      }
     } catch {
       showErr('Error de conexión. Intentá de nuevo.');
     }
@@ -211,6 +255,7 @@ function initOtpFlow() {
       const json = await postForm('/login/reenviar', new FormData());
       if (json.success) {
         if (window.Tornalyx?.Toast) window.Tornalyx.Toast.success('Código reenviado.');
+        clearOtpBoxes();
         if (json.target_masked) showOtpStep(json.target_masked);
         startResendCooldown(60);
       } else {
@@ -226,10 +271,11 @@ function initOtpFlow() {
     e.preventDefault();
     document.getElementById('otpCard')?.classList.add('hidden');
     document.getElementById('credCard')?.classList.remove('hidden');
-    const codigo = document.getElementById('codigo');
-    if (codigo) codigo.value = '';
+    clearOtpBoxes();
     hideErr();
   });
+
+  syncOtpBoxes();
 }
 
 /* Deshabilita el enlace "Reenviar" durante unos segundos. */
@@ -257,16 +303,18 @@ function initPasswordStrength() {
   const passInput = document.getElementById('passReg');
   if (!passInput) return;
 
+  const card  = document.getElementById('strengthCard');
+  const icon  = document.getElementById('strengthIcon');
   const fill  = document.getElementById('strengthFill');
   const label = document.getElementById('strengthLabel');
   if (!fill || !label) return;
 
   const levels = [
-    { w: '0%',    color: 'transparent',              text: 'Ingresa una contraseña' },
-    { w: '25%',   color: 'var(--red-bright)',         text: 'Débil' },
-    { w: '50%',   color: 'var(--color-warning,#f59e0b)', text: 'Regular' },
-    { w: '75%',   color: '#eab308',                  text: 'Buena' },
-    { w: '100%',  color: '#22c55e',                  text: 'Fuerte' }
+    { w: '0%',   tier: 'var(--muted-2)',                icon: '🔓', text: 'Ingresa una contraseña' },
+    { w: '25%',  tier: 'var(--red-bright)',              icon: '📎', text: 'Débil — se descifra al toque' },
+    { w: '50%',  tier: 'var(--color-warning,#f59e0b)',   icon: '🔑', text: 'Regular' },
+    { w: '75%',  tier: '#eab308',                        icon: '🔒', text: 'Buena' },
+    { w: '100%', tier: '#22c55e',                        icon: '🛡️', text: 'Fuerte' }
   ];
 
   passInput.addEventListener('input', function () {
@@ -278,9 +326,13 @@ function initPasswordStrength() {
     if (/[^A-Za-z0-9]/.test(val)) score++;
     const lv = levels[score] || levels[0];
     fill.style.width      = lv.w;
-    fill.style.background = lv.color;
+    fill.style.background = lv.tier;
     label.textContent     = lv.text;
-    label.style.color     = lv.color;
+    if (icon) icon.textContent = lv.icon;
+    if (card) {
+      card.style.setProperty('--tier', lv.tier);
+      card.toggleAttribute('data-tier', !!val);
+    }
   });
 }
 
@@ -309,6 +361,20 @@ function initPasswordRequirements() {
 
   input.addEventListener('input', evaluate);
   evaluate(); // estado inicial
+}
+
+/* ─── Login social (Google / GitHub) ─────────────────── */
+/* Todavía no hay backend de OAuth: los botones avisan que está en camino
+   en vez de simular un inicio de sesión que no existe. */
+function initSocialButtons() {
+  document.querySelectorAll('[data-social]').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const nombre = this.dataset.social === 'google' ? 'Google' : 'GitHub';
+      const msg = `Inicio de sesión con ${nombre}: próximamente.`;
+      if (window.Tornalyx?.Toast) window.Tornalyx.Toast.info(msg);
+      else alert(msg);
+    });
+  });
 }
 
 /* ─── Envío del formulario de Registro (AJAX) ────────── */
@@ -412,6 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initOtpFlow();
   initPasswordStrength();
   initPasswordRequirements();
+  initSocialButtons();
   initRegistroSubmit();
   initRealtimeValidation();
 });

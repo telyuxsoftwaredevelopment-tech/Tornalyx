@@ -275,9 +275,19 @@ p  { line-height:1.6; }
   color:var(--muted);
   margin-left:8px;
 }
-.navbar__links a,.nav-links a { transition:color .15s; }
+.navbar__links a,.nav-links a { position:relative; padding-bottom:4px; transition:color .15s; }
 .navbar__links a:hover,.nav-links a:hover,
 .navbar__links a.active,.nav-links a.active { color:var(--ink); }
+.navbar__links a::after,.nav-links a::after {
+  content:'';
+  position:absolute; left:0; right:0; bottom:0;
+  height:2px; border-radius:2px;
+  background:var(--red-bright);
+  transform:scaleX(0); transform-origin:left;
+  transition:transform .25s cubic-bezier(.22,1,.36,1);
+}
+.navbar__links a:hover::after,.nav-links a:hover::after,
+.navbar__links a.active::after,.nav-links a.active::after { transform:scaleX(1); }
 
 .navbar__actions,.nav-right {
   display:none;
@@ -494,8 +504,18 @@ select.form-control option { background:var(--bg-2); color:var(--ink); }
 .foot-brand .brand { margin-bottom:14px; }
 .foot-brand p { color:var(--muted); font-size:14px; line-height:1.6; max-width:32ch; }
 .foot-col h5 { font-family:var(--font-heading); font-size:13px; font-weight:600; color:var(--ink); margin-bottom:16px; letter-spacing:.4px; text-transform:uppercase; }
-.foot-col a  { display:block; color:var(--muted); font-size:14px; margin-bottom:12px; transition:color .15s,transform .15s; }
-.foot-col a:hover { color:var(--red-bright); transform:translateX(2px); }
+.foot-col a  {
+  position:relative;
+  display:block; color:var(--muted); font-size:14px; margin-bottom:12px; padding-left:0;
+  transition:color .15s,padding-left .2s cubic-bezier(.22,1,.36,1);
+}
+.foot-col a::before {
+  content:''; position:absolute; left:-10px; top:50%; translate:0 -50%;
+  width:0; height:2px; border-radius:2px; background:var(--red-bright);
+  transition:width .2s cubic-bezier(.22,1,.36,1);
+}
+.foot-col a:hover { color:var(--red-bright); padding-left:12px; }
+.foot-col a:hover::before { width:6px; }
 .foot-bottom {
   display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
   margin-top:44px; padding-top:24px; border-top:1px solid var(--line-soft);

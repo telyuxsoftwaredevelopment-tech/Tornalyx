@@ -33,10 +33,45 @@
       cursor:pointer; font-size:var(--font-size-sm); color:var(--muted);
     }
     input[type="checkbox"] { width:16px; height:16px; accent-color:var(--red); cursor:pointer; flex:none; margin-top:2px; }
-    /* Medidor de fortaleza de contraseña (lado Registro) */
-    .strength-bar { height:4px; border-radius:2px; background:var(--line); margin-top:8px; overflow:hidden; }
-    .strength-fill { height:100%; border-radius:2px; transition:all var(--transition-base); width:0; }
-    .strength-label { font-size:12px; margin-top:4px; color:var(--muted-2); }
+
+    /* ── Entrada escalonada de los campos (reusa [data-reveal] del sitio) ── */
+    .auth-face__form [data-reveal]:nth-of-type(1) { transition-delay:0ms; }
+    .auth-face__form [data-reveal]:nth-of-type(2) { transition-delay:60ms; }
+    .auth-face__form [data-reveal]:nth-of-type(3) { transition-delay:120ms; }
+    .auth-face__form [data-reveal]:nth-of-type(4) { transition-delay:180ms; }
+    .auth-face__form [data-reveal]:nth-of-type(5) { transition-delay:240ms; }
+    .auth-face__form [data-reveal]:nth-of-type(n+6) { transition-delay:300ms; }
+
+    /* Glow de foco un poco más presente que el genérico del sitio */
+    .auth-face__form .form-control:focus,
+    .otp-box:focus {
+      box-shadow:0 0 0 3px rgba(236,28,36,.15), 0 0 22px rgba(236,28,36,.12);
+    }
+
+    /* ── Medidor de fortaleza de contraseña (lado Registro) ── */
+    .strength-card {
+      display:flex; align-items:center; gap:12px;
+      margin-top:10px; padding:10px 12px;
+      border-radius:12px; border:1px solid var(--line); background:var(--bg-2);
+      transition:border-color var(--transition-base), box-shadow var(--transition-base);
+    }
+    .strength-card[data-tier] {
+      border-color: color-mix(in srgb, var(--tier) 45%, var(--line));
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--tier) 18%, transparent),
+                  0 0 18px color-mix(in srgb, var(--tier) 22%, transparent);
+    }
+    .strength-card__icon {
+      font-size:1.35rem; line-height:1; flex:none;
+      transition:transform var(--transition-base);
+    }
+    .strength-card[data-tier] .strength-card__icon { transform:scale(1.12) rotate(-4deg); }
+    .strength-card__body { flex:1; min-width:0; }
+    .strength-label {
+      font-size:12px; font-weight:600; margin:0 0 6px; display:block;
+      color:var(--tier, var(--muted-2)); transition:color var(--transition-base);
+    }
+    .strength-bar { height:4px; border-radius:2px; background:var(--line); overflow:hidden; }
+    .strength-fill { height:100%; border-radius:2px; transition:width var(--transition-base), background var(--transition-base); width:0; }
     .pass-reqs { list-style:none; margin:10px 0 0; padding:0; display:grid; gap:6px; }
     .pass-reqs li {
       display:flex; align-items:center; gap:8px;
@@ -54,6 +89,34 @@
     .pass-reqs .req-ico::after { content:'\2713'; }
     .pass-reqs li.met { color:#22c55e; }
     .pass-reqs li.met .req-ico { background:#22c55e; border-color:#22c55e; color:#fff; }
+
+    /* ── OTP: casilleros conectados ── */
+    .otp-boxes { display:flex; gap:8px; justify-content:center; }
+    .otp-box {
+      width:100%; max-width:48px; aspect-ratio:3/4;
+      text-align:center; font-family:var(--mono); font-size:1.4rem; font-weight:700;
+      color:var(--ink); background:var(--bg-2);
+      border:1.5px solid var(--line); border-radius:10px; padding:0;
+      transition:border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
+    }
+    .otp-box:active { transform:scale(.95); }
+    .otp-box.is-filled { border-color:var(--red-bright); }
+    .otp-track { display:flex; gap:8px; margin-top:10px; }
+    .otp-track__seg {
+      flex:1; height:3px; border-radius:2px; background:var(--line); overflow:hidden;
+    }
+    .otp-track__seg::after {
+      content:''; display:block; height:100%; width:0;
+      background:var(--red-bright); box-shadow:0 0 8px var(--red-glow);
+      transition:width .35s cubic-bezier(.22,1,.36,1);
+    }
+    .otp-track__seg.is-lit::after { width:100%; }
+
+    /* ── Login social (sin backend de OAuth: son placeholders "Próximamente") ── */
+    .social-row { display:flex; gap:10px; margin-top:var(--space-4); }
+    .btn-social { flex:1; background:var(--bg-2); border:1.5px solid var(--line); color:var(--ink); }
+    .btn-social:hover { border-color:var(--muted-2); background:var(--bg-3); }
+    .social-icon { width:18px; height:18px; flex:none; }
   </style>
 </head>
 <body>
@@ -99,14 +162,14 @@
                 <!-- El token CSRF se envía como header X-CSRF-Token (cookie XSRF-TOKEN)
                      desde validations.js → postForm(). -->
                 <form id="loginForm" action="/login" method="POST" novalidate>
-                  <div class="form-group">
+                  <div class="form-group" data-reveal>
                     <label class="form-label" for="email">Correo electrónico</label>
                     <input class="form-control" type="email" id="email" name="email"
                            placeholder="tu@correo.com" autocomplete="email" required aria-required="true" />
                     <span class="form-error hidden" id="emailError">Ingresa un correo válido.</span>
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group" data-reveal>
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)">
                       <label class="form-label" for="password" style="margin:0">Contraseña</label>
                       <a href="#" class="link-red" style="font-size:12px">¿Olvidaste tu contraseña?</a>
@@ -120,17 +183,38 @@
                     <span class="form-error hidden" id="passwordError">La contraseña es obligatoria.</span>
                   </div>
 
-                  <div class="form-group">
+                  <div class="form-group" data-reveal>
                     <label class="check-label">
                       <input type="checkbox" name="remember" />
                       Recordar mi sesión
                     </label>
                   </div>
 
-                  <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
-                    Iniciar sesión
-                  </button>
+                  <div data-reveal>
+                    <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+                      Iniciar sesión
+                    </button>
+                  </div>
                 </form>
+
+                <div class="divider" data-reveal>o continuá con</div>
+                <div class="social-row" data-reveal>
+                  <button type="button" class="btn btn-social" data-social="google">
+                    <svg class="social-icon" viewBox="0 0 18 18" aria-hidden="true">
+                      <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                      <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                      <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.68 9c0-.593.102-1.17.284-1.706V4.962H.957A9.001 9.001 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/>
+                      <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.581C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/>
+                    </svg>
+                    Google
+                  </button>
+                  <button type="button" class="btn btn-social" data-social="github">
+                    <svg class="social-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    GitHub
+                  </button>
+                </div>
 
                 <p class="text-center" style="font-size:12px;color:var(--muted-2);margin-top:var(--space-4)">
                   Al iniciar sesión aceptás nuestros <a href="/terminos" class="link-red">Términos de uso</a> y <a href="/terminos" class="link-red">Política de privacidad</a>.
@@ -149,11 +233,20 @@
 
                 <form id="otpForm" novalidate>
                   <div class="form-group">
-                    <label class="form-label" for="codigo">Código de verificación</label>
-                    <input class="form-control" type="text" id="codigo" name="codigo"
-                           inputmode="numeric" autocomplete="one-time-code" maxlength="6"
-                           pattern="[0-9]{6}" placeholder="000000" required aria-required="true"
-                           style="letter-spacing:.4em;text-align:center;font-size:1.25rem" />
+                    <label class="form-label" id="otpBoxesLabel">Código de verificación</label>
+                    <div class="otp-boxes" id="otpBoxes" role="group" aria-labelledby="otpBoxesLabel">
+                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1 de 6" />
+                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2 de 6" />
+                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3 de 6" />
+                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4 de 6" />
+                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 5 de 6" />
+                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 6 de 6" />
+                    </div>
+                    <div class="otp-track" id="otpTrack" aria-hidden="true">
+                      <span class="otp-track__seg"></span><span class="otp-track__seg"></span><span class="otp-track__seg"></span>
+                      <span class="otp-track__seg"></span><span class="otp-track__seg"></span><span class="otp-track__seg"></span>
+                    </div>
+                    <input type="hidden" id="codigo" name="codigo" />
                   </div>
 
                   <button type="submit" class="btn btn-primary btn-full" id="otpBtn">
@@ -197,7 +290,7 @@
                 <p>Completá tus datos para unirte a Tornalyx</p>
               </div>
 
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)" data-reveal>
                 <div class="form-group">
                   <label class="form-label" for="nombre">Nombre</label>
                   <input class="form-control" type="text" id="nombre" name="nombre" placeholder="Carlos" required />
@@ -207,15 +300,20 @@
                   <input class="form-control" type="text" id="apellido" name="apellido" placeholder="García" required />
                 </div>
               </div>
-              <div class="form-group">
+              <div class="form-group" data-reveal>
                 <label class="form-label" for="emailReg">Correo electrónico</label>
                 <input class="form-control" type="email" id="emailReg" name="email" placeholder="tu@correo.com" required />
               </div>
-              <div class="form-group">
+              <div class="form-group" data-reveal>
                 <label class="form-label" for="passReg">Contraseña</label>
                 <input class="form-control" type="password" id="passReg" name="password" placeholder="Mínimo 8 caracteres" required />
-                <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
-                <span class="strength-label" id="strengthLabel">Ingresa una contraseña</span>
+                <div class="strength-card" id="strengthCard">
+                  <span class="strength-card__icon" id="strengthIcon" aria-hidden="true">🔓</span>
+                  <div class="strength-card__body">
+                    <span class="strength-label" id="strengthLabel">Ingresa una contraseña</span>
+                    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                  </div>
+                </div>
                 <ul class="pass-reqs" id="passReqs" aria-label="Requisitos de la contraseña">
                   <li data-req="length"><span class="req-ico" aria-hidden="true"></span>Al menos 8 caracteres</li>
                   <li data-req="upper"><span class="req-ico" aria-hidden="true"></span>Una letra mayúscula (A-Z)</li>
@@ -223,25 +321,46 @@
                   <li data-req="number"><span class="req-ico" aria-hidden="true"></span>Un número (0-9)</li>
                 </ul>
               </div>
-              <div class="form-group">
+              <div class="form-group" data-reveal>
                 <label class="form-label" for="passConfirm">Confirmar contraseña</label>
                 <input class="form-control" type="password" id="passConfirm" placeholder="Repite la contraseña" required />
               </div>
-              <div class="form-group">
+              <div class="form-group" data-reveal>
                 <label class="form-label" for="fechaNac">Fecha de nacimiento</label>
                 <input class="form-control" type="date" id="fechaNac" name="fecha_nacimiento" required />
               </div>
 
               <input type="hidden" name="rol" value="participante" />
 
-              <div class="form-group" style="margin-top:var(--space-5)">
+              <div class="form-group" style="margin-top:var(--space-5)" data-reveal>
                 <label class="check-label">
                   <input type="checkbox" id="terminos" name="terminos" required />
                   <span>Acepto los <a href="/terminos" target="_blank" rel="noopener" class="link-red">Términos de uso</a> y la <a href="/terminos" target="_blank" rel="noopener" class="link-red">Política de privacidad</a> de Tornalyx.</span>
                 </label>
               </div>
 
-              <button type="submit" class="btn btn-primary btn-full" form="registroForm">Crear cuenta</button>
+              <div data-reveal>
+                <button type="submit" class="btn btn-primary btn-full" form="registroForm">Crear cuenta</button>
+              </div>
+
+              <div class="divider" data-reveal>o continuá con</div>
+              <div class="social-row" data-reveal>
+                <button type="button" class="btn btn-social" data-social="google">
+                  <svg class="social-icon" viewBox="0 0 18 18" aria-hidden="true">
+                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                    <path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.68 9c0-.593.102-1.17.284-1.706V4.962H.957A9.001 9.001 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/>
+                    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.581C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/>
+                  </svg>
+                  Google
+                </button>
+                <button type="button" class="btn btn-social" data-social="github">
+                  <svg class="social-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                  </svg>
+                  GitHub
+                </button>
+              </div>
 
               <form id="registroForm" action="/registro" method="POST" style="display:none"></form>
              </div>
