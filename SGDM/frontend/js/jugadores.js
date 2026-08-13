@@ -36,6 +36,37 @@ function fechaHora(valor) {
   });
 }
 
+/* ─── Placeholders mientras se espera al API ─────────── */
+function skeletonJugadorCard() {
+  return `
+    <div class="jugador-card" aria-hidden="true" style="cursor:default">
+      <span class="skeleton" style="width:48px;height:48px;border-radius:50%;flex:none"></span>
+      <span style="flex:1">
+        <span class="skeleton" style="display:block;height:14px;width:60%;margin-bottom:8px"></span>
+        <span class="skeleton" style="display:block;height:11px;width:40%"></span>
+      </span>
+    </div>`;
+}
+
+function skeletonFicha() {
+  const stats = Array.from({ length: 5 }, () => '<span class="skeleton" style="height:36px"></span>').join('');
+  return `
+    <div class="card" aria-hidden="true">
+      <div class="card__body">
+        <div style="display:flex;align-items:center;gap:var(--space-4)">
+          <span class="skeleton" style="width:64px;height:64px;border-radius:50%;flex:none"></span>
+          <div style="flex:1">
+            <span class="skeleton" style="display:block;height:20px;width:50%;margin-bottom:8px"></span>
+            <span class="skeleton" style="display:block;height:14px;width:30%"></span>
+          </div>
+        </div>
+      </div>
+      <div class="card__footer" style="display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-2)">
+        ${stats}
+      </div>
+    </div>`;
+}
+
 /* ─── Listado de resultados ────────────────────────── */
 function renderResultados(jugadores) {
   const cont = $('resultados');
@@ -142,7 +173,7 @@ function renderFicha(data) {
 }
 
 async function abrirFicha(id) {
-  $('ficha').innerHTML = '<p style="color:var(--muted)">Cargando ficha…</p>';
+  $('ficha').innerHTML = skeletonFicha();
   try {
     renderFicha(await Api.get('/api/jugador/' + id));
   } catch (err) {
@@ -156,6 +187,7 @@ async function buscar(q) {
     $('resultados').innerHTML = '<p style="color:var(--muted);font-size:var(--font-size-sm)">Escribí al menos 2 letras para buscar.</p>';
     return;
   }
+  $('resultados').innerHTML = Array.from({ length: 3 }, skeletonJugadorCard).join('');
   try {
     const data = await Api.get('/api/jugadores?q=' + encodeURIComponent(q.trim()));
     renderResultados(data.jugadores || []);

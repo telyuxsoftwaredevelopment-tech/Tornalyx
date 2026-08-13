@@ -29,9 +29,17 @@
       font-size:var(--font-size-sm);
       color:var(--muted);
     }
-    .breadcrumb a { color:var(--muted); transition:color .15s; }
+    .breadcrumb a { position:relative; color:var(--muted); transition:color .15s; }
     .breadcrumb a:hover { color:var(--red-bright); }
-    .breadcrumb span { color:var(--muted-2); margin:0 6px; }
+    .breadcrumb a::after {
+      content:''; position:absolute; left:0; right:0; bottom:-4px;
+      height:1.5px; background:var(--red-bright);
+      transform:scaleX(0); transform-origin:left;
+      transition:transform .2s cubic-bezier(.22,1,.36,1);
+    }
+    .breadcrumb a:hover::after { transform:scaleX(1); }
+    .breadcrumb span { display:inline-block; color:var(--muted-2); margin:0 6px; transition:transform .2s ease, color .2s ease; }
+    .breadcrumb a:hover + span { transform:translateX(2px); color:var(--red-bright); }
 
     /* Info boxes */
     .info-grid { display:grid; grid-template-columns:1fr; gap:var(--space-4); margin-bottom:var(--space-6); }

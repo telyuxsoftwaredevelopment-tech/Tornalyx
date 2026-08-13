@@ -46,6 +46,32 @@ async function postForm(url, data) {
   return res.json();
 }
 
+/* Estado de carga en un botón de submit: cambia el texto y lo deshabilita
+   mientras se espera la respuesta del servidor. */
+function setBtnLoading(btn, loading) {
+  if (!btn) return;
+  if (loading) {
+    btn.dataset.originalText = btn.dataset.originalText || btn.textContent;
+    btn.textContent = btn.dataset.loadingText || 'Un momento…';
+    btn.classList.add('is-loading');
+    btn.disabled = true;
+  } else {
+    btn.textContent = btn.dataset.originalText || btn.textContent;
+    btn.classList.remove('is-loading');
+    btn.disabled = false;
+  }
+}
+
+/* Sacude un elemento para reforzar visualmente un error (p. ej. login
+   fallido). Se saca y se vuelve a poner la clase para poder re-disparar
+   la animación en fallos consecutivos. */
+function shakeEl(el) {
+  if (!el) return;
+  el.classList.remove('auth-shake');
+  void el.offsetWidth; // fuerza reflow
+  el.classList.add('auth-shake');
+}
+
 /* ─── Toggle visibilidad de contraseña ──────────────── */
 /* El ícono es siempre el ojo; el estado "visible" se marca con la clase
    .is-visible (estilo en CSS) y el aria-label, sin cambiar de emoji. */
@@ -116,6 +142,8 @@ function initLoginValidation() {
     }
     if (!valid) return;
 
+    const submitBtn = document.getElementById('loginBtn');
+    setBtnLoading(submitBtn, true);
     try {
       const json = await postForm('/login', new FormData(form));
       if (json.success && json.twofa) {
@@ -128,9 +156,12 @@ function initLoginValidation() {
           msg += ` Intentos restantes: ${json.intentos_restantes}.`;
         }
         authError(msg);
+        shakeEl(document.getElementById('credCard'));
       }
     } catch {
       authError('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setBtnLoading(submitBtn, false);
     }
   });
 
@@ -157,6 +188,43 @@ function showOtpStep(targetMasked) {
   const t = document.getElementById('otpTarget');
   if (t && targetMasked) t.textContent = targetMasked;
   document.querySelector('.otp-box')?.focus();
+  startOtpCountdown();
+}
+
+/* Debe coincidir con el TTL fijo que usa AuthController::iniciarMfaEmail
+   ($_SESSION['pending_2fa']['expires'] = time() + 600) tanto al enviar el
+   código como al reenviarlo. Si se recarga la página a mitad del desafío
+   la cuenta vuelve a arrancar en 10:00 aunque el backend tenga menos
+   tiempo real restante: es una aproximación visual, el backend sigue
+   siendo la autoridad sobre la expiración real. */
+const OTP_TTL_SECONDS = 600;
+let otpCountdownId = null;
+
+function startOtpCountdown() {
+  stopOtpCountdown();
+  const bar   = document.getElementById('otpTimerBar');
+  const label = document.getElementById('otpTimerLabel');
+  if (!bar || !label) return;
+  const deadline = Date.now() + OTP_TTL_SECONDS * 1000;
+
+  function tick() {
+    const remaining = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+    bar.style.width = (remaining / OTP_TTL_SECONDS * 100) + '%';
+    bar.classList.toggle('is-low', remaining <= 120 && remaining > 30);
+    bar.classList.toggle('is-critical', remaining <= 30);
+    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const s = String(remaining % 60).padStart(2, '0');
+    label.textContent = remaining > 0
+      ? `El código vence en ${m}:${s}`
+      : 'El código venció. Reenvialo para recibir uno nuevo.';
+    if (remaining <= 0) stopOtpCountdown();
+  }
+  tick();
+  otpCountdownId = setInterval(tick, 1000);
+}
+
+function stopOtpCountdown() {
+  if (otpCountdownId) { clearInterval(otpCountdownId); otpCountdownId = null; }
 }
 
 function initOtpFlow() {
@@ -232,17 +300,22 @@ function initOtpFlow() {
     }
     const data = new FormData();
     data.append('codigo', codigo);
+    const submitBtn = document.getElementById('otpBtn');
+    setBtnLoading(submitBtn, true);
     try {
       const json = await postForm('/login/verificar', data);
       if (json.success) {
         redirectByRole(json.rol);
       } else {
         showErr(json.error || 'Código incorrecto.');
+        shakeEl(document.getElementById('otpCard'));
         clearOtpBoxes();
         boxes[0]?.focus();
       }
     } catch {
       showErr('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setBtnLoading(submitBtn, false);
     }
   });
 
@@ -273,6 +346,7 @@ function initOtpFlow() {
     document.getElementById('credCard')?.classList.remove('hidden');
     clearOtpBoxes();
     hideErr();
+    stopOtpCountdown();
   });
 
   syncOtpBoxes();
@@ -363,6 +437,70 @@ function initPasswordRequirements() {
   evaluate(); // estado inicial
 }
 
+/* ─── Sugerencias de dominio de email ─────────────────── */
+const EMAIL_DOMAINS = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com'];
+
+function initEmailDomainSuggest() {
+  document.querySelectorAll('input[type="email"]').forEach(input => {
+    const box = document.getElementById(input.id + 'Suggest');
+    if (!box) return;
+
+    function render() {
+      const val = input.value;
+      const at  = val.indexOf('@');
+      if (at === -1) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const typed   = val.slice(at + 1).toLowerCase();
+      const opciones = EMAIL_DOMAINS.filter(d => d.startsWith(typed) && d !== typed);
+      if (!opciones.length) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      box.innerHTML = opciones.map(d => `<button type="button">${val.slice(0, at + 1)}${d}</button>`).join('');
+      box.classList.remove('hidden');
+    }
+
+    input.addEventListener('input', render);
+    input.addEventListener('blur', () => setTimeout(() => box.classList.add('hidden'), 150));
+    box.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      input.value = btn.textContent;
+      box.classList.add('hidden');
+      input.dispatchEvent(new Event('input'));
+      input.focus();
+    });
+  });
+}
+
+/* ─── Avatar con iniciales en vivo (panel promo de registro) ── */
+function initPromoAvatar() {
+  const nombre   = document.getElementById('nombre');
+  const apellido = document.getElementById('apellido');
+  const avatar   = document.getElementById('promoAvatar');
+  if (!nombre || !apellido || !avatar) return;
+
+  const update = () => {
+    const iniciales = ((nombre.value.trim()[0] || '') + (apellido.value.trim()[0] || '')).toUpperCase();
+    avatar.textContent = iniciales || '?';
+  };
+  nombre.addEventListener('input', update);
+  apellido.addEventListener('input', update);
+}
+
+/* ─── Check en vivo: "confirmar contraseña" coincide ──── */
+function initPasswordConfirmCheck() {
+  const pass    = document.getElementById('passReg');
+  const confirm = document.getElementById('passConfirm');
+  const hint    = document.getElementById('confirmHint');
+  if (!pass || !confirm || !hint) return;
+
+  const evaluate = () => {
+    if (!confirm.value) { hint.textContent = ''; hint.className = 'confirm-hint'; return; }
+    const coincide = confirm.value === pass.value;
+    hint.textContent = coincide ? '✓ Coinciden' : 'Todavía no coinciden';
+    hint.className = 'confirm-hint ' + (coincide ? 'ok' : 'no');
+  };
+  confirm.addEventListener('input', evaluate);
+  pass.addEventListener('input', evaluate);
+}
+
 /* ─── Envío del formulario de Registro (AJAX) ────────── */
 function initRegistroSubmit() {
   const form = document.getElementById('registroForm');
@@ -419,6 +557,8 @@ function initRegistroSubmit() {
         if (el) data.append(name, el.value);
       });
 
+    const submitBtn = document.getElementById('registroBtn');
+    setBtnLoading(submitBtn, true);
     try {
       const json = await postForm('/registro', data);
       if (json.success && json.twofa) {
@@ -431,9 +571,17 @@ function initRegistroSubmit() {
         redirectByRole(json.rol);
       } else {
         authError(json.error || 'No se pudo crear la cuenta.');
+        /* No se sacude .auth-face--back directamente: ya tiene su propio
+           transform:rotateY(180deg) en desktop, y la animación de shake
+           (que solo anima translateX) lo pisaría y "desflipearía" la
+           tarjeta por un instante. El panel interno no tiene transform
+           propio, así que es seguro sacudirlo a él. */
+        shakeEl(document.querySelector('#authFaceSignup .auth-face__inner'));
       }
     } catch {
       authError('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setBtnLoading(submitBtn, false);
     }
   });
 }
@@ -464,6 +612,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initOtpFlow();
   initPasswordStrength();
   initPasswordRequirements();
+  initPasswordConfirmCheck();
+  initEmailDomainSuggest();
+  initPromoAvatar();
   initRegistroSubmit();
   initRealtimeValidation();
 });

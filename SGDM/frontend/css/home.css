@@ -18,6 +18,19 @@
 .hero-text .lead { margin:0; max-width:52ch; }
 .hero-cta { margin-top:32px; animation:fade-up .6s .28s cubic-bezier(.22,1,.36,1) both; }
 
+/* ─── Contadores animados: torneos/disciplinas reales, cargados por JS
+   (home-stats.js). Arrancan ocultos: si el API falla, no se muestran en
+   vez de dejar un "0" que parezca roto. ────────────────────────────── */
+.hero-stats {
+  display:flex; gap:40px; margin-top:32px;
+  animation:fade-up .6s .4s cubic-bezier(.22,1,.36,1) both;
+}
+.hero-stat__value {
+  display:block; font-family:var(--font-heading);
+  font-size:clamp(1.75rem,4vw,2.25rem); font-weight:700; color:var(--ink);
+}
+.hero-stat__label { font-size:13px; color:var(--muted); }
+
 /* ─── Audiencias: foto a la izquierda, texto a la derecha ─ */
 .audiencias-grid {
   display:grid;

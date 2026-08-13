@@ -45,6 +45,9 @@
 select.form-control { cursor: pointer; }
 
 /* ─── Tarjeta de torneo ──────────────────────────────── */
+/* perspective en el grid (no en la card): así el tilt 3D que le aplica
+   torneos.js por mousemove tiene un punto de fuga desde el que rotar. */
+.cards-grid { perspective: 1000px; }
 .torneo-card {
   background: var(--bg-card);
   border: 1px solid var(--line);

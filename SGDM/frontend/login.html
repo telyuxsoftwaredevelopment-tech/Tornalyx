@@ -111,6 +111,56 @@
       transition:width .35s cubic-bezier(.22,1,.36,1);
     }
     .otp-track__seg.is-lit::after { width:100%; }
+
+    /* ── Cuenta regresiva de vigencia del código ── */
+    .otp-timer { height:3px; border-radius:2px; background:var(--line); overflow:hidden; margin-top:var(--space-4); }
+    .otp-timer__bar { height:100%; width:100%; background:var(--red-bright); transition:width 1s linear, background .3s ease; }
+    .otp-timer__bar.is-low { background:#eab308; }
+    .otp-timer__bar.is-critical { background:var(--red); }
+    .otp-timer__label { font-size:12px; color:var(--muted-2); margin:6px 0 0; text-align:center; }
+
+    /* ── Sugerencias de dominio de email ── */
+    .email-suggest { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .email-suggest.hidden { display:none; }
+    .email-suggest button {
+      font-size:12px; padding:4px 10px; border-radius:999px;
+      border:1px solid var(--line); background:var(--bg-2); color:var(--muted);
+      cursor:pointer; transition:border-color .15s, color .15s;
+    }
+    .email-suggest button:hover { border-color:var(--red-bright); color:var(--ink); }
+
+    /* ── Estado de carga en botones de submit ── */
+    .btn.is-loading { opacity:.75; cursor:progress; }
+    .btn.is-loading::after {
+      content:''; width:14px; height:14px;
+      border:2px solid rgba(255,255,255,.4); border-top-color:#fff;
+      border-radius:50%; display:inline-block;
+      animation:btn-spin .6s linear infinite;
+    }
+    @keyframes btn-spin { to { transform:rotate(360deg); } }
+
+    /* ── Shake de error ── */
+    @keyframes auth-shake {
+      10%, 90% { transform:translateX(-1px); }
+      20%, 80% { transform:translateX(2px); }
+      30%, 50%, 70% { transform:translateX(-4px); }
+      40%, 60%      { transform:translateX(4px); }
+    }
+    .auth-shake { animation:auth-shake .5s cubic-bezier(.36,.07,.19,.97) both; }
+
+    /* ── Avatar con iniciales en vivo (panel promo de registro) ── */
+    .promo-avatar {
+      width:64px; height:64px; border-radius:50%;
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--head); font-size:1.5rem; font-weight:700;
+      background:rgba(255,255,255,.15); border:2px solid rgba(255,255,255,.5);
+      color:#fff; transition:transform .2s ease;
+    }
+
+    /* ── Check de confirmación de contraseña ── */
+    .confirm-hint { display:block; font-size:12px; margin-top:6px; min-height:1em; }
+    .confirm-hint.ok { color:#22c55e; }
+    .confirm-hint.no { color:var(--red-bright); }
   </style>
 </head>
 <body>
@@ -160,6 +210,7 @@
                     <label class="form-label" for="email">Correo electrónico</label>
                     <input class="form-control" type="email" id="email" name="email"
                            placeholder="tu@correo.com" autocomplete="email" required aria-required="true" />
+                    <div class="email-suggest hidden" id="emailSuggest" role="listbox" aria-label="Sugerencias de dominio"></div>
                     <span class="form-error hidden" id="emailError">Ingresa un correo válido.</span>
                   </div>
 
@@ -185,7 +236,7 @@
                   </div>
 
                   <div data-reveal>
-                    <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+                    <button type="submit" class="btn btn-primary btn-full" id="loginBtn" data-loading-text="Verificando…">
                       Iniciar sesión
                     </button>
                   </div>
@@ -200,13 +251,16 @@
               <div class="hidden" id="otpCard">
                 <div class="alert alert-error hidden" id="otpError" role="alert"></div>
 
-                <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-4)">
+                <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-2)">
                   Te enviamos un código de verificación de 6 dígitos a
                   <strong id="otpTarget" style="color:var(--ink)">tu destino</strong>.
                   Ingrésalo para continuar.
                 </p>
 
-                <form id="otpForm" novalidate>
+                <div class="otp-timer" aria-hidden="true"><div class="otp-timer__bar" id="otpTimerBar"></div></div>
+                <p class="otp-timer__label" id="otpTimerLabel"></p>
+
+                <form id="otpForm" novalidate style="margin-top:var(--space-4)">
                   <div class="form-group">
                     <label class="form-label" id="otpBoxesLabel">Código de verificación</label>
                     <div class="otp-boxes" id="otpBoxes" role="group" aria-labelledby="otpBoxesLabel">
@@ -224,7 +278,7 @@
                     <input type="hidden" id="codigo" name="codigo" />
                   </div>
 
-                  <button type="submit" class="btn btn-primary btn-full" id="otpBtn">
+                  <button type="submit" class="btn btn-primary btn-full" id="otpBtn" data-loading-text="Verificando…">
                     Verificar
                   </button>
                 </form>
@@ -253,6 +307,7 @@
           <!-- Cara trasera: Crear cuenta -->
           <div class="auth-face auth-face--back" id="authFaceSignup">
             <div class="auth-face__promo">
+              <span class="promo-avatar" id="promoAvatar" aria-hidden="true">?</span>
               <h2>¿Ya tenés cuenta?</h2>
               <p>Iniciá sesión para gestionar tus torneos.</p>
               <button type="button" class="btn btn-promo" data-auth-toggle="login">Iniciar sesión →</button>
@@ -278,6 +333,7 @@
               <div class="form-group" data-reveal>
                 <label class="form-label" for="emailReg">Correo electrónico</label>
                 <input class="form-control" type="email" id="emailReg" name="email" placeholder="tu@correo.com" required />
+                <div class="email-suggest hidden" id="emailRegSuggest" role="listbox" aria-label="Sugerencias de dominio"></div>
               </div>
               <div class="form-group" data-reveal>
                 <label class="form-label" for="passReg">Contraseña</label>
@@ -299,6 +355,7 @@
               <div class="form-group" data-reveal>
                 <label class="form-label" for="passConfirm">Confirmar contraseña</label>
                 <input class="form-control" type="password" id="passConfirm" placeholder="Repite la contraseña" required />
+                <span class="confirm-hint" id="confirmHint"></span>
               </div>
               <div class="form-group" data-reveal>
                 <label class="form-label" for="fechaNac">Fecha de nacimiento</label>
@@ -315,7 +372,7 @@
               </div>
 
               <div data-reveal>
-                <button type="submit" class="btn btn-primary btn-full" form="registroForm">Crear cuenta</button>
+                <button type="submit" class="btn btn-primary btn-full" id="registroBtn" form="registroForm" data-loading-text="Creando cuenta…">Crear cuenta</button>
               </div>
 
               <form id="registroForm" action="/registro" method="POST" style="display:none"></form>
