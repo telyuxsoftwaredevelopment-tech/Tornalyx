@@ -406,9 +406,31 @@ async function cargarStats() {
   }
 }
 
+/** Avisa en el panel si falta correr alguna migración .sql en esta base. */
+async function chequearSalud() {
+  const banner = document.getElementById('saludBanner');
+  if (!banner) return;
+  try {
+    const data = await Api.get('/api/admin/salud');
+    const faltantes = data.migraciones_faltantes || [];
+    if (!faltantes.length) {
+      banner.classList.add('hidden');
+      return;
+    }
+    banner.innerHTML = '⚠️ Falta correr en la base: <strong>' +
+      faltantes.map(Utils.escapeHtml).join(', ') + '</strong>.';
+    banner.classList.remove('hidden');
+  } catch {
+    /* Si /api/admin/salud falla, no tapamos el resto del panel con esto. */
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   /* Solo corre en la vista del panel de administración. */
-  if (document.getElementById('kpiUsuarios')) cargarStats();
+  if (document.getElementById('kpiUsuarios')) {
+    cargarStats();
+    chequearSalud();
+  }
 
   if (document.getElementById('usuariosBody')) {
     cargarUsuarios();

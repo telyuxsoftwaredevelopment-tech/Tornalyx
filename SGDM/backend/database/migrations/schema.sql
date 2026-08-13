@@ -23,6 +23,12 @@ CREATE TABLE IF NOT EXISTS usuarios (
     rol          ENUM('participante','organizador','administrador') NOT NULL DEFAULT 'participante',
     estado       ENUM('activo','suspendido','pendiente') NOT NULL DEFAULT 'activo',
     avatar_url   VARCHAR(255) DEFAULT NULL,
+    -- Foto de perfil guardada en la propia fila (ver add_avatar_blob.sql;
+    -- mantener en sincronía). Render free no tiene disco persistente, así
+    -- que el archivo no puede vivir en frontend/uploads: se sirve desde acá
+    -- vía GET /api/perfil/avatar/{id}, y avatar_url solo guarda esa URL.
+    avatar_data  MEDIUMBLOB   DEFAULT NULL,
+    avatar_mime  VARCHAR(30)  DEFAULT NULL,
     -- Perfil público (ver add_perfil.sql; mantener en sincronía)
     bio          TEXT         DEFAULT NULL,
     ubicacion    VARCHAR(120) DEFAULT NULL,

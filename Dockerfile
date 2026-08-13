@@ -36,13 +36,12 @@ COPY SGDM/docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 # Código de la aplicación.
 COPY . /var/www/html/
 
-# storage/throttle debe ser escribible por Apache (control de fuerza bruta),
-# igual que uploads/avatars (PerfilController::subirAvatar hace mkdir() ahí
-# la primera vez); sin este chown, Apache corre como www-data y no tiene
-# permiso de escritura en lo que copió el COPY de arriba.
+# storage/throttle debe ser escribible por Apache (control de fuerza bruta);
+# sin este chown, Apache corre como www-data y no tiene permiso de escritura
+# en lo que copió el COPY de arriba. Los avatares NO usan disco (Render free
+# no tiene almacenamiento persistente): se guardan como BLOB en la base,
+# ver add_avatar_blob.sql y PerfilController::avatar()/servirAvatar().
 RUN mkdir -p /var/www/html/SGDM/backend/storage/throttle \
-             /var/www/html/SGDM/frontend/uploads/avatars \
-    && chown -R www-data:www-data /var/www/html/SGDM/backend/storage \
-                                   /var/www/html/SGDM/frontend/uploads
+    && chown -R www-data:www-data /var/www/html/SGDM/backend/storage
 
 EXPOSE 80

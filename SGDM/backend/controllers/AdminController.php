@@ -3,6 +3,7 @@ require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../models/Estadistica.php';
 require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../models/DocAcceso.php';
+require_once __DIR__ . '/../models/Migracion.php';
 require_once __DIR__ . '/../shared/Session.php';
 require_once __DIR__ . '/../shared/Mailer.php';
 
@@ -40,6 +41,28 @@ class AdminController extends Controller {
             'stats'     => $this->estadisticaModel->resumenGeneral(),
             'actividad' => $this->estadisticaModel->actividadReciente(),
         ]);
+    }
+
+    /**
+     * Chequeo de salud del esquema (GET /api/admin/salud): compara las
+     * migraciones add_*.sql del repo contra schema_migrations y avisa si
+     * falta correr alguna en esta base (ver add_schema_migrations.sql).
+     * Solo para administradores.
+     */
+    public function salud(): void {
+        if (!$this->requireApiRole(['administrador'])) {
+            return;
+        }
+
+        try {
+            $faltantes = (new Migracion())->faltantes();
+        } catch (Throwable $e) {
+            // schema_migrations todavía no existe en esta base: es en sí
+            // misma una migración pendiente (add_schema_migrations.sql).
+            $faltantes = ['schema_migrations (correr add_schema_migrations.sql)'];
+        }
+
+        $this->jsonSuccess(['migraciones_faltantes' => $faltantes]);
     }
 
     /**

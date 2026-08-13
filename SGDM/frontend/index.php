@@ -112,6 +112,7 @@ $router->get('/api/perfil',             static fn() => (new PerfilController())-
 $router->post('/api/perfil/actualizar', static fn() => (new PerfilController())->actualizar());
 $router->post('/api/perfil/password',   static fn() => (new PerfilController())->password());
 $router->post('/api/perfil/avatar',     static fn() => (new PerfilController())->avatar());
+$router->get('#^/api/perfil/avatar/(\d+)$#', static fn($id) => (new PerfilController())->servirAvatar((int) $id));
 
 // ─── TORNEOS (API JSON) ────────────────────────────────────────
 $router->get('/api/torneos',           static fn() => (new TorneoController())->index());
@@ -149,6 +150,7 @@ $router->get('#^/api/jugador/(\d+)$#',    static fn($id) => (new PerfilControlle
 
 // ─── ADMIN (API JSON) ──────────────────────────────────────────
 $router->get('/api/admin/stats',    static fn() => (new AdminController())->stats());
+$router->get('/api/admin/salud',    static fn() => (new AdminController())->salud());
 $router->get('/api/admin/usuarios', static fn() => (new AdminController())->usuarios());
 $router->post('/api/admin/usuario/crear',      static fn() => (new AdminController())->crearUsuario());
 $router->post('/api/admin/usuario/actualizar', static fn() => (new AdminController())->actualizarUsuario());

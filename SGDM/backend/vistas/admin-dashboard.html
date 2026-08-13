@@ -235,6 +235,10 @@
             <p>Resumen general del sistema Tornalyx · Actualizado ahora</p>
           </div>
         </div>
+        <!-- Se completa con GET /api/admin/salud si falta correr alguna
+             migración .sql en esta base (ver add_schema_migrations.sql) -->
+        <div class="alert alert-error hidden" id="saludBanner" role="alert"></div>
+
         <!-- KPIs y actividad los completa admin.js con GET /api/admin/stats -->
         <div class="kpi-grid" data-reveal>
           <div class="kpi-card">

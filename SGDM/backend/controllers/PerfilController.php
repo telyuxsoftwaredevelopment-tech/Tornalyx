@@ -29,11 +29,8 @@ class PerfilController extends Controller {
         'image/webp' => 'webp',
     ];
 
-    /** Carpeta física (dentro de frontend/) donde se guardan los avatares. */
-    private const AVATAR_DIR = __DIR__ . '/../../frontend/uploads/avatars';
-
-    /** Prefijo público con el que se sirve esa carpeta. */
-    private const AVATAR_URL = '/uploads/avatars';
+    /** Ruta pública donde se sirve el avatar de un usuario (ver servirAvatar). */
+    private const AVATAR_URL = '/api/perfil/avatar';
 
     private Usuario $usuarioModel;
     private Torneo  $torneoModel;
@@ -178,8 +175,10 @@ class PerfilController extends Controller {
 
     /**
      * Sube o reemplaza la foto de perfil (POST /api/perfil/avatar).
-     * Valida tipo real (finfo + getimagesize) y tamaño; guarda con nombre
-     * aleatorio bajo public/uploads/avatars y borra la foto anterior.
+     * Valida tipo real (finfo + getimagesize) y tamaño; se guarda como BLOB
+     * en la propia fila del usuario (no en disco: Render free no tiene
+     * almacenamiento persistente, cualquier archivo escrito en frontend/
+     * desaparece en el próximo redeploy) y se sirve vía servirAvatar().
      */
     public function avatar(): void {
         if (!$this->requireApiRole(self::ROLES)) {
@@ -204,31 +203,40 @@ class PerfilController extends Controller {
             return;
         }
 
-        if (!is_dir(self::AVATAR_DIR) && !mkdir(self::AVATAR_DIR, 0755, true)) {
-            $this->jsonError('No se pudo guardar la imagen. Intentá más tarde.', [], 500);
+        $datos = file_get_contents($file['tmp_name']);
+        if ($datos === false) {
+            $this->jsonError('No se pudo leer la imagen. Intentá más tarde.', [], 500);
             return;
         }
 
-        $nombre  = 'u' . $userId . '-' . bin2hex(random_bytes(8)) . '.' . self::AVATAR_MIMES[$mime];
-        $destino = self::AVATAR_DIR . '/' . $nombre;
-        if (!move_uploaded_file($file['tmp_name'], $destino)) {
-            $this->jsonError('No se pudo guardar la imagen. Intentá más tarde.', [], 500);
-            return;
-        }
-
-        // Borrar la foto anterior solo si vivía en nuestra carpeta de avatares.
-        $usuario  = $this->usuarioModel->findById($userId);
-        $anterior = (string) ($usuario['avatar_url'] ?? '');
-        if (str_starts_with($anterior, self::AVATAR_URL . '/')) {
-            $fisico = self::AVATAR_DIR . '/' . basename($anterior);
-            if (is_file($fisico)) {
-                @unlink($fisico);
-            }
-        }
-
-        $url = self::AVATAR_URL . '/' . $nombre;
-        $this->usuarioModel->actualizar($userId, ['avatar_url' => $url]);
+        // La URL cambia con cada subida (cache-busting): el navegador
+        // cachea agresivo las imágenes, y sin esto seguiría mostrando la
+        // vieja aunque la fila ya tenga la nueva.
+        $url = self::AVATAR_URL . '/' . $userId . '?v=' . time();
+        $this->usuarioModel->actualizar($userId, [
+            'avatar_data' => $datos,
+            'avatar_mime' => $mime,
+            'avatar_url'  => $url,
+        ]);
         $this->jsonSuccess(['avatar_url' => $url]);
+    }
+
+    /**
+     * Sirve el avatar de un usuario guardado en la base (GET
+     * /api/perfil/avatar/{id}). Pública y sin autenticación: es la misma
+     * imagen que ya se ve en la ficha pública del jugador y en los
+     * resultados de búsqueda, no hay nada que proteger.
+     */
+    public function servirAvatar(int $id): void {
+        $usuario = $this->usuarioModel->findById($id);
+        if (!$usuario || $usuario['avatar_data'] === null || $usuario['avatar_mime'] === null) {
+            http_response_code(404);
+            return;
+        }
+        header('Content-Type: ' . $usuario['avatar_mime']);
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Content-Length: ' . strlen($usuario['avatar_data']));
+        echo $usuario['avatar_data'];
     }
 
     /**
