@@ -14,7 +14,7 @@ require_once __DIR__ . '/../shared/Mailer.php';
 class AdminController extends Controller {
 
     /** Roles válidos para filtrar el listado de usuarios. */
-    private const ROLES = ['participante', 'organizador', 'administrador'];
+    private const ROLES = ['participante', 'administrador'];
 
     /** Estados válidos para una cuenta de usuario (coinciden con el ENUM). */
     private const ESTADOS_USUARIO = ['activo', 'suspendido', 'pendiente'];

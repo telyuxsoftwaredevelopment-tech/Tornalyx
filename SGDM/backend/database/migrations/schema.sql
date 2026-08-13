@@ -20,7 +20,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email        VARCHAR(120) NOT NULL UNIQUE,
     password     VARCHAR(255) NOT NULL,          -- bcrypt hash
     fecha_nac    DATE         NOT NULL,
-    rol          ENUM('participante','organizador','administrador') NOT NULL DEFAULT 'participante',
+    -- 'organizador' ya no es un rol de cuenta: se es organizador de un torneo
+    -- puntual vía torneos.organizador_id (ver add_rol_torneo_simplificado.sql).
+    rol          ENUM('participante','administrador') NOT NULL DEFAULT 'participante',
     estado       ENUM('activo','suspendido','pendiente') NOT NULL DEFAULT 'activo',
     avatar_url   VARCHAR(255) DEFAULT NULL,
     -- Foto de perfil guardada en la propia fila (ver add_avatar_blob.sql;

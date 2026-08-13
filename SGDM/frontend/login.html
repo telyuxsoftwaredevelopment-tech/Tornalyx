@@ -132,7 +132,13 @@
     .email-suggest button:hover { border-color:var(--red-bright); color:var(--ink); }
 
     /* ── Estado de carga en botones de submit ── */
-    .btn.is-loading { opacity:.75; cursor:progress; }
+    /* Al tocar "Iniciar sesión" / "Crear cuenta" el botón se desplaza y
+       vuelve (mobile-first: da confirmación táctil inmediata al toque,
+       sin depender de :hover) antes de que aparezca el spinner. */
+    .btn.is-loading {
+      opacity:.75; cursor:progress;
+      animation:btn-submit-slide .4s cubic-bezier(.34,1.56,.64,1);
+    }
     .btn.is-loading::after {
       content:''; width:14px; height:14px;
       border:2px solid rgba(255,255,255,.4); border-top-color:#fff;
@@ -140,6 +146,12 @@
       animation:btn-spin .6s linear infinite;
     }
     @keyframes btn-spin { to { transform:rotate(360deg); } }
+    @keyframes btn-submit-slide {
+      0%   { transform:translateX(0); }
+      40%  { transform:translateX(10px); }
+      100% { transform:translateX(0); }
+    }
+    html.a11y-motion .btn.is-loading { animation:none; }
 
     /* ── Shake de error ── */
     @keyframes auth-shake {

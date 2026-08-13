@@ -13,9 +13,6 @@ require_once __DIR__ . '/../shared/Session.php';
  */
 class PerfilController extends Controller {
 
-    /** Roles que pueden operar sobre su propio perfil. */
-    private const ROLES = ['participante', 'organizador', 'administrador'];
-
     /** Límite de la biografía, en palabras. */
     private const BIO_MAX_PALABRAS = 500;
 
@@ -46,7 +43,7 @@ class PerfilController extends Controller {
      * torneos + equipos + estadísticas agregadas, todo desde la base.
      */
     public function datos(): void {
-        if (!$this->requireApiRole(self::ROLES)) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $userId  = (int) Session::getUserId();
@@ -82,7 +79,7 @@ class PerfilController extends Controller {
      * Actualiza datos personales, bio y ubicación (POST /api/perfil/actualizar).
      */
     public function actualizar(): void {
-        if (!$this->requireApiRole(self::ROLES)) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $userId = (int) Session::getUserId();
@@ -148,7 +145,7 @@ class PerfilController extends Controller {
      * Cambia la contraseña verificando la actual (POST /api/perfil/password).
      */
     public function password(): void {
-        if (!$this->requireApiRole(self::ROLES)) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $userId  = (int) Session::getUserId();
@@ -181,7 +178,7 @@ class PerfilController extends Controller {
      * desaparece en el próximo redeploy) y se sirve vía servirAvatar().
      */
     public function avatar(): void {
-        if (!$this->requireApiRole(self::ROLES)) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $userId = (int) Session::getUserId();

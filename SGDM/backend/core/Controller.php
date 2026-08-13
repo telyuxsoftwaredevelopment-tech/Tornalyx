@@ -90,4 +90,20 @@ abstract class Controller {
         }
         return true;
     }
+
+    /**
+     * Exige sesión activa, sin restricción de rol.
+     *
+     * Los roles de torneo (organizador/participante) ya no son un rol de
+     * cuenta: se derivan de torneos.organizador_id y de inscripciones. Los
+     * endpoints que dependen de esa pertenencia validan la propiedad ellos
+     * mismos (p. ej. puedeGestionar()); acá solo se exige estar logueado.
+     */
+    protected function requireApiLogin(): bool {
+        if (!Session::isLoggedIn()) {
+            $this->jsonError('Tu sesión expiró. Iniciá sesión de nuevo.', ['login' => true], 401);
+            return false;
+        }
+        return true;
+    }
 }

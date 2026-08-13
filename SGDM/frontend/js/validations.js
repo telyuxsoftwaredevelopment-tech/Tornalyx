@@ -9,14 +9,10 @@
 /* ─── Helpers de autenticación (AJAX) ────────────────── */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/* Redirige al panel según el rol devuelto por el backend. */
+/* Redirige al panel según el rol devuelto por el backend. "Organizador" ya
+   no es un rol de cuenta: cualquier usuario logueado entra a "Mis torneos". */
 function redirectByRole(rol) {
-  const map = {
-    administrador: '/admin/dashboard',
-    organizador:   '/organizador/dashboard',
-    participante:  '/perfil',
-  };
-  window.location.href = map[rol] || '/';
+  window.location.href = rol === 'administrador' ? '/admin/dashboard' : '/organizador/dashboard';
 }
 
 /* Muestra un mensaje de error (toast si existe, alert como fallback). */

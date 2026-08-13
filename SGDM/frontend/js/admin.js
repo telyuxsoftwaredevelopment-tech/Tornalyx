@@ -21,9 +21,8 @@ const DOT_POR_TIPO = {
 
 /* Color del badge y etiqueta legible de cada rol. */
 const ROL_BADGE = {
-  participante:  { badge: 'badge-blue',   label: 'Participante'  },
-  organizador:  { badge: 'badge-yellow', label: 'Organizador'   },
-  administrador: { badge: 'badge-red',    label: 'Administrador' }
+  participante:  { badge: 'badge-blue', label: 'Participante'  },
+  administrador: { badge: 'badge-red',  label: 'Administrador' }
 };
 
 /* Punto y etiqueta de cada estado de usuario. */

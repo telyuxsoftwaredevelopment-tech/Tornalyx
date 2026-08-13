@@ -53,7 +53,7 @@ class PartidoController extends Controller {
      * En liga crea el calendario completo; en eliminación y suizo, una ronda.
      */
     public function generar(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $torneoId = filter_input(INPUT_POST, 'torneo_id', FILTER_VALIDATE_INT);
@@ -105,7 +105,7 @@ class PartidoController extends Controller {
      * Programa fecha, hora y lugar de un partido (POST /api/partido/programar).
      */
     public function programar(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $partidoId = filter_input(INPUT_POST, 'partido_id', FILTER_VALIDATE_INT);
@@ -147,7 +147,7 @@ class PartidoController extends Controller {
      * pendiente, en juego, finalizado o aplazado.
      */
     public function estado(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $partidoId = filter_input(INPUT_POST, 'partido_id', FILTER_VALIDATE_INT);
@@ -174,7 +174,7 @@ class PartidoController extends Controller {
      * y recalcula la tabla de posiciones del torneo.
      */
     public function resultado(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $partidoId = filter_input(INPUT_POST, 'partido_id',      FILTER_VALIDATE_INT);
@@ -223,7 +223,7 @@ class PartidoController extends Controller {
      * (POST /api/partido/asistencia).
      */
     public function asistencia(): void {
-        if (!$this->requireApiRole(['participante', 'organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $partidoId = filter_input(INPUT_POST, 'partido_id', FILTER_VALIDATE_INT);

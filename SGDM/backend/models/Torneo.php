@@ -92,16 +92,22 @@ class Torneo extends Model {
     /**
      * Indica si un organizador ya tiene un torneo con ese nombre. Evita
      * duplicados por doble envío del formulario o por error de carga.
+     * $excluirId se usa al editar, para no chocar contra el propio torneo.
      *
-     * @param int    $organizadorId
-     * @param string $nombre
+     * @param int      $organizadorId
+     * @param string   $nombre
+     * @param int|null $excluirId
      * @return bool
      */
-    public function existeNombreDeOrganizador(int $organizadorId, string $nombre): bool {
-        $stmt = $this->db->prepare(
-            'SELECT 1 FROM torneos WHERE organizador_id = ? AND nombre = ? LIMIT 1'
-        );
-        $stmt->execute([$organizadorId, $nombre]);
+    public function existeNombreDeOrganizador(int $organizadorId, string $nombre, ?int $excluirId = null): bool {
+        $sql    = 'SELECT 1 FROM torneos WHERE organizador_id = ? AND nombre = ?';
+        $params = [$organizadorId, $nombre];
+        if ($excluirId !== null) {
+            $sql .= ' AND id <> ?';
+            $params[] = $excluirId;
+        }
+        $stmt = $this->db->prepare($sql . ' LIMIT 1');
+        $stmt->execute($params);
         return (bool) $stmt->fetchColumn();
     }
 

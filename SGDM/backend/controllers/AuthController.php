@@ -171,7 +171,11 @@ class AuthController extends Controller {
         $email     = filter_input(INPUT_POST, 'email',         FILTER_SANITIZE_EMAIL)         ?? '';
         $password  = filter_input(INPUT_POST, 'password',      FILTER_DEFAULT)                ?? '';
         $fechaNac  = filter_input(INPUT_POST, 'fecha_nacimiento', FILTER_DEFAULT)             ?? '';
-        $rol       = filter_input(INPUT_POST, 'rol', FILTER_DEFAULT)                          ?? 'participante';
+        // El rol de cuenta ya no se elige al registrarse: "organizador" es una
+        // pertenencia por torneo (torneos.organizador_id), no un rol global.
+        // Toda alta pública queda como 'participante'; solo un administrador
+        // puede promover a 'administrador' desde el panel.
+        $rol = 'participante';
 
         // Validaciones básicas en backend
         if (empty($nombre) || empty($email) || empty($password) || empty($fechaNac)) {
@@ -185,9 +189,6 @@ class AuthController extends Controller {
         if (!$this->passwordEsFuerte($password)) {
             $this->jsonError('La contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas y números.');
             return;
-        }
-        if (!in_array($rol, ['participante', 'organizador'], true)) {
-            $rol = 'participante';
         }
 
         // Verificar email duplicado

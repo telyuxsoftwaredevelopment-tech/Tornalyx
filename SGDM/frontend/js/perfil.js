@@ -51,7 +51,7 @@
 
   function pintarHero(u) {
     $('heroNombre').textContent = `${u.nombre} ${u.apellido}`.trim();
-    $('heroRol').textContent = { participante: 'Participante', organizador: 'Organizador', administrador: 'Administrador' }[u.rol] || u.rol;
+    $('heroRol').textContent = { participante: 'Participante', administrador: 'Administrador' }[u.rol] || u.rol;
 
     const bio = $('heroBio');
     if (u.bio) {

@@ -33,7 +33,7 @@ class InscripcionController extends Controller {
      * la respuesta indica si quedó aprobada o pendiente de revisión.
      */
     public function inscribirse(): void {
-        if (!$this->requireApiRole(['participante', 'organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $usuarioId = (int) Session::getUserId();
@@ -92,7 +92,7 @@ class InscripcionController extends Controller {
      * Cancela la propia inscripción (POST /api/inscripcion/cancelar).
      */
     public function cancelar(): void {
-        if (!$this->requireApiRole(['participante', 'organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $torneoId = filter_input(INPUT_POST, 'torneo_id', FILTER_VALIDATE_INT);
@@ -123,7 +123,7 @@ class InscripcionController extends Controller {
      * Solo el organizador dueño y los administradores.
      */
     public function listar(int $torneoId): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         if (!$this->puedeGestionar($torneoId)) {
@@ -139,7 +139,7 @@ class InscripcionController extends Controller {
      * Aprueba o rechaza una inscripción (POST /api/inscripcion/resolver).
      */
     public function resolver(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $id     = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);

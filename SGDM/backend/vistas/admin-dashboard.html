@@ -203,7 +203,7 @@
       <div class="user-row">
         <div class="user-avatar" data-user-avatar>A</div>
         <div>
-          <div class="user-name" data-user-name>Administrador</div>
+          <a class="user-name" data-user-name href="/perfil" style="text-decoration:none">Administrador</a>
           <div class="user-role" data-user-role>admin</div>
         </div>
         <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">🚪</a>
@@ -283,7 +283,6 @@
               <select class="form-control" id="usuariosRol" style="max-width:180px;padding:8px 14px">
                 <option value="">Todos los roles</option>
                 <option value="participante">Participantes</option>
-                <option value="organizador">Organizadores</option>
                 <option value="administrador">Administradores</option>
               </select>
               <input class="form-control" type="search" id="usuariosBuscar" placeholder="Buscar..." style="max-width:240px;padding:8px 14px" />
@@ -547,7 +546,6 @@
             <label class="form-label" for="usuarioRolCampo">Rol</label>
             <select class="form-control" id="usuarioRolCampo" name="rol" required>
               <option value="participante">Participante</option>
-              <option value="organizador">Organizador</option>
               <option value="administrador">Administrador</option>
             </select>
           </div>

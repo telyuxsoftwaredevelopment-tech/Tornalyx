@@ -95,11 +95,14 @@ $router->get('/api/me',           static fn() => (new AuthController())->me());
 // estuviera dentro de frontend/, la regla de URLs bonitas del .htaccess lo
 // serviría como estático sin pasar por ningún control de acceso.
 $router->get('/perfil', static function () {
-    Session::requireRole(['participante', 'organizador', 'administrador']);
+    Session::requireRole(['participante', 'administrador']);
     readfile(__DIR__ . '/../backend/vistas/perfil.html');
 });
 $router->get('/organizador/dashboard', static function () {
-    Session::requireRole(['organizador', 'administrador']);
+    // "Mis torneos": cualquier usuario logueado puede crear y gestionar
+    // torneos, el rol de organizador ya no es una cuenta global sino una
+    // pertenencia por torneo (torneos.organizador_id).
+    Session::requireRole(['participante', 'administrador']);
     readfile(__DIR__ . '/../backend/vistas/organizador-dashboard.html');
 });
 $router->get('/admin/dashboard', static function () {
@@ -126,6 +129,9 @@ $router->get('#^/api/torneo/(\d+)/partidos$#',      static fn($id) => (new Parti
 $router->get('#^/api/torneo/(\d+)/equipos$#',       static fn($id) => (new InscripcionController())->equipos((int) $id));
 $router->get('#^/api/torneo/(\d+)/inscripciones$#', static fn($id) => (new InscripcionController())->listar((int) $id));
 $router->get('#^/api/torneo/(\d+)/avisos$#',        static fn($id) => (new AvisoController())->deTorneo((int) $id));
+$router->post('#^/api/torneo/(\d+)/editar$#',       static fn($id) => (new TorneoController())->actualizar((int) $id));
+$router->post('#^/api/torneo/(\d+)/eliminar$#',     static fn($id) => (new TorneoController())->eliminar((int) $id));
+$router->post('#^/api/torneo/(\d+)/cancelar$#',     static fn($id) => (new TorneoController())->cancelar((int) $id));
 
 // ─── INSCRIPCIONES Y EQUIPOS (API JSON) ────────────────────────
 $router->post('/api/inscripcion',          static fn() => (new InscripcionController())->inscribirse());
