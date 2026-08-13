@@ -15,13 +15,12 @@ apt-get install -y prometheus-node-exporter
 echo "==> Instalando mysqld_exporter (métricas de MySQL)"
 apt-get install -y prometheus-mysqld-exporter
 install -d -m 0750 -o prometheus -g prometheus /etc/prometheus-mysqld-exporter
-cat > /etc/prometheus-mysqld-exporter/.my.cnf <<EOF
+(umask 077; cat > /etc/prometheus-mysqld-exporter/.my.cnf <<EOF
 [client]
 user=tornalyx_monitor
 password=${DB_MONITOR_PASS}
-host=127.0.0.1
 EOF
-chmod 600 /etc/prometheus-mysqld-exporter/.my.cnf
+)
 chown prometheus:prometheus /etc/prometheus-mysqld-exporter/.my.cnf
 
 echo "==> Instalando Prometheus"
@@ -33,6 +32,7 @@ systemctl enable prometheus
 echo "==> Instalando Grafana"
 apt-get install -y apt-transport-https software-properties-common
 if [[ ! -f /etc/apt/sources.list.d/grafana.list ]]; then
+    mkdir -p /etc/apt/keyrings
     curl -fsSL https://apt.grafana.com/gpg.key | gpg --dearmor -o /etc/apt/keyrings/grafana.gpg
     echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" \
         > /etc/apt/sources.list.d/grafana.list

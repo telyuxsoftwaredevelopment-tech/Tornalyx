@@ -18,10 +18,12 @@ y Grafana los consulta para armar dashboards.
 
 ## Por qué reusar `tornalyx_monitor`
 
-El usuario ya existe en `dcl.sql` con exactamente los permisos de
-solo-lectura que necesita `mysqld_exporter` — evita crear un usuario nuevo
-con permisos redundantes y mantiene la separación de funciones que ya
-documenta ese archivo.
+El usuario ya existe en `dcl.sql` con `SELECT` + `PROCESS`, permisos que
+cubren las métricas core de `mysqld_exporter` (global_status, global_variables,
+conexiones activas, etc.). Le falta `REPLICATION CLIENT` para colectores de
+replicación/binlog, pero en este único servidor esos no son necesarios.
+Reusar el usuario evita redundancia, mantiene la separación de funciones que
+ya documenta `dcl.sql`, y es una decisión deliberada y transparente de alcance.
 
 ## Acceso
 
