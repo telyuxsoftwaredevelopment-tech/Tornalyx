@@ -829,12 +829,14 @@ select.form-control option { background:var(--bg-2); color:var(--ink); }
 }
 .skip-link:focus { left:0; }
 
-/* En el navbar (--nav) el disparador es un ícono más del menú; en páginas
-   sin menú (incluidos los paneles de admin/organizador) queda como botón
-   flotante circular. Va abajo a la DERECHA: los dashboards tienen un
-   sidebar fijo pegado al borde izquierdo (0 a var(--sidebar-width)) que un
-   botón flotante a la izquierda taparía, junto con el acceso al perfil que
-   vive en el pie de ese sidebar. */
+/* El disparador es siempre un ícono dentro de la barra superior de la
+   página (menú público, franja de cuenta del login o topbar de los
+   paneles privados vía #topbarActions) — nunca la palabra "Accesibilidad"
+   ni un botón flotante. El flotante circular de acá abajo es un respaldo
+   por si alguna página no tuviera ninguna barra: antes vivía abajo a la
+   izquierda y en los paneles con sidebar fijo (0 a var(--sidebar-width))
+   tapaba el acceso al perfil que vive en su pie; por eso, si llega a
+   usarse, va a la derecha. */
 .a11y-widget--nav { display:inline-flex; }
 .a11y-widget--nav .a11y-btn {
   padding:0; width:20px; height:20px;

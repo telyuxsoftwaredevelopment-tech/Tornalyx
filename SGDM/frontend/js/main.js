@@ -493,25 +493,29 @@ function initAccessibility() {
     document.body.prepend(skip);
   }
 
-  /* El disparador es un enlace más del menú ("Accesibilidad", junto a
-     Documentación). El panel vive en <body> con posición fija para que no
-     lo recorte el navbar y sea el mismo en escritorio y en móvil. */
-  const navLinks = document.querySelector('.nav .nav-links');
-  const widget   = document.createElement('div');
-  widget.className = navLinks ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
-  // Ícono en vez de la palabra "Accesibilidad": en el botón flotante de los
-  // paneles privados el texto no entraba sin agrandar el botón, y el nombre
-  // accesible sigue viajando por aria-label/title para lectores de pantalla.
+  /* El disparador es siempre un ícono (nunca la palabra "Accesibilidad"),
+     ubicado dentro de la barra superior de la página, sea cual sea su
+     forma: el menú público (.nav-links), la franja de cuenta del login
+     (.nav-right) o la topbar de los paneles privados (#topbarActions).
+     Solo si una página no tiene ninguna barra cae al botón flotante. */
+  const navBar = document.querySelector('.nav .nav-links')
+    || document.querySelector('.nav .nav-right, .nav .nav-right-static')
+    || document.getElementById('topbarActions');
+  const widget = document.createElement('div');
+  widget.className = navBar ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
+  // El nombre accesible viaja por aria-label/title para lectores de pantalla.
+  const A11Y_ICON_SVG = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <circle cx="12" cy="7.2" r="1.3" fill="currentColor" stroke="none"/>
+      <path d="M6.5 9.2c3.6 1.1 7.4 1.1 11 0"/>
+      <path d="M12 10.4v4.1M12 14.5l-2.6 5M12 14.5l2.6 5"/>
+    </svg>`;
   widget.innerHTML = `
     <button type="button" class="a11y-btn" id="a11yBtn" aria-expanded="false"
             aria-controls="a11yPanel" aria-label="Accesibilidad" title="Opciones de accesibilidad">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"/>
-        <circle cx="12" cy="7.2" r="1.3" fill="currentColor" stroke="none"/>
-        <path d="M6.5 9.2c3.6 1.1 7.4 1.1 11 0"/>
-        <path d="M12 10.4v4.1M12 14.5l-2.6 5M12 14.5l2.6 5"/>
-      </svg>
+      ${A11Y_ICON_SVG}
     </button>`;
 
   const panel = document.createElement('div');
@@ -543,18 +547,24 @@ function initAccessibility() {
       </label>`;
 
   document.body.appendChild(panel);
-  if (navLinks) {
-    navLinks.appendChild(widget);          // queda a continuación de Documentación
+  if (navBar) {
+    navBar.appendChild(widget);            // último ítem de esa barra
   } else {
-    document.body.appendChild(widget);     // páginas sin menú: botón flotante
+    document.body.appendChild(widget);     // páginas sin ninguna barra: botón flotante
   }
 
   const btn = widget.querySelector('#a11yBtn');
 
-  /* Mismo panel desde el menú móvil, donde .nav-links está oculto. */
+  /* Mismo panel desde el menú móvil, donde .nav-links está oculto. Ícono
+     también acá (no la palabra), con aria-label para lectores de pantalla. */
   const abrirDesdeMobile = document.createElement('a');
   abrirDesdeMobile.href = '#';
-  abrirDesdeMobile.textContent = 'Accesibilidad';
+  abrirDesdeMobile.setAttribute('aria-label', 'Accesibilidad');
+  abrirDesdeMobile.title = 'Opciones de accesibilidad';
+  abrirDesdeMobile.style.display = 'inline-flex';
+  abrirDesdeMobile.style.width = '22px';
+  abrirDesdeMobile.style.height = '22px';
+  abrirDesdeMobile.innerHTML = A11Y_ICON_SVG;
   document.querySelectorAll('.mobile-nav').forEach(nav => {
     const copia = abrirDesdeMobile.cloneNode(true);
     copia.addEventListener('click', e => {
