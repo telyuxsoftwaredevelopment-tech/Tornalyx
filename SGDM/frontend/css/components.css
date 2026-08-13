@@ -314,3 +314,80 @@
 .status-dot--green  { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
 .status-dot--yellow { background: #eab308; box-shadow: 0 0 6px #eab308; }
 .status-dot--red    { background: var(--red-bright); box-shadow: 0 0 6px var(--red-bright); }
+
+/* ─── Auth flip card (login / registro) ──────────────── */
+.auth-flip-wrap { width: 100%; max-width: 920px; margin: 0 auto; }
+.auth-flip-wrap .auth-logo { text-align: center; margin-bottom: var(--space-6); }
+.auth-flip-wrap .auth-logo .logo-mark {
+  width: 72px; height: 72px; border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--red-deep);
+  margin: 0 auto;
+}
+
+.auth-card-flip { perspective: 1600px; }
+.auth-flip {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform .8s cubic-bezier(.4,0,.2,1), height .8s cubic-bezier(.4,0,.2,1);
+}
+.auth-flip.is-flipped { transform: rotateY(180deg); }
+.auth-flip.no-anim { transition: none; }
+
+.auth-face {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  background: var(--bg-card);
+  border: 1px solid var(--line-soft);
+  border-radius: 20px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.auth-face--front { position: relative; }
+.auth-face--back {
+  position: absolute; inset: 0;
+  grid-template-columns: 1fr 1.35fr;
+  transform: rotateY(180deg);
+}
+
+.auth-face__form  { padding: var(--space-8); overflow: auto; }
+.auth-face__promo {
+  background: linear-gradient(135deg, var(--red-deep), var(--red));
+  color: #fff;
+  padding: var(--space-8);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center; gap: var(--space-4);
+}
+.auth-face__promo h2 { font-family: var(--head); font-size: var(--font-size-2xl); }
+.auth-face__promo p  { font-size: var(--font-size-sm); opacity: .9; max-width: 26ch; }
+
+.btn-promo {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,.75);
+  color: #fff;
+  box-shadow: none;
+}
+.btn-promo:hover  { background: rgba(255,255,255,.15); border-color: #fff; color: #fff; }
+.btn-promo:active { box-shadow: none; background: rgba(255,255,255,.25); }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-flip { transition: none; }
+}
+
+/* Mobile: el panel promocional colapsa como franja compacta arriba en vez
+   de partir la pantalla en dos; el flip 3D se reemplaza por un toggle
+   simple entre las dos caras (sin rotateY, que no tiene sentido apiladas). */
+@media (max-width: 768px) {
+  .auth-card-flip { perspective: none; }
+  .auth-flip { transform: none !important; height: auto !important; transition: none; }
+  .auth-face {
+    position: relative !important;
+    grid-template-columns: 1fr !important;
+    transform: none !important;
+    display: none;
+  }
+  .auth-face.is-active { display: grid; }
+  .auth-face__form  { order: 2; padding: var(--space-6); }
+  .auth-face__promo { order: 1; padding: var(--space-5) var(--space-6); }
+  .auth-face__promo p { display: none; }
+}

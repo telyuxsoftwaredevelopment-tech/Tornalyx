@@ -2,6 +2,10 @@ Options -Indexes
 
 RewriteEngine On
 
+# /registro y /login sirven el mismo login.html (tarjeta fusionada con flip
+# 3D entre Iniciar sesión / Crear cuenta); no existe un registro.html propio.
+RewriteRule ^registro/?$ login.html [L]
+
 # URLs "bonitas" -> archivo .html estático correspondiente (p. ej. /login
 # -> login.html, /admin/dashboard -> admin/dashboard.html). Las vistas
 # simples ya no pasan por PHP; solo lo hacen las rutas de guardia de sesión
