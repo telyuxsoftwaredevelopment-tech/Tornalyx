@@ -318,11 +318,17 @@
 /* ─── Auth flip card (login / registro) ──────────────── */
 /* Ocupa toda la pantalla disponible bajo el navbar (sin tarjeta flotando
    en un recuadro chico): cada cara tiene la altura completa del viewport,
-   así que no depende de medir el contenido con JS para no cortarlo. */
+   así que no depende de medir el contenido con JS para no cortarlo.
+   .auth-card-flip se ancla con position:absolute+inset:0 a .auth-page (en
+   vez de height:100%): un height:100% no se resuelve de forma confiable
+   contra un contenedor cuyo alto viene de flex:1 varios niveles arriba
+   (el navegador lo trata como "auto" y la tarjeta colapsa al alto de su
+   contenido, dejando espacio vacío debajo). inset:0 la ancla de forma
+   directa al tamaño ya resuelto de .auth-page, sin ese problema. */
 .auth-card-flip {
   perspective: 1600px;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   animation: auth-fade-in .6s cubic-bezier(.22,1,.36,1) both;
 }
 @keyframes auth-fade-in {
@@ -398,13 +404,15 @@
    de partir la pantalla en dos; el flip 3D se reemplaza por un toggle
    simple entre las dos caras (sin rotateY, que no tiene sentido apiladas). */
 @media (max-width: 768px) {
-  .auth-card-flip { perspective: none; height: auto; min-height: 100%; }
+  /* En mobile no fijamos la tarjeta al tamaño de la pantalla: si el
+     contenido (el registro) no entra, tiene que poder crecer y que
+     scrollee la página entera, no quedar recortada. */
+  .auth-card-flip { position: static; perspective: none; }
   .auth-flip { transform: none !important; height: auto; transition: none; }
   .auth-face {
     position: relative !important;
     grid-template-columns: 1fr !important;
-    grid-auto-rows: auto 1fr;
-    height: auto; min-height: 100%;
+    height: auto;
     transform: none !important;
     display: none;
   }
