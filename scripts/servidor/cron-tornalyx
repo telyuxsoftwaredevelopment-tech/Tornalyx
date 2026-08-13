@@ -1,0 +1,8 @@
+# Tornalyx — cron de respaldo diario.
+# Instalar en /etc/cron.d/tornalyx (lo hace instalar-cron-backup.sh).
+# Corre como root porque necesita leer SGDM/frontend/uploads/avatars, que es
+# propiedad de www-data; mysqldump igual se autentica con el usuario de BD
+# de mínimo privilegio tornalyx_backup, no con root de MySQL.
+#
+# minuto hora día mes día-semana usuario comando
+5 3 * * * root TORNALYX_BACKUP_ENV=/etc/tornalyx/backup.env /opt/tornalyx/scripts/servidor/respaldo.sh >> /var/log/tornalyx-backup.log 2>&1
