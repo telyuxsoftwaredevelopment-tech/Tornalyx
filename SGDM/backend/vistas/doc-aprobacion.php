@@ -10,7 +10,7 @@
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../css/variables.css" />
-  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/main.css?v=2" />
   <link rel="stylesheet" href="../css/components.css" />
   <style>
     .aprob-page { padding:var(--space-12) var(--space-4) var(--space-16); }
@@ -93,6 +93,6 @@
     </div>
   </footer>
 
-  <script src="../js/main.js"></script>
+  <script src="../js/main.js?v=2"></script>
 </body>
 </html>
