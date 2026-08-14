@@ -31,6 +31,28 @@
 }
 .hero-stat__label { font-size:13px; color:var(--muted); }
 
+/* ─── Vista previa a la derecha del hero (columna 2 de .hero-top) ─────
+   Mobile-first: apilada debajo del texto por defecto (.hero-top sigue en
+   una sola columna); pasa a dos columnas recién en escritorio. El fondo
+   de la sección sigue siendo el sólido de siempre: la imagen es un
+   elemento contenido, no un background que lo tape. ─────────────────── */
+.hero-media {
+  animation:fade-up .6s .2s cubic-bezier(.22,1,.36,1) both;
+}
+.hero-media img {
+  display:block;
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  border-radius:20px;
+  border:1px solid var(--line);
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+}
+
+@media(min-width:860px) {
+  .hero-top { grid-template-columns:1.1fr 1fr; }
+}
+
 /* ─── Audiencias: foto a la izquierda, texto a la derecha ─ */
 .audiencias-grid {
   display:grid;
