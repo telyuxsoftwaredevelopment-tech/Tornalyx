@@ -392,8 +392,13 @@ class TorneoController extends Controller {
             $this->jsonError('El enlace del canal oficial no puede superar los 255 caracteres.', ['campo' => 'discord_url']);
             return null;
         }
-        if ($discord !== '' && !filter_var($discord, FILTER_VALIDATE_URL)) {
-            $this->jsonError('El enlace del canal oficial no es una URL válida.', ['campo' => 'discord_url']);
+        // FILTER_VALIDATE_URL solo exige sintaxis de URI: acepta esquemas como
+        // "javascript:" o "data:" como válidos. Sin este chequeo de esquema, un
+        // organizador podría guardar "javascript:alert(1)" como canal oficial y
+        // el front lo vuelca tal cual en el href del botón "Entrar al canal".
+        if ($discord !== '' && (!filter_var($discord, FILTER_VALIDATE_URL)
+            || !preg_match('#^https?://#i', $discord))) {
+            $this->jsonError('El enlace del canal oficial debe ser una URL http(s) válida.', ['campo' => 'discord_url']);
             return null;
         }
         if (!in_array($formato, self::FORMATOS, true)) {
