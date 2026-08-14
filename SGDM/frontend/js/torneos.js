@@ -19,20 +19,22 @@ const { Api, Utils } = window.Tornalyx;
 let catalogo = [];
 
 /**
- * Fondo de la cabecera de cada card, por disciplina.
+ * Fondo de la cabecera de cada card, por disciplina: micro-degradados
+ * oscuros dentro de la paleta del sitio (nunca colores sueltos ajenos a la
+ * marca), variando ángulo e intensidad de rojo para distinguir disciplinas.
  * @param {string} disciplina
  * @returns {string} valor CSS de background
  */
 function fondoDisciplina(disciplina) {
   const paletas = [
-    '#1e3a8a',
-    '#4c1d95',
-    '#065f46',
-    '#92400e',
-    '#1f2937',
-    '#0c4a6e'
+    'linear-gradient(135deg, #1a1012 0%, #2a1416 100%)',
+    'linear-gradient(135deg, #1a1012 0%, #431316 100%)',
+    'linear-gradient(160deg, #130c0d 0%, #5c1418 100%)',
+    'linear-gradient(135deg, #1f1113 0%, #6b1318 100%)',
+    'linear-gradient(200deg, #1a1012 0%, #3d1216 100%)',
+    'linear-gradient(115deg, #130c0d 0%, #501317 100%)'
   ];
-  /* Hash simple del nombre: la misma disciplina siempre recibe el mismo color. */
+  /* Hash simple del nombre: la misma disciplina siempre recibe el mismo degradé. */
   const texto = String(disciplina || '');
   let hash = 0;
   for (let i = 0; i < texto.length; i++) hash = (hash + texto.charCodeAt(i)) % paletas.length;
@@ -73,7 +75,7 @@ function cardHtml(t) {
       <div class="torneo-card__body">
         <div class="torneo-card__meta">
           <span class="badge ${estado.badge}">${esc(estado.label)}</span>
-          <span class="badge badge-blue">${esc(TorneoUI.formato(t.formato))}</span>
+          <span class="badge badge-muted">${esc(TorneoUI.formato(t.formato))}</span>
         </div>
         <h3 class="torneo-card__title">${esc(t.nombre)}</h3>
         <div class="torneo-card__info">${lineas.map(l => `<span>${l}</span>`).join('')}</div>

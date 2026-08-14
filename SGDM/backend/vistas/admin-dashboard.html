@@ -95,21 +95,8 @@
     .section-panel { display:none; }
     .section-panel.active { display:block; }
 
-    .kpi-grid {
-      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:var(--space-4); margin-bottom:var(--space-6);
-    }
-    .kpi-card {
-      background:var(--bg-card); border:1px solid var(--line);
-      border-radius:16px; padding:var(--space-5); transition:border-color .2s;
-    }
-    .kpi-card:hover { border-color:var(--red-deep); }
-    .kpi-card__label { font-size:var(--font-size-sm); color:var(--muted); margin-bottom:var(--space-2); }
-    .kpi-card__value {
-      font-family:var(--head); font-size:2.25rem; font-weight:800; line-height:1;
-      color:var(--red-bright); margin-bottom:6px;
-    }
-    .kpi-card__delta { font-size:12px; color:var(--muted-2); font-family:var(--mono); }
+    /* .kpi-grid / .kpi-card viven en main.css (compartido con el panel
+       de organizador, con ícono en la esquina superior derecha). */
 
     .data-table { width:100%; border-collapse:collapse; }
     .data-table th {
@@ -252,21 +239,25 @@
         <!-- KPIs y actividad los completa admin.js con GET /api/admin/stats -->
         <div class="kpi-grid" data-reveal>
           <div class="kpi-card">
+            <span class="kpi-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg></span>
             <div class="kpi-card__label">Usuarios registrados</div>
             <div class="kpi-card__value" id="kpiUsuarios">—</div>
             <div class="kpi-card__delta" id="kpiUsuariosDelta"></div>
           </div>
           <div class="kpi-card">
+            <span class="kpi-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4h10v3a5 5 0 0 1-10 0V4Z"/><path d="M7 5H4.5A2.5 2.5 0 0 0 7 7.5"/><path d="M17 5h2.5A2.5 2.5 0 0 1 17 7.5"/><path d="M12 11v4"/><path d="M9 19h6"/><path d="M10.5 15h3l.8 4h-4.6l.8-4Z"/></svg></span>
             <div class="kpi-card__label">Torneos activos</div>
             <div class="kpi-card__value" id="kpiTorneos">—</div>
             <div class="kpi-card__delta" id="kpiTorneosDelta"></div>
           </div>
           <div class="kpi-card">
+            <span class="kpi-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.6 4.5 5.3"/></svg></span>
             <div class="kpi-card__label">Equipos inscritos</div>
             <div class="kpi-card__value" id="kpiEquipos">—</div>
             <div class="kpi-card__delta" id="kpiEquiposDelta"></div>
           </div>
           <div class="kpi-card">
+            <span class="kpi-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 5h13l-3 4 3 4H5"/></svg></span>
             <div class="kpi-card__label">Partidos registrados</div>
             <div class="kpi-card__value" id="kpiPartidos">—</div>
             <div class="kpi-card__delta" id="kpiPartidosDelta"></div>

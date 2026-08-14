@@ -22,6 +22,7 @@
     .doc-materias { display:grid; grid-template-columns:1fr; gap:var(--space-4); max-width:960px; margin:0 auto; }
     .doc-materia {
       display:flex; flex-direction:column; gap:6px;
+      justify-content:space-between;
       padding:var(--space-6); background:var(--bg-card);
       border:1px solid var(--line-soft); border-radius:16px;
       text-decoration:none; transition:border-color var(--transition-fast), transform var(--transition-fast);

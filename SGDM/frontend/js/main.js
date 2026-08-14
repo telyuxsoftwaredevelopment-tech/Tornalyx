@@ -700,6 +700,34 @@ async function initCurrentUser() {
   });
 }
 
+/* ─── Menú de acciones (3 puntos) ─────────────────────── */
+/* Delegado en document: abre/cierra sin importar si el .action-menu se
+   agregó al DOM después (filas de tabla, tarjetas pintadas por JS). */
+function initActionMenus() {
+  const cerrarTodos = except => {
+    document.querySelectorAll('.action-menu.is-open').forEach(m => {
+      if (m === except) return;
+      m.classList.remove('is-open');
+      m.querySelector('.action-menu__trigger')?.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  document.addEventListener('click', e => {
+    const trigger = e.target.closest('.action-menu__trigger');
+    if (!trigger) { cerrarTodos(); return; }
+
+    const menu = trigger.closest('.action-menu');
+    const abrir = !menu.classList.contains('is-open');
+    cerrarTodos(abrir ? menu : null);
+    menu.classList.toggle('is-open', abrir);
+    trigger.setAttribute('aria-expanded', String(abrir));
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') cerrarTodos();
+  });
+}
+
 /* ─── Init global ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
@@ -709,6 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTabShortcuts();
   initThemeToggle();
   initAccessibility();
+  initActionMenus();
   initAuthNav();
   Toast.init();
   Modal.init();

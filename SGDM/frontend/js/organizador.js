@@ -167,10 +167,23 @@ function torneoItemHtml(t) {
         <span style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">${esc(barraValor)}</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:${barraAncho}%"></div></div>
-      <div style="margin-top:var(--space-3);display:flex;gap:var(--space-2);flex-wrap:wrap">
+      <div style="margin-top:var(--space-3);display:flex;justify-content:space-between;align-items:center;gap:var(--space-2)">
         <a class="btn btn-ghost btn-sm" href="/torneo-detalle?id=${t.id}">Ver detalle</a>
-        <button type="button" class="btn btn-ghost btn-sm" data-editar="${t.id}">Editar ajustes</button>
-        <button type="button" class="btn btn-ghost btn-sm" data-eliminar="${t.id}" style="color:var(--red-bright)">Eliminar</button>
+        <div class="action-menu">
+          <button type="button" class="action-menu__trigger" aria-haspopup="true" aria-expanded="false" aria-label="Más acciones para ${esc(t.nombre)}">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+          </button>
+          <div class="action-menu__list" role="menu">
+            <button type="button" class="action-menu__item" role="menuitem" data-editar="${t.id}">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              Editar ajustes
+            </button>
+            <button type="button" class="action-menu__item action-menu__item--danger" role="menuitem" data-eliminar="${t.id}">
+              <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              Eliminar
+            </button>
+          </div>
+        </div>
       </div>
     </div>`;
 }

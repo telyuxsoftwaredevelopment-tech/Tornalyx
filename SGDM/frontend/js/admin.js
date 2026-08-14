@@ -132,6 +132,11 @@ function usuarioRowHtml(u) {
   const rol    = ROL_BADGE[u.rol] || { badge: 'badge-muted', label: u.rol || '—' };
   const estado = ESTADO_USUARIO[u.estado] || { dot: 'dot-muted', label: u.estado || '—' };
   const nombre = [u.nombre, u.apellido].filter(Boolean).join(' ');
+  const suspendido   = u.estado === 'suspendido';
+  const txtToggle    = suspendido ? 'Activar cuenta' : 'Suspender cuenta';
+  const iconoToggle  = suspendido
+    ? '<svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>'
+    : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>';
 
   return `
     <tr>
@@ -140,7 +145,23 @@ function usuarioRowHtml(u) {
       <td><span class="badge ${rol.badge}">${esc(rol.label)}</span></td>
       <td><span class="dot ${estado.dot}"></span>${esc(estado.label)}</td>
       <td style="font-family:var(--mono);font-size:12px">${esc(fechaRegistro(u.created_at))}</td>
-      <td><a href="#" data-editar="${u.id}" style="color:var(--red-bright);font-size:12px">Editar</a></td>
+      <td>
+        <div class="action-menu">
+          <button type="button" class="action-menu__trigger" aria-haspopup="true" aria-expanded="false" aria-label="Más acciones para ${esc(nombre)}">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+          </button>
+          <div class="action-menu__list" role="menu">
+            <button type="button" class="action-menu__item" role="menuitem" data-editar="${u.id}">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              Editar
+            </button>
+            <button type="button" class="action-menu__item ${suspendido ? '' : 'action-menu__item--danger'}" role="menuitem" data-toggle-estado="${u.id}">
+              ${iconoToggle}
+              ${txtToggle}
+            </button>
+          </div>
+        </div>
+      </td>
     </tr>`;
 }
 
@@ -163,12 +184,16 @@ function renderUsuarios() {
     ? filtrados.map(usuarioRowHtml).join('')
     : '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No hay usuarios que coincidan.</td></tr>';
 
-  /* Cada enlace "Editar" abre el modal con los datos de ese usuario. */
-  body.querySelectorAll('[data-editar]').forEach(a =>
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      abrirModalUsuario(usuarios.find(u => u.id === Number(a.dataset.editar)));
+  /* "Editar" abre el modal con los datos de ese usuario. */
+  body.querySelectorAll('[data-editar]').forEach(b =>
+    b.addEventListener('click', () => {
+      abrirModalUsuario(usuarios.find(u => u.id === Number(b.dataset.editar)));
     })
+  );
+  /* "Suspender/Activar cuenta": reenvía los mismos datos del usuario con
+     el estado invertido, sin abrir el modal (mismo endpoint que editar). */
+  body.querySelectorAll('[data-toggle-estado]').forEach(b =>
+    b.addEventListener('click', () => toggleEstadoUsuario(Number(b.dataset.toggleEstado)))
   );
 
   const footer = document.getElementById('usuariosFooter');
@@ -252,6 +277,36 @@ function upsertUsuario(u) {
   if (i >= 0) usuarios[i] = u;
   else        usuarios.unshift(u);
   renderUsuarios();
+}
+
+/**
+ * Suspende o reactiva una cuenta desde el menú de acciones de la fila,
+ * sin pasar por el modal. Reenvía los datos actuales del usuario con el
+ * estado invertido al mismo endpoint que usa "Editar" (que exige todos
+ * los campos, no solo el que cambió).
+ * @param {number} id
+ */
+async function toggleEstadoUsuario(id) {
+  const u = usuarios.find(x => x.id === id);
+  if (!u) return;
+  const nuevoEstado = u.estado === 'suspendido' ? 'activo' : 'suspendido';
+
+  try {
+    const data = await Api.post('/api/admin/usuario/actualizar', {
+      id: u.id,
+      nombre: u.nombre,
+      apellido: u.apellido,
+      email: u.email,
+      rol: u.rol,
+      estado: nuevoEstado,
+      fecha_nac: (u.fecha_nac || '').slice(0, 10),
+    });
+    Toast.success(data.mensaje || 'Listo.');
+    if (data.usuario) upsertUsuario(data.usuario);
+    else await cargarUsuarios();
+  } catch (err) {
+    Toast.error(err.message);
+  }
 }
 
 /** Envía el formulario del modal a crear o actualizar según el modo. */
