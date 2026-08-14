@@ -376,6 +376,74 @@ p  { line-height:1.6; }
   .navbar__hamburger,.burger { display:none; }
 }
 
+/* ─── Nav utility (mobile) ────────────────────────────────
+   Reemplaza al burger en las páginas públicas que navegan por la bottom
+   nav: sólo lleva tema + accesibilidad (la navegación bajó a la barra
+   inferior, ver .bottom-nav). */
+.nav-utility { display:flex; align-items:center; gap:10px; margin-left:auto; }
+@media(min-width:860px) { .nav-utility { display:none; } }
+
+/* ─── Bottom nav (mobile, páginas públicas) ───────────────
+   Pill deslizante posicionado por JS (initBottomNav en main.js) sobre el
+   tab con aria-current="page"; content-box a propósito para que el
+   safe-area del home indicator sea espacio extra y no achique los 60px
+   de íconos. */
+.bottom-nav {
+  position:fixed; left:0; right:0; bottom:0; z-index:60;
+  box-sizing:content-box;
+  display:flex; justify-content:space-around; align-items:center;
+  height:60px;
+  padding-bottom:env(safe-area-inset-bottom);
+  background:rgba(var(--bg-rgb),.92);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);
+}
+@media(min-width:860px) { .bottom-nav { display:none; } }
+
+body:has(.bottom-nav) { padding-bottom:calc(60px + env(safe-area-inset-bottom)); }
+@media(min-width:860px) { body:has(.bottom-nav) { padding-bottom:0; } }
+/* El panel de accesibilidad se ancla abajo en mobile; con bottom nav
+   presente hay que subirlo para que no quede tapado. */
+@media(max-width:520px) {
+  body:has(.bottom-nav) .a11y-panel { bottom:calc(60px + 12px + env(safe-area-inset-bottom)); }
+}
+
+.bottom-nav__pill {
+  /* left:0 explícito: al ser abs-positioned dentro de un contenedor flex,
+     sin esto la "posición estática" de referencia para translateX() es
+     ambigua/inconsistente entre navegadores. */
+  position:absolute; left:0; top:6px; height:48px; width:56px;
+  border-radius:14px;
+  background:rgba(236,28,36,.13); /* --red en rgba, ver variables.css */
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1),
+             width .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+}
+
+.bottom-nav__item {
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:2px; flex:1;
+  padding:6px 0;
+  color:var(--muted);
+  font-size:10px; font-weight:600;
+  transition:color .2s;
+}
+.bottom-nav__icon { display:inline-flex; transition:transform .3s cubic-bezier(.34,1.56,.64,1); }
+.bottom-nav__icon svg { width:22px; height:22px; }
+.bottom-nav__item[aria-current="page"] { color:var(--red-bright); }
+.bottom-nav__item[aria-current="page"] .bottom-nav__icon { transform:translateY(-1px) scale(1.1); }
+.bottom-nav__item:active .bottom-nav__icon { transform:scale(.86); }
+
+.bottom-nav__avatar {
+  width:22px; height:22px; border-radius:50%; flex:none;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--font-heading); font-weight:700; font-size:9px;
+  color:#fff; background:var(--red);
+  background-size:cover; background-position:center;
+}
+
 /* ─── Hero ────────────────────────────────────────────── */
 .hero {
   position:relative;

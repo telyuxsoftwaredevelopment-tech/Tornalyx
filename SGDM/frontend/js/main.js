@@ -35,6 +35,45 @@ function initMobileNav() {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 }
 
+/* ─── Bottom Nav (mobile, páginas públicas) ──────────── */
+/* Desliza el pill de fondo hasta el tab con aria-current="page". Como acá
+   no hay SPA (cada tab es una carga de página nueva), la animación se
+   simula: se guarda el índice del tab activo en sessionStorage, y al
+   entrar a la página siguiente el pill arranca en la posición vieja (sin
+   transición) y en el frame siguiente se anima hacia la nueva. Así cada
+   navegación se siente como un slide, no como un salto. */
+function initBottomNav() {
+  const nav = document.querySelector('.bottom-nav');
+  if (!nav) return;
+  const pill  = nav.querySelector('.bottom-nav__pill');
+  const items = Array.from(nav.querySelectorAll('.bottom-nav__item'));
+  const activeIndex = items.findIndex(a => a.getAttribute('aria-current') === 'page');
+  if (!pill || activeIndex === -1) return;
+
+  const place = (index, animate) => {
+    const item = items[index];
+    if (!item) return;
+    pill.style.transition = animate ? '' : 'none';
+    pill.style.width = (item.offsetWidth - 8) + 'px';
+    pill.style.transform = `translateX(${item.offsetLeft + 4}px)`;
+  };
+
+  const STORAGE_KEY = 'tornalyx-bottomnav-idx';
+  let prevIndex = -1;
+  try { prevIndex = parseInt(sessionStorage.getItem(STORAGE_KEY), 10); } catch { /* privado / bloqueado */ }
+
+  if (Number.isInteger(prevIndex) && prevIndex >= 0 && prevIndex !== activeIndex) {
+    place(prevIndex, false);
+    requestAnimationFrame(() => requestAnimationFrame(() => place(activeIndex, true)));
+  } else {
+    place(activeIndex, false);
+  }
+
+  try { sessionStorage.setItem(STORAGE_KEY, String(activeIndex)); } catch { /* privado / bloqueado */ }
+
+  window.addEventListener('resize', () => place(activeIndex, false));
+}
+
 /* ─── Scroll Reveal ─────────────────────────────────── */
 function initScrollReveal() {
   if ('IntersectionObserver' in window) {
@@ -432,6 +471,27 @@ async function initAuthNav() {
     return a;
   };
 
+  /* Tab "Cuenta" de la bottom nav: mismo criterio que el avatar de arriba,
+     pero sin reemplazar el <a> entero (rompería el pill de initBottomNav,
+     que mide sus posiciones por índice) — sólo se le cambia el ícono
+     interno. Va antes del reemplazo genérico de a[href="/login"] de abajo
+     para que ese selector ya no lo encuentre (le cambiamos el href acá). */
+  document.querySelectorAll('.bottom-nav__account[href="/login"]').forEach(a => {
+    a.href = panelUrl;
+    a.title = panelTxt;
+    a.setAttribute('aria-label', panelTxt);
+    const icono = a.querySelector('.bottom-nav__icon');
+    if (!icono) return;
+    const av = document.createElement('span');
+    av.className = 'bottom-nav__avatar';
+    if (me.avatar_url) {
+      av.style.backgroundImage = `url(${encodeURI(me.avatar_url)})`;
+    } else {
+      av.textContent = ((me.nombre || '')[0] || '') + ((me.apellido || '')[0] || '');
+    }
+    icono.replaceWith(av);
+  });
+
   /* En desktop el acceso a la cuenta del nav pasa a ser la foto; cualquier
      otro botón/enlace "Entrar" de la página (hero, footer, CTAs sueltos)
      pasa a llevar al panel en vez de mandar de nuevo al login. */
@@ -570,10 +630,32 @@ function initAccessibility() {
     const copia = abrirDesdeMobile.cloneNode(true);
     copia.addEventListener('click', e => {
       e.preventDefault();
+      // Sin esto, el click sigue subiendo hasta el listener de "click
+      // afuera cierra" de más abajo (.mobile-nav no es descendiente de
+      // `widget` ni de `panel`) y cierra el panel en el mismo evento
+      // que lo abre.
+      e.stopPropagation();
       document.getElementById('mobileClose')?.click();
       togglePanel(true);
     });
     nav.insertBefore(copia, nav.querySelector('.theme-toggle'));
+  });
+
+  /* Mismo criterio en las páginas que reemplazaron el menú móvil por la
+     bottom nav: el disparador vive en la tira de utilidades del header
+     (#navUtility), no hay drawer que cerrar antes de abrir el panel.
+     stopPropagation: #navUtility no es descendiente de `widget` ni de
+     `panel`, así que sin esto el listener de "click afuera cierra" (más
+     abajo) lo trataría como un click externo y cerraría el panel en el
+     mismo evento que lo abre. */
+  document.querySelectorAll('.nav-utility').forEach(host => {
+    const copia = abrirDesdeMobile.cloneNode(true);
+    copia.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      togglePanel(true);
+    });
+    host.appendChild(copia);
   });
 
   const aplicar = () => {
@@ -731,6 +813,7 @@ function initActionMenus() {
 /* ─── Init global ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
+  initBottomNav();
   initScrollReveal();
   initTabs();
   initImageFallbacks();
