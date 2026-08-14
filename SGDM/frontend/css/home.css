@@ -18,18 +18,23 @@
 .hero-text .lead { margin:0; max-width:52ch; }
 .hero-cta { margin-top:32px; animation:fade-up .6s .28s cubic-bezier(.22,1,.36,1) both; }
 
-/* ─── Contadores animados: torneos/disciplinas reales, cargados por JS
-   (home-stats.js). Arrancan ocultos: si el API falla, no se muestran en
-   vez de dejar un "0" que parezca roto. ────────────────────────────── */
-.hero-stats {
-  display:flex; gap:40px; margin-top:32px;
+/* ─── Propuesta de valor debajo del CTA: tags fijos, no contadores reales
+   (evita el "social proof inverso" de mostrar pocos torneos/disciplinas
+   mientras la plataforma es chica). ──────────────────────────────────── */
+.hero-values {
+  display:flex; gap:16px; flex-wrap:wrap; margin-top:32px;
   animation:fade-up .6s .4s cubic-bezier(.22,1,.36,1) both;
 }
-.hero-stat__value {
-  display:block; font-family:var(--font-heading);
-  font-size:clamp(1.75rem,4vw,2.25rem); font-weight:700; color:var(--ink);
+.hero-value {
+  padding-left:14px;
+  border-left:2px solid var(--red);
+  max-width:172px;
 }
-.hero-stat__label { font-size:13px; color:var(--muted); }
+.hero-value__title {
+  display:block; font-family:var(--font-heading);
+  font-size:15px; font-weight:700; color:var(--ink);
+}
+.hero-value__desc { font-size:13px; color:var(--muted); margin-top:2px; }
 
 /* ─── Vista previa a la derecha del hero (columna 2 de .hero-top) ─────
    Mobile-first: apilada debajo del texto por defecto (.hero-top sigue en
@@ -46,12 +51,16 @@
   object-fit:cover;
   border-radius:20px;
   border:1px solid var(--line);
-  box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6), 0 0 32px -6px var(--red-glow);
 }
 
 @media(min-width:860px) {
   .hero-top { grid-template-columns:1.1fr 1fr; }
 }
+
+/* Menos aire entre el hero y la sección siguiente: el bloque de valor ya
+   cierra el hero visualmente, no hace falta tanto respiro extra. */
+.hero { padding-bottom:clamp(32px,5vw,64px); }
 
 /* ─── Audiencias: foto a la izquierda, texto a la derecha ─ */
 .audiencias-grid {
@@ -72,6 +81,7 @@
   border:1px solid var(--line);
   background:var(--bg-2);
   overflow:hidden;
+  box-shadow:0 0 32px -6px var(--red-glow);
 }
 .galeria__slide {
   position:absolute; inset:0;
