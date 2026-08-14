@@ -251,20 +251,20 @@
               <div class="form-grid-2">
                 <div class="form-group">
                   <label class="form-label" for="pNombre">Nombre</label>
-                  <input class="form-control" type="text" id="pNombre" name="nombre" required />
+                  <input class="form-control" type="text" id="pNombre" name="nombre" maxlength="60" required />
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="pApellido">Apellido</label>
-                  <input class="form-control" type="text" id="pApellido" name="apellido" required />
+                  <input class="form-control" type="text" id="pApellido" name="apellido" maxlength="60" required />
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="pEmail">Correo electrónico</label>
-                <input class="form-control" type="email" id="pEmail" name="email" required />
+                <input class="form-control" type="email" id="pEmail" name="email" maxlength="120" required />
               </div>
               <div class="form-group">
                 <label class="form-label" for="pFecha">Fecha de nacimiento</label>
-                <input class="form-control" type="date" id="pFecha" name="fecha_nac" required />
+                <input class="form-control" type="date" id="pFecha" name="fecha_nac" min="1900-01-01" required />
               </div>
               <div class="form-group">
                 <label class="form-label" for="pUbicacion">Ubicación</label>

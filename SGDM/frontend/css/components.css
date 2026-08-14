@@ -76,6 +76,9 @@
 }
 .form-control.input-error { border-color: var(--red-bright); }
 .form-control::placeholder { color: var(--muted-2); }
+/* Las casillas de mensaje (reglamento, premios, avisos, bio, etc.) no se
+   pueden agrandar arrastrando: el alto lo define `rows`, no el usuario. */
+textarea.form-control { resize: none; }
 .form-error    { display: block; font-size: 12px; color: var(--red-bright); margin-top: 4px; }
 .form-error.hidden { display: none; }
 

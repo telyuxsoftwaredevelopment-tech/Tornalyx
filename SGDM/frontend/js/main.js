@@ -432,10 +432,11 @@ async function initAuthNav() {
     return a;
   };
 
-  /* En desktop el acceso a la cuenta pasa a ser la foto; en el menú móvil
-     conviene el texto, que es más claro con el menú desplegado. */
+  /* En desktop el acceso a la cuenta del nav pasa a ser la foto; cualquier
+     otro botón/enlace "Entrar" de la página (hero, footer, CTAs sueltos)
+     pasa a llevar al panel en vez de mandar de nuevo al login. */
   document.querySelectorAll('.nav-right a[href="/login"]').forEach(a => a.replaceWith(avatar()));
-  document.querySelectorAll('.mobile-nav a[href="/login"]').forEach(a => {
+  document.querySelectorAll('a[href="/login"]').forEach(a => {
     a.href = panelUrl;
     a.textContent = panelTxt;
   });

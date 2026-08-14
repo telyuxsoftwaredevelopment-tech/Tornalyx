@@ -103,8 +103,7 @@ class PerfilController extends Controller {
             $this->jsonError('Correo electrónico inválido.');
             return;
         }
-        $d = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaNac);
-        if ($d === false || $d->format('Y-m-d') !== $fechaNac) {
+        if (!$this->esFechaNacValida($fechaNac)) {
             $this->jsonError('La fecha de nacimiento no es válida.');
             return;
         }

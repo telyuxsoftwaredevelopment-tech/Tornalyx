@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
   <title>Tornalyx | Panel de Administración</title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
@@ -221,6 +222,15 @@
         <span style="font-size:12px;font-family:var(--mono);color:var(--muted-2)">
           <span class="dot dot-green"></span>Sistema activo
         </span>
+        <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
+          <input type="checkbox" class="theme-toggle__input" />
+          <span class="theme-toggle__track">
+            <span class="theme-toggle__thumb">
+              <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+            </span>
+          </span>
+        </label>
         <a href="/torneos" class="btn btn-ghost btn-sm">Ver sitio</a>
       </div>
     </header>
@@ -363,7 +373,7 @@
               <div class="form-group">
                 <label class="form-label" for="descripcion">Descripción del torneo</label>
                 <textarea class="form-control" id="descripcion" name="descripcion" rows="3" maxlength="2000"
-                  placeholder="Describe el torneo, reglas especiales, premios, etc." style="resize:vertical"></textarea>
+                  placeholder="Describe el torneo, reglas especiales, premios, etc."></textarea>
               </div>
               <div class="form-group">
                 <label class="form-label" for="publicar">Al crearlo</label>
@@ -560,7 +570,7 @@
         </div>
         <div class="form-group">
           <label class="form-label" for="usuarioFechaNac">Fecha de nacimiento</label>
-          <input class="form-control" type="date" id="usuarioFechaNac" name="fecha_nac" required />
+          <input class="form-control" type="date" id="usuarioFechaNac" name="fecha_nac" min="1900-01-01" required />
         </div>
         <div class="form-group">
           <label class="form-label" for="usuarioPassword">Contraseña</label>

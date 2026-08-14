@@ -182,7 +182,11 @@ class AuthController extends Controller {
             $this->jsonError('Todos los campos son obligatorios.');
             return;
         }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (mb_strlen($nombre) > 60 || mb_strlen($apellido) > 60) {
+            $this->jsonError('Nombre y apellido no pueden superar los 60 caracteres.');
+            return;
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 120) {
             $this->jsonError('Correo electrónico inválido.');
             return;
         }

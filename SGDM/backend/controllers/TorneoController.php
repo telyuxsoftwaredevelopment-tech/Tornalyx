@@ -388,6 +388,10 @@ class TorneoController extends Controller {
             $this->jsonError('Los premios no pueden superar los 2000 caracteres.', ['campo' => 'premios']);
             return null;
         }
+        if ($discord !== '' && mb_strlen($discord) > 255) {
+            $this->jsonError('El enlace del canal oficial no puede superar los 255 caracteres.', ['campo' => 'discord_url']);
+            return null;
+        }
         if ($discord !== '' && !filter_var($discord, FILTER_VALIDATE_URL)) {
             $this->jsonError('El enlace del canal oficial no es una URL válida.', ['campo' => 'discord_url']);
             return null;
@@ -446,7 +450,15 @@ class TorneoController extends Controller {
      */
     private function esFechaValida(string $fecha): bool {
         $d = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
-        return $d !== false && $d->format('Y-m-d') === $fecha;
+        if ($d === false || $d->format('Y-m-d') !== $fecha) {
+            return false;
+        }
+        // `Y` acepta años de más de 4 dígitos (p. ej. "20260-01-01" pasa el
+        // formato igual): sin este rango, un typo explota contra la columna
+        // DATE de la base recién al guardar. A diferencia de una fecha de
+        // nacimiento, un torneo sí puede planificarse a futuro.
+        $anio = (int) $d->format('Y');
+        return $anio >= 1900 && $anio <= 2200;
     }
 
     /**
