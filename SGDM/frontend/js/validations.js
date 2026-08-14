@@ -537,9 +537,12 @@ function initRegistroSubmit() {
     }
     // El año de <input type="date"> no está acotado en todos los navegadores
     // (se puede escribir "20001-07-13" a mano): sin este chequeo el backend
-    // lo rechaza recién después del viaje al servidor.
-    const anioNac = Number(fecha.value.slice(0, 4));
-    if (anioNac < 1900 || fecha.value > new Date().toISOString().slice(0, 10)) {
+    // lo rechaza recién después del viaje al servidor. El regex exige año de
+    // EXACTAMENTE 4 dígitos: con eso, comparar como string contra otra fecha
+    // ISO de 4 dígitos es válido (mismo largo, mismo formato).
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha.value)
+        || fecha.value < '1900-01-01'
+        || fecha.value > new Date().toISOString().slice(0, 10)) {
       authError('La fecha de nacimiento no es válida.');
       fecha.focus();
       return;

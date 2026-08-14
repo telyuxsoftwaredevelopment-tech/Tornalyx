@@ -106,4 +106,21 @@ abstract class Controller {
         }
         return true;
     }
+
+    /**
+     * Valida una fecha de nacimiento: formato YYYY-MM-DD, existente, no
+     * futura y con año dentro de un rango humano razonable. `Y` en
+     * DateTime::createFromFormat acepta años de más de 4 dígitos (p. ej.
+     * "20001-07-13" por un typo pasa el formato igual), y sin el piso de
+     * 1900 el INSERT/UPDATE explota contra la columna DATE de la base.
+     * Usado por el registro público y el alta/edición de usuarios del admin.
+     */
+    protected function esFechaNacValida(string $fecha): bool {
+        $d = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
+        if ($d === false || $d->format('Y-m-d') !== $fecha) {
+            return false;
+        }
+        $anio = (int) $d->format('Y');
+        return $anio >= 1900 && $d <= new DateTimeImmutable('today');
+    }
 }

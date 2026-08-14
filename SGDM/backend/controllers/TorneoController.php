@@ -198,6 +198,8 @@ class TorneoController extends Controller {
             return;
         }
 
+        $tieneActividad = $this->tieneActividad($id);
+
         // El formato define cómo se arma el fixture: no se puede tocar una vez
         // generado, porque los partidos ya creados quedarían inconsistentes.
         $tieneFixture = count((new Partido())->listarPorTorneo($id)) > 0;
@@ -209,19 +211,47 @@ class TorneoController extends Controller {
             return;
         }
 
-        $this->torneoModel->update($id, [
+        // "Por equipos" define si las inscripciones llevan equipo_id: cambiar
+        // la modalidad con inscripciones ya cargadas las dejaría huérfanas.
+        // Solo aplica si el formulario que llamó realmente envió este campo
+        // (el panel de admin usa una versión simplificada del formulario que
+        // no lo incluye, y en ese caso se preserva el valor actual más abajo).
+        $requiereEquiposEnviado = filter_input(INPUT_POST, 'requiere_equipos', FILTER_DEFAULT) !== null;
+        if ($requiereEquiposEnviado && $tieneActividad
+            && ((int) $campos['porEquipos'] !== (int) $torneo['requiere_equipos'])) {
+            $this->jsonError(
+                'El torneo ya tiene inscripciones o partidos: no se puede cambiar la modalidad (individual/equipos).',
+                ['campo' => 'requiere_equipos']
+            );
+            return;
+        }
+
+        // Los formularios simplificados (p. ej. el del panel de admin) no
+        // incluyen todos los campos del torneo. Si un campo no vino en el
+        // POST, se conserva el valor actual en vez de vaciarlo/resetearlo.
+        $datos = [
             'nombre'            => $campos['nombre'],
             'descripcion'       => $campos['descripcion'],
-            'reglamento'        => $campos['reglamento'],
-            'premios'           => $campos['premios'],
-            'discord_url'       => $campos['discord'],
             'disciplina'        => $campos['disciplina'],
             'formato'           => $campos['formato'],
-            'requiere_equipos'  => $campos['porEquipos'] ? 1 : 0,
             'max_participantes' => $campos['maxPart'],
             'fecha_inicio'      => $campos['fechaInicio'],
             'fecha_fin'         => $campos['fechaFin'],
-        ]);
+        ];
+        foreach ([
+            'reglamento'  => 'reglamento',
+            'premios'     => 'premios',
+            'discord_url' => 'discord',
+        ] as $columna => $clave) {
+            if (filter_input(INPUT_POST, $columna, FILTER_DEFAULT) !== null) {
+                $datos[$columna] = $campos[$clave];
+            }
+        }
+        if ($requiereEquiposEnviado) {
+            $datos['requiere_equipos'] = $campos['porEquipos'] ? 1 : 0;
+        }
+
+        $this->torneoModel->update($id, $datos);
 
         $torneoActualizado = $this->torneoModel->findConOrganizador($id);
         $this->jsonSuccess([
@@ -232,8 +262,9 @@ class TorneoController extends Controller {
 
     /**
      * Elimina un torneo (POST /api/torneo/{id}/eliminar).
-     * Solo si todavía no tiene actividad (inscriptos aprobados o partidos);
-     * si ya la tiene, se sugiere cancelarlo en vez de borrarlo.
+     * Solo si todavía no tiene actividad (inscripciones, aunque estén
+     * pendientes de revisión, o partidos); si ya la tiene, se sugiere
+     * cancelarlo en vez de borrarlo.
      */
     public function eliminar(int $id): void {
         if (!$this->requireApiLogin()) {
@@ -249,11 +280,9 @@ class TorneoController extends Controller {
             return;
         }
 
-        $inscriptos = (new Inscripcion())->contarAprobadas($id);
-        $partidos   = count((new Partido())->listarPorTorneo($id));
-        if ($inscriptos > 0 || $partidos > 0) {
+        if ($this->tieneActividad($id)) {
             $this->jsonError(
-                'Este torneo ya tiene actividad (inscriptos o partidos): no se puede eliminar. Cancelalo en vez de borrarlo.',
+                'Este torneo ya tiene actividad (inscripciones o partidos): no se puede eliminar. Cancelalo en vez de borrarlo.',
                 ['sugerir_cancelar' => true],
                 409
             );
@@ -262,6 +291,17 @@ class TorneoController extends Controller {
 
         $this->torneoModel->delete($id);
         $this->jsonSuccess(['mensaje' => 'Torneo eliminado.']);
+    }
+
+    /**
+     * True si el torneo ya tiene inscripciones (en cualquier estado, no solo
+     * aprobadas: una solicitud pendiente ya es actividad real de alguien) o
+     * partidos generados. Se usa para bloquear el borrado y el cambio de
+     * modalidad (individual/equipos) una vez que hay gente involucrada.
+     */
+    private function tieneActividad(int $torneoId): bool {
+        return count((new Inscripcion())->listarPorTorneo($torneoId)) > 0
+            || count((new Partido())->listarPorTorneo($torneoId)) > 0;
     }
 
     /**

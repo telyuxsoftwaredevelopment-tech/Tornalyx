@@ -367,20 +367,4 @@ HTML;
             && preg_match('/[0-9]/', $password);
     }
 
-    /**
-     * Valida una fecha de nacimiento: formato YYYY-MM-DD, existente, no
-     * futura y con año dentro de un rango humano razonable. `Y` en
-     * DateTime::createFromFormat acepta años de más de 4 dígitos (p. ej.
-     * "20001-07-13" por un typo pasa el formato igual), y sin este chequeo
-     * el INSERT explota contra la columna DATE de la base.
-     */
-    private function esFechaNacValida(string $fecha): bool {
-        $d = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
-        if ($d === false || $d->format('Y-m-d') !== $fecha) {
-            return false;
-        }
-        $anio = (int) $d->format('Y');
-        return $anio >= 1900 && $d <= new DateTimeImmutable('today');
-    }
-
 }
