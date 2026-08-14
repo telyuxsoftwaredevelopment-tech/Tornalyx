@@ -4,8 +4,7 @@
 
 | Dato | Origen | Motivo |
 |------|--------|--------|
-| Base de datos completa (`tornalyx_db`) | MySQL, vía `mysqldump` con el usuario `tornalyx_backup` (`SGDM/backend/database/dcl.sql:108-110`) | Contiene usuarios, torneos, partidos, resultados — todo el estado de negocio, no reconstruible. |
-| Avatares subidos por usuarios | `SGDM/frontend/uploads/avatars/` (ver `SGDM/backend/controllers/PerfilController.php:33`) | Único dato binario que vive fuera de git y fuera de la base. |
+| Base de datos completa (`tornalyx_db`), incluidos los avatares | MySQL, vía `mysqldump` con el usuario `tornalyx_backup` (`SGDM/backend/database/dcl.sql:108-110`) | Contiene usuarios, torneos, partidos, resultados — todo el estado de negocio, no reconstruible. Los avatares no se respaldan aparte: desde `add_avatar_blob.sql` viven como BLOB (`avatar_data`/`avatar_mime`) en la propia fila de `usuarios` (Render free no tiene disco persistente), así que ya quedan incluidos en este mismo dump. |
 | Código de la aplicación | — | **No se respalda por separado**: ya vive versionado en git/GitHub, que es su propio sistema de respaldo distribuido. |
 
 ## Tipo de respaldo
@@ -15,18 +14,16 @@
   todas las tablas de `schema.sql`). No se usa incremental/binlog: el
   tamaño de la base de un sistema de gestión de torneos universitario no
   justifica la complejidad operativa de un point-in-time recovery.
-- **Copia completa (full) del directorio de avatares** vía `tar`, ya que es
-  la manera más simple de mantener consistencia con el `avatar_url` que
-  apunta a esos archivos en la base.
+  Este dump ya incluye los avatares (BLOB en `usuarios`): no hace falta un
+  respaldo de archivos aparte.
 
 ## Cronograma
 
 | Respaldo | Frecuencia | Horario | Retención |
 |----------|------------|---------|-----------|
-| Base de datos | Diario | 03:05 (hora del servidor, baja carga) | 7 diarios + 4 semanales (domingo) + 3 mensuales (día 1) |
-| Avatares | Diario | 03:05 (secuencial, mismo cron) | Igual que la base: 7 diarios + 4 semanales + 3 mensuales |
+| Base de datos (incluye avatares) | Diario | 03:05 (hora del servidor, baja carga) | 7 diarios + 4 semanales (domingo) + 3 mensuales (día 1) |
 
-Ambos respaldos se ejecutan en el mismo job de cron (`scripts/servidor/cron-tornalyx`): primero la base de datos, luego los avatares, secuencialmente dentro de la misma ejecución a las 03:05.
+El respaldo corre en el job de cron `scripts/servidor/cron-tornalyx` a las 03:05.
 
 La retención escalonada (diario/semanal/mensual) evita que un error
 detectado tarde (ej.: una semana después) ya no tenga respaldo disponible,

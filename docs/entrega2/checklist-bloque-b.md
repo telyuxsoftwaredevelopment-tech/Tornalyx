@@ -11,3 +11,12 @@ Nota: los scripts de este bloque están listos para aplicar pero no se
 ejecutaron contra un VPS real (no hay uno provisionado al momento de esta
 entrega). Cada documento incluye los pasos exactos para aplicarlos cuando
 exista el servidor.
+
+Nota (14/08): al re-auditar el bloque se encontró que `respaldo.sh`
+todavía respaldaba `SGDM/frontend/uploads/avatars/`, una carpeta que
+`add_avatar_blob.sql` dejó de usar en una sesión posterior a cuando se
+escribió este bloque (los avatares pasaron a vivir como BLOB en
+`usuarios`, dentro del propio `mysqldump`). Se corrigió el script, el
+`.env.example`, el cron y `politica-backups.md` para que dejen de
+referenciar esa carpeta — sin el fix, el respaldo fallaba al intentar
+tarrear un directorio inexistente.

@@ -16,7 +16,7 @@ fi
 chmod 600 /etc/tornalyx/backup.env
 
 echo "==> Creando directorio de respaldos"
-mkdir -p /var/backups/tornalyx/db /var/backups/tornalyx/avatares
+mkdir -p /var/backups/tornalyx/db
 
 echo "==> Instalando el cron"
 install -m 0644 "$SCRIPT_DIR/cron-tornalyx" /etc/cron.d/tornalyx
