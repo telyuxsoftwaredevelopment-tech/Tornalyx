@@ -443,6 +443,20 @@ textarea.form-control { resize: none; }
   padding: var(--space-10) clamp(var(--space-6), 6vw, var(--space-16));
 }
 .auth-face__inner { width: 100%; max-width: 440px; margin: auto; }
+/* Sobre el vidrio esmerilado el botón se mezclaba con el fondo; se le suma
+   un brillo rojo en reposo (no sólo al :hover) para que resalte de entrada. */
+.auth-face__inner .btn-primary {
+  box-shadow:
+    6px 6px 14px rgba(0,0,0,.55),
+    -4px -4px 10px rgba(255,70,75,.1),
+    0 0 26px -4px var(--red-glow);
+}
+.auth-face__inner .btn-primary:hover {
+  box-shadow:
+    8px 8px 18px rgba(0,0,0,.6),
+    -5px -5px 12px rgba(255,80,85,.14),
+    0 0 34px -4px var(--red-glow);
+}
 
 .auth-face__promo {
   height: 100%;
@@ -457,11 +471,11 @@ textarea.form-control { resize: none; }
 
 .btn-promo {
   background: transparent;
-  border: 1.5px solid rgba(255,255,255,.75);
+  border: 1.5px solid #fff;
   color: #fff;
-  box-shadow: none;
+  box-shadow: 0 0 0 5px rgba(255,255,255,.14), 0 0 30px -2px rgba(255,255,255,.6);
 }
-.btn-promo:hover  { background: rgba(255,255,255,.15); border-color: #fff; color: #fff; }
+.btn-promo:hover  { background: rgba(255,255,255,.15); border-color: #fff; color: #fff; box-shadow: 0 0 0 6px rgba(255,255,255,.18), 0 0 36px 0 rgba(255,255,255,.75); }
 .btn-promo:active { box-shadow: none; background: rgba(255,255,255,.25); }
 
 @media (prefers-reduced-motion: reduce) {
