@@ -153,6 +153,8 @@
   width: 36px; height: 36px;
   border-radius: 50%;
   background: var(--red);
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;

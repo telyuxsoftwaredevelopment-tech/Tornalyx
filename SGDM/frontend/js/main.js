@@ -775,8 +775,19 @@ async function initCurrentUser() {
   fill('[data-user-nombre]',   nombre);
   fill('[data-user-apellido]', apellido);
   fill('[data-user-role]',     me.rol || '');
-  fill('[data-user-avatar]',   initials || (nombre[0] || '').toUpperCase());
   fill('[data-user-email]',    me.email || '');
+
+  /* Avatar: foto real si subió una (mismo criterio que perfil.js), si no
+     las iniciales sobre el rojo de marca que ya trae el CSS de fondo. */
+  document.querySelectorAll('[data-user-avatar]').forEach(el => {
+    if (me.avatar_url) {
+      el.textContent = '';
+      el.style.backgroundImage = `url(${encodeURI(me.avatar_url)})`;
+    } else {
+      el.style.backgroundImage = '';
+      el.textContent = initials || (nombre[0] || '').toUpperCase();
+    }
+  });
   document.querySelectorAll('[data-user-welcome]').forEach(el => {
     el.textContent = 'Bienvenido/a, ' + (nombre || full);
   });

@@ -58,11 +58,13 @@
     .user-avatar {
       width:34px; height:34px; border-radius:50%;
       background:var(--red);
+      background-size:cover; background-position:center;
       display:flex; align-items:center; justify-content:center;
       font-weight:700; font-size:12px; color:#fff; flex:none; font-family:var(--head);
     }
     .user-name  { font-size:var(--font-size-sm); color:var(--ink); font-weight:600; }
     .user-role  { font-size:11px; color:var(--muted-2); font-family:var(--mono); }
+    .sidebar__item .icon svg { width:18px; height:18px; }
 
     .sidebar-overlay {
       position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:150;
@@ -160,31 +162,31 @@
     <nav class="sidebar__nav">
       <div class="sidebar__section">Principal</div>
       <a class="sidebar__item active" data-section="inicio" data-title="Dashboard">
-        <span class="icon">📊</span> Dashboard
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span> Dashboard
       </a>
       <div class="sidebar__section">Gestión</div>
       <a class="sidebar__item" data-section="usuarios" data-title="Usuarios">
-        <span class="icon">👤</span> Usuarios
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.2" r="3.4"/><path d="M4.8 20c0-4 3.2-7.2 7.2-7.2s7.2 3.2 7.2 7.2"/></svg></span> Usuarios
       </a>
       <a class="sidebar__item" data-section="torneos" data-title="Torneos">
-        <span class="icon">🏆</span> Torneos
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v3.5a5 5 0 0 1-10 0V4Z"/><path d="M7 5.2H5.2a2 2 0 0 0 0 4H7"/><path d="M17 5.2h1.8a2 2 0 0 1 0 4H17"/><path d="M12 12.5V16"/><path d="M9 20h6"/><path d="M9.5 16h5l.6 4h-6.2l.6-4Z"/></svg></span> Torneos
       </a>
       <a class="sidebar__item" data-section="equipos" data-title="Equipos">
-        <span class="icon">👥</span> Equipos
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.2" r="3.2"/><path d="M3.5 20c0-3.6 2.5-6.3 5.5-6.3s5.5 2.7 5.5 6.3"/><circle cx="16.8" cy="9" r="2.3"/><path d="M15 14.2c2.4.5 4.2 2.7 4.5 5.8"/></svg></span> Equipos
       </a>
       <a class="sidebar__item" data-section="resultados" data-title="Resultados">
-        <span class="icon">📋</span> Resultados
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><rect x="5" y="6" width="14" height="15" rx="2"/><path d="M9 12h6M9 16h6"/></svg></span> Resultados
       </a>
       <div class="sidebar__section">Documentación</div>
       <a class="sidebar__item" data-section="solicitudes" data-title="Solicitudes de acceso">
-        <span class="icon">🔒</span> Solicitudes de acceso
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span> Solicitudes de acceso
       </a>
       <div class="sidebar__section">Sistema</div>
       <a class="sidebar__item" data-section="reportes" data-title="Reportes">
-        <span class="icon">📈</span> Reportes
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span> Reportes
       </a>
       <a class="sidebar__item" data-section="config" data-title="Configuración">
-        <span class="icon">⚙️</span> Configuración
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg></span> Configuración
       </a>
     </nav>
     <div class="sidebar__footer">
@@ -194,7 +196,9 @@
           <a class="user-name" data-user-name href="/perfil" style="text-decoration:none">Administrador</a>
           <div class="user-role" data-user-role>admin</div>
         </div>
-        <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">🚪</a>
+        <a href="/logout" style="margin-left:auto;color:var(--muted-2);display:inline-flex" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </a>
       </div>
     </div>
   </aside>
@@ -578,7 +582,7 @@
     </div>
   </div>
 
-  <script src="../../js/main.js?v=3"></script>
+  <script src="../../js/main.js?v=4"></script>
   <script src="../../js/dashboard.js"></script>
   <script src="../../js/torneo-ui.js"></script>
   <script src="../../js/organizador.js"></script>
