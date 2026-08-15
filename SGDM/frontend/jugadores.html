@@ -9,7 +9,7 @@
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../css/variables.css" />
-  <link rel="stylesheet" href="../css/main.css?v=4" />
+  <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/torneos.css" />
   <style>
@@ -38,6 +38,16 @@
     .ficha-stat__valor { font-family:var(--head); font-size:1.5rem; font-weight:800; color:var(--red-bright); }
     .ficha-stat__label { font-size:11px; color:var(--muted); }
     .prosa { color:var(--muted); line-height:1.7; white-space:pre-line; }
+
+    .profile-redes { display:flex; gap:10px; margin-top:var(--space-3); }
+    .profile-redes a {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:34px; height:34px; border-radius:50%;
+      border:1px solid var(--line); color:var(--muted);
+      transition:color .15s, border-color .15s, transform .15s;
+    }
+    .profile-redes a:hover { color:var(--red-bright); border-color:var(--red-deep); transform:translateY(-2px); }
+    .profile-redes svg { width:17px; height:17px; }
   </style>
 </head>
 <body>
@@ -175,7 +185,7 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=4"></script>
+  <script src="../js/main.js?v=5"></script>
   <script src="../js/torneo-ui.js"></script>
   <script src="../js/jugadores.js"></script>
 </body>

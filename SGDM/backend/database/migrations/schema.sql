@@ -34,6 +34,11 @@ CREATE TABLE IF NOT EXISTS usuarios (
     -- Perfil público (ver add_perfil.sql; mantener en sincronía)
     bio          TEXT         DEFAULT NULL,
     ubicacion    VARCHAR(120) DEFAULT NULL,
+    -- Redes sociales, opcionales (ver add_redes_sociales.sql; mantener en
+    -- sincronía). Se muestran como íconos clickeables en el perfil.
+    twitter_url   VARCHAR(255) DEFAULT NULL,
+    facebook_url  VARCHAR(255) DEFAULT NULL,
+    instagram_url VARCHAR(255) DEFAULT NULL,
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email  (email),

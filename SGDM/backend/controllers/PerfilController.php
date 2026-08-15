@@ -90,6 +90,9 @@ class PerfilController extends Controller {
         $fechaNac  = trim((string) (filter_input(INPUT_POST, 'fecha_nac', FILTER_DEFAULT) ?? ''));
         $ubicacion = trim((string) (filter_input(INPUT_POST, 'ubicacion', FILTER_DEFAULT) ?? ''));
         $bio       = trim((string) (filter_input(INPUT_POST, 'bio',       FILTER_DEFAULT) ?? ''));
+        $twitter   = trim((string) (filter_input(INPUT_POST, 'twitter_url',   FILTER_DEFAULT) ?? ''));
+        $facebook  = trim((string) (filter_input(INPUT_POST, 'facebook_url',  FILTER_DEFAULT) ?? ''));
+        $instagram = trim((string) (filter_input(INPUT_POST, 'instagram_url', FILTER_DEFAULT) ?? ''));
 
         if ($nombre === '' || $apellido === '' || $email === '' || $fechaNac === '') {
             $this->jsonError('Nombre, apellido, correo y fecha de nacimiento son obligatorios.');
@@ -123,14 +126,23 @@ class PerfilController extends Controller {
             $this->jsonError('Ese correo ya está en uso por otra cuenta.', [], 409);
             return;
         }
+        foreach (['twitter_url' => $twitter, 'facebook_url' => $facebook, 'instagram_url' => $instagram] as $campo => $valor) {
+            if ($valor !== '' && !$this->esUrlValida($valor)) {
+                $this->jsonError('El enlace de ' . $campo . ' debe ser una URL http(s) válida.');
+                return;
+            }
+        }
 
         $this->usuarioModel->actualizar($userId, [
-            'nombre'    => $nombre,
-            'apellido'  => $apellido,
-            'email'     => $email,
-            'fecha_nac' => $fechaNac,
-            'ubicacion' => $ubicacion !== '' ? $ubicacion : null,
-            'bio'       => $bio !== '' ? $bio : null,
+            'nombre'        => $nombre,
+            'apellido'      => $apellido,
+            'email'         => $email,
+            'fecha_nac'     => $fechaNac,
+            'ubicacion'     => $ubicacion !== '' ? $ubicacion : null,
+            'bio'           => $bio !== '' ? $bio : null,
+            'twitter_url'   => $twitter   !== '' ? $twitter   : null,
+            'facebook_url'  => $facebook  !== '' ? $facebook  : null,
+            'instagram_url' => $instagram !== '' ? $instagram : null,
         ]);
 
         // El nav y los saludos usan el nombre guardado en sesión.
@@ -263,14 +275,17 @@ class PerfilController extends Controller {
 
         $this->jsonSuccess([
             'jugador' => [
-                'id'         => (int) $u['id'],
-                'nombre'     => $u['nombre'],
-                'apellido'   => $u['apellido'],
-                'rol'        => $u['rol'],
-                'bio'        => $u['bio']        ?? null,
-                'ubicacion'  => $u['ubicacion']  ?? null,
-                'avatar_url' => $u['avatar_url'] ?? null,
-                'created_at' => $u['created_at'] ?? null,
+                'id'            => (int) $u['id'],
+                'nombre'        => $u['nombre'],
+                'apellido'      => $u['apellido'],
+                'rol'           => $u['rol'],
+                'bio'           => $u['bio']           ?? null,
+                'ubicacion'     => $u['ubicacion']     ?? null,
+                'avatar_url'    => $u['avatar_url']    ?? null,
+                'twitter_url'   => $u['twitter_url']   ?? null,
+                'facebook_url'  => $u['facebook_url']  ?? null,
+                'instagram_url' => $u['instagram_url'] ?? null,
+                'created_at'    => $u['created_at']    ?? null,
             ],
             'torneos'   => $this->torneoModel->listarDeParticipante($id),
             'equipos'   => $this->torneoModel->equiposDeUsuario($id),
@@ -284,16 +299,32 @@ class PerfilController extends Controller {
      */
     private function usuarioPublico(array $u): array {
         return [
-            'id'         => (int) ($u['id'] ?? 0),
-            'nombre'     => $u['nombre']     ?? '',
-            'apellido'   => $u['apellido']   ?? '',
-            'email'      => $u['email']      ?? '',
-            'rol'        => $u['rol']        ?? '',
-            'fecha_nac'  => $u['fecha_nac']  ?? null,
-            'ubicacion'  => $u['ubicacion']  ?? null,
-            'bio'        => $u['bio']        ?? null,
-            'avatar_url' => $u['avatar_url'] ?? null,
-            'created_at' => $u['created_at'] ?? null,
+            'id'            => (int) ($u['id'] ?? 0),
+            'nombre'        => $u['nombre']        ?? '',
+            'apellido'      => $u['apellido']      ?? '',
+            'email'         => $u['email']         ?? '',
+            'rol'           => $u['rol']           ?? '',
+            'fecha_nac'     => $u['fecha_nac']     ?? null,
+            'ubicacion'     => $u['ubicacion']     ?? null,
+            'bio'           => $u['bio']           ?? null,
+            'avatar_url'    => $u['avatar_url']    ?? null,
+            'twitter_url'   => $u['twitter_url']   ?? null,
+            'facebook_url'  => $u['facebook_url']  ?? null,
+            'instagram_url' => $u['instagram_url'] ?? null,
+            'created_at'    => $u['created_at']    ?? null,
         ];
+    }
+
+    /**
+     * True si $url es una URL http(s) sintácticamente válida. Mismo criterio
+     * que discord_url en TorneoController::validarCampos(): FILTER_VALIDATE_URL
+     * por sí solo acepta esquemas como "javascript:" o "data:" como válidos,
+     * así que sin el chequeo de esquema alguien podría guardar
+     * "javascript:alert(1)" como red social y el front lo volcaría tal cual
+     * en el href del ícono.
+     */
+    private function esUrlValida(string $url): bool {
+        return filter_var($url, FILTER_VALIDATE_URL) !== false
+            && preg_match('#^https?://#i', $url) === 1;
     }
 }

@@ -49,6 +49,21 @@
     }
   }
 
+  /* ─── Redes sociales ───────────────────────────────── */
+  const REDES_ICONS = {
+    twitter_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg>',
+    facebook_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 21v-7h2.5l.5-3H14V9a1.5 1.5 0 0 1 1.5-1.5H17V4.6C16.5 4.5 15.6 4.4 14.7 4.4c-2.5 0-4.2 1.6-4.2 4.4V11H8v3h2.5v7"/></svg>',
+    instagram_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1"/></svg>',
+  };
+  const REDES_LABELS = { twitter_url: 'X / Twitter', facebook_url: 'Facebook', instagram_url: 'Instagram' };
+
+  function redesHtml(u) {
+    return Object.keys(REDES_ICONS)
+      .filter(k => u[k])
+      .map(k => `<a href="${Utils.escapeHtml(u[k])}" target="_blank" rel="noopener noreferrer" aria-label="${REDES_LABELS[k]}" title="${REDES_LABELS[k]}">${REDES_ICONS[k]}</a>`)
+      .join('');
+  }
+
   function pintarHero(u) {
     $('heroNombre').textContent = `${u.nombre} ${u.apellido}`.trim();
     $('heroRol').textContent = { participante: 'Participante', administrador: 'Administrador' }[u.rol] || u.rol;
@@ -71,6 +86,7 @@
     if (u.ubicacion) meta.push('📍 ' + u.ubicacion);
     meta.push('✉️ ' + u.email);
     $('heroMeta').innerHTML = meta.map(m => `<span>${Utils.escapeHtml(m)}</span>`).join('');
+    $('heroRedes').innerHTML = redesHtml(u);
 
     pintarAvatar($('heroAvatar'), u);
     pintarAvatar($('editAvatar'), u);
@@ -140,6 +156,9 @@
     $('pFecha').value     = u.fecha_nac || '';
     $('pUbicacion').value = u.ubicacion || '';
     $('pBio').value       = u.bio       || '';
+    $('pTwitter').value   = u.twitter_url   || '';
+    $('pFacebook').value  = u.facebook_url  || '';
+    $('pInstagram').value = u.instagram_url || '';
     actualizarContadorBio();
   }
 
@@ -173,12 +192,15 @@
       }
       try {
         const res = await Api.post('/api/perfil/actualizar', {
-          nombre:    $('pNombre').value.trim(),
-          apellido:  $('pApellido').value.trim(),
-          email:     $('pEmail').value.trim(),
-          fecha_nac: $('pFecha').value,
-          ubicacion: $('pUbicacion').value.trim(),
-          bio:       $('pBio').value.trim(),
+          nombre:         $('pNombre').value.trim(),
+          apellido:       $('pApellido').value.trim(),
+          email:          $('pEmail').value.trim(),
+          fecha_nac:      $('pFecha').value,
+          ubicacion:      $('pUbicacion').value.trim(),
+          bio:            $('pBio').value.trim(),
+          twitter_url:    $('pTwitter').value.trim(),
+          facebook_url:   $('pFacebook').value.trim(),
+          instagram_url:  $('pInstagram').value.trim(),
         });
         usuarioActual = res.usuario;
         pintarHero(usuarioActual);
