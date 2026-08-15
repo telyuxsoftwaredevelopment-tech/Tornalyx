@@ -36,10 +36,21 @@
       display:flex; align-items:center; justify-content:space-between; gap:var(--space-4);
     }
     .topbar-left { display:flex; align-items:center; gap:var(--space-3); }
+    /* ☰ anima a ✕ al abrir (mismo tratamiento que .burger en las páginas
+       públicas), para dar feedback visual del estado del sidebar. */
     .menu-toggle {
-      display:none; background:none; border:none; cursor:pointer;
-      color:var(--muted); font-size:1.2rem; padding:6px; border-radius:8px;
+      display:none; flex-direction:column; gap:4px;
+      background:none; border:none; cursor:pointer;
+      padding:8px; border-radius:8px;
     }
+    .menu-toggle span {
+      display:block; width:20px; height:2px;
+      background:var(--muted); border-radius:2px;
+      transition:transform .25s ease, opacity .2s;
+    }
+    .menu-toggle.open span:nth-child(1) { transform:translateY(6px) rotate(45deg); }
+    .menu-toggle.open span:nth-child(2) { opacity:0; }
+    .menu-toggle.open span:nth-child(3) { transform:translateY(-6px) rotate(-45deg); }
     @media(max-width:768px) {
       .sidebar { transform:translateX(-100%); }
       .sidebar.open { transform:translateX(0); }
@@ -195,7 +206,9 @@
   <div class="app-main">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">☰</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar">
+          <span></span><span></span><span></span>
+        </button>
         <span class="topbar-title" id="topbarTitle">Mi perfil</span>
       </div>
       <div id="topbarActions" style="display:flex;align-items:center;gap:var(--space-3)">

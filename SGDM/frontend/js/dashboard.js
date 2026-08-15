@@ -65,18 +65,26 @@ function initDashboard() {
     });
   });
 
-  /* Overlay mobile */
+  /* Overlay mobile — el toggle además refleja el estado (☰ anima a ✕,
+     mismo tratamiento que .burger en las páginas públicas) para dar
+     feedback visual de que el sidebar está abierto. */
   function openSidebar() {
     sidebar.classList.add('open');
     if (overlay) overlay.classList.add('show');
+    if (toggle)  { toggle.classList.add('open'); toggle.setAttribute('aria-expanded', 'true'); }
     document.body.style.overflow = 'hidden';
   }
   function closeSidebar() {
     sidebar.classList.remove('open');
     if (overlay) overlay.classList.remove('show');
+    if (toggle)  { toggle.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
     document.body.style.overflow = '';
   }
 
+  /* Solo abre: .topbar tiene su propio z-index (crea un stacking context),
+     así que una vez abierto el sidebar (z-index más alto) lo tapa y ya no
+     se puede volver a tocar — cerrar se resuelve con el overlay, Escape o
+     tocando un ítem del sidebar, que sí quedan siempre alcanzables. */
   if (toggle)  toggle.addEventListener('click', openSidebar);
   if (overlay) overlay.addEventListener('click', closeSidebar);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
