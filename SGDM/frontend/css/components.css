@@ -390,6 +390,15 @@ textarea.form-control { resize: none; }
   from { opacity: 0; transform: translateY(14px) scale(.99); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
+/* En monitores muy anchos, .auth-face__form crecía sin límite y el
+   formulario (ancho fijo, ver .auth-face__inner) quedaba perdido en medio
+   de un montón de vidrio esmerilado vacío mostrando la foto de fondo. Se
+   limita el ancho total de la tarjeta y se centra — left:0;right:0 ya
+   vienen de inset:0, así que width+margin:auto alcanza para centrar un
+   elemento position:absolute sin pisar el transform de la animación. */
+@media(min-width:1300px) {
+  .auth-card-flip { width:1300px; margin:0 auto; }
+}
 
 .auth-flip {
   position: relative;
