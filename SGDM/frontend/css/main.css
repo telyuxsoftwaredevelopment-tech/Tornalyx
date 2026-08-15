@@ -545,6 +545,19 @@ body:has(.bottom-nav) { padding-bottom:calc(60px + env(safe-area-inset-bottom));
   box-shadow:0 0 0 3px rgba(236,28,36,.15);
 }
 .form-control::placeholder { color:var(--muted-2); }
+
+/* Barras de búsqueda: al enfocar, el borde "florece" a pill completo con
+   un glow más marcado — variante del efecto expanding-search, adaptada a
+   inputs que ya viven a ancho completo dentro de un grid de filtros (acá
+   no hay espacio para crecer en ancho sin romper el layout, así que la
+   expansión es de forma/radio en vez de tamaño). */
+input[type="search"].form-control {
+  transition:border-color var(--transition-fast), box-shadow var(--transition-fast), border-radius .3s cubic-bezier(.34,1.56,.64,1);
+}
+input[type="search"].form-control:focus {
+  border-radius:999px;
+  box-shadow:0 0 0 4px rgba(236,28,36,.15), 0 0 20px rgba(236,28,36,.12);
+}
 select.form-control option { background:var(--bg-2); color:var(--ink); }
 .form-hint  { font-size:var(--font-size-xs); color:var(--muted); margin-top:var(--space-1); }
 .form-error { font-size:var(--font-size-xs); color:var(--red-bright); margin-top:var(--space-1); }

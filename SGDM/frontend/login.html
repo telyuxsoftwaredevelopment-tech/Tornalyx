@@ -9,11 +9,21 @@
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../css/variables.css" />
-  <link rel="stylesheet" href="../css/main.css?v=3" />
+  <link rel="stylesheet" href="../css/main.css?v=4" />
   <link rel="stylesheet" href="../css/components.css" />
   <style>
     body { display:flex; flex-direction:column; min-height:100vh; }
-    .auth-page { flex:1; position:relative; min-height:0; }
+    /* Foto de fondo detrás del glassmorphism del panel de formulario
+       (.auth-face__form, en components.css). Oscurecida para que el
+       texto y los inputs sigan legibles sin importar el tema. */
+    .auth-page {
+      flex:1; position:relative; min-height:0;
+      background-image:
+        linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.55)),
+        url(../assets/hero-arena.jpg);
+      background-size:cover;
+      background-position:center;
+    }
     .auth-face__heading { text-align:center; margin-bottom:var(--space-6); }
     .auth-face__heading h1 { font-family:var(--head); font-size:var(--font-size-2xl); color:var(--ink); }
     .auth-face__heading p  { font-size:var(--font-size-sm); color:var(--muted); margin-top:4px; }
