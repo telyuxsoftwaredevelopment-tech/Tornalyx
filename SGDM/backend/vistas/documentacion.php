@@ -10,7 +10,7 @@
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../css/variables.css" />
-  <link rel="stylesheet" href="../css/main.css?v=4" />
+  <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/components.css" />
   <style>
     .doc-page { padding:var(--space-10) var(--space-4) var(--space-16); }
@@ -245,6 +245,6 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=4"></script>
+  <script src="../js/main.js?v=5"></script>
 </body>
 </html>

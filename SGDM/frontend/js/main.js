@@ -72,6 +72,78 @@ function initBottomNav() {
   try { sessionStorage.setItem(STORAGE_KEY, String(activeIndex)); } catch { /* privado / bloqueado */ }
 
   window.addEventListener('resize', () => place(activeIndex, false));
+
+  initArrastreBottomNav(nav, items, pill, activeIndex, place);
+}
+
+/* Arrastrar el dedo (o el mouse) sobre la barra desliza el pill en tiempo
+   real, tab por tab; soltar sobre un tab distinto navega ahí, soltar sobre
+   el mismo o afuera lo devuelve a su lugar. Un tap simple (sin arrastre
+   real, movimiento menor al umbral) no pasa por acá: el <a> navega solo,
+   como siempre — por eso solo se llama preventDefault() una vez confirmado
+   el arrastre, nunca en el pointerdown. */
+function initArrastreBottomNav(nav, items, pill, activeIndex, place) {
+  const UMBRAL = 10; // px de movimiento antes de considerarlo arrastre y no tap
+  let inicio = null;
+  let arrastrando = false;
+  let idPuntero = null;
+  let destino = activeIndex;
+  let ultimoFueArrastre = false;
+
+  const indiceBajoPuntero = (clientX) => {
+    let mejor = destino;
+    items.forEach((item, i) => {
+      const r = item.getBoundingClientRect();
+      if (clientX >= r.left && clientX < r.right) mejor = i;
+    });
+    return mejor;
+  };
+
+  nav.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    inicio = { x: e.clientX, y: e.clientY };
+    arrastrando = false;
+    idPuntero = e.pointerId;
+    destino = activeIndex;
+  });
+
+  nav.addEventListener('pointermove', e => {
+    if (inicio === null || e.pointerId !== idPuntero) return;
+    if (!arrastrando) {
+      if (Math.abs(e.clientX - inicio.x) < UMBRAL && Math.abs(e.clientY - inicio.y) < UMBRAL) return;
+      arrastrando = true;
+    }
+    e.preventDefault();
+    destino = indiceBajoPuntero(e.clientX);
+    place(destino, false);
+    items.forEach((item, i) => item.classList.toggle('bottom-nav__item--targeted', i === destino));
+  });
+
+  const soltar = e => {
+    if (inicio === null || e.pointerId !== idPuntero) return;
+    ultimoFueArrastre = arrastrando;
+    if (arrastrando) {
+      items.forEach(item => item.classList.remove('bottom-nav__item--targeted'));
+      if (destino !== activeIndex && items[destino] && items[destino].href) {
+        window.location.href = items[destino].href;
+      } else {
+        place(activeIndex, true);
+      }
+    }
+    inicio = null;
+    arrastrando = false;
+    idPuntero = null;
+  };
+
+  nav.addEventListener('pointerup', soltar);
+  nav.addEventListener('pointercancel', soltar);
+
+  // Sin esto, tras un arrastre real el navegador todavía dispara un
+  // "click" sobre el tab donde arrancó el gesto (no donde se soltó),
+  // navegando dos veces o al lugar equivocado.
+  nav.addEventListener('click', e => {
+    if (ultimoFueArrastre) { e.preventDefault(); ultimoFueArrastre = false; }
+  });
 }
 
 /* ─── Scroll Reveal ─────────────────────────────────── */
