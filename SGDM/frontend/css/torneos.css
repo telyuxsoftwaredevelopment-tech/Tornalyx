@@ -73,6 +73,43 @@ select.form-control { cursor: pointer; }
   position: absolute; inset: 0;
   background: rgba(0,0,0,.3);
 }
+
+/* Con foto de fondo subida: cabecera más alta (da lugar al reveal) y sin
+   el tinte plano del ::after — un degradé propio alcanza para que el
+   ícono/badge de arriba (si hubiera) siga legible. */
+.torneo-card__sport--photo {
+  height: 180px;
+  background-size: cover;
+  background-position: center;
+}
+.torneo-card__sport--photo::after {
+  background: linear-gradient(to bottom, rgba(0,0,0,.1), rgba(0,0,0,.55));
+}
+/* Reveal en vidrio esmerilado: oculto hasta hover/foco, muestra la
+   disciplina y una descripción corta que no entra en el resto de la
+   tarjeta. :focus-within para que llegue por teclado, no solo con mouse. */
+.torneo-card__reveal {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: var(--space-4);
+  background: rgba(0,0,0,.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.torneo-card:hover .torneo-card__reveal,
+.torneo-card:focus-within .torneo-card__reveal {
+  opacity: 1;
+}
+.torneo-card__reveal-disc {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  color: rgba(255,255,255,.75); margin-bottom: 4px;
+}
+.torneo-card__reveal p {
+  font-size: 13px; line-height: 1.4; color: #fff; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
 .torneo-card__body  { padding: var(--space-4); flex: 1; }
 .torneo-card__meta  { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3); }
 .torneo-card__title { font-family: var(--head); font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--space-2); color: var(--ink); }

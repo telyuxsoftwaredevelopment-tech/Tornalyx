@@ -24,6 +24,20 @@ class TorneoController extends Controller {
     private const MIN_PARTICIPANTES = 2;
     private const MAX_PARTICIPANTES = 512;
 
+    /** Tamaño máximo de la foto de fondo en bytes (4 MB: más margen que el
+     *  avatar porque acá cubre toda una tarjeta/hero, no un círculo chico). */
+    private const BANNER_MAX_BYTES = 4 * 1024 * 1024;
+
+    /** MIME reales admitidos para la foto de fondo. */
+    private const BANNER_MIMES = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+    ];
+
+    /** Ruta pública donde se sirve la foto de un torneo (ver servirBanner). */
+    private const BANNER_URL = '/api/torneo';
+
     private Torneo    $torneoModel;
     private Resultado $resultadoModel;
 
@@ -324,6 +338,79 @@ class TorneoController extends Controller {
 
         $this->torneoModel->cambiarEstado($id, 'cancelado');
         $this->jsonSuccess(['mensaje' => 'Torneo cancelado.']);
+    }
+
+    /**
+     * Sube o reemplaza la foto de fondo del torneo (POST /api/torneo/{id}/banner).
+     * Mismo criterio que PerfilController::avatar(): valida tipo real
+     * (finfo + getimagesize) y tamaño, se guarda como BLOB en la propia fila
+     * (Render free no tiene disco persistente) y se sirve vía servirBanner().
+     * Solo el organizador dueño del torneo o un administrador.
+     */
+    public function imagen(int $id): void {
+        if (!$this->requireApiLogin()) {
+            return;
+        }
+        $torneo = $this->torneoModel->findById($id);
+        if (!$torneo) {
+            $this->jsonError('Torneo no encontrado.', [], 404);
+            return;
+        }
+        if (!$this->esDueno($torneo)) {
+            $this->jsonError('No tenés permiso para editar este torneo.', [], 403);
+            return;
+        }
+
+        $file = $_FILES['banner'] ?? null;
+        if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            $this->jsonError('No se recibió ninguna imagen.');
+            return;
+        }
+        if ((int) $file['size'] > self::BANNER_MAX_BYTES) {
+            $this->jsonError('La imagen no puede superar los 4 MB.');
+            return;
+        }
+
+        // Tipo real del archivo, no el que declara el cliente.
+        $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+        if (!isset(self::BANNER_MIMES[$mime]) || getimagesize($file['tmp_name']) === false) {
+            $this->jsonError('Formato no admitido. Usá JPG, PNG o WebP.');
+            return;
+        }
+
+        $datos = file_get_contents($file['tmp_name']);
+        if ($datos === false) {
+            $this->jsonError('No se pudo leer la imagen. Intentá más tarde.', [], 500);
+            return;
+        }
+
+        // La URL cambia con cada subida (cache-busting): el navegador cachea
+        // agresivo las imágenes, y sin esto seguiría mostrando la vieja
+        // aunque la fila ya tenga la nueva.
+        $url = self::BANNER_URL . '/' . $id . '/banner?v=' . time();
+        $this->torneoModel->update($id, [
+            'banner_data' => $datos,
+            'banner_mime' => $mime,
+            'banner_url'  => $url,
+        ]);
+        $this->jsonSuccess(['banner_url' => $url]);
+    }
+
+    /**
+     * Sirve la foto de fondo de un torneo guardada en la base (GET
+     * /api/torneo/{id}/banner). Pública y sin autenticación: es la misma
+     * imagen que ya se ve en el listado público de torneos.
+     */
+    public function servirBanner(int $id): void {
+        $torneo = $this->torneoModel->findById($id);
+        if (!$torneo || $torneo['banner_data'] === null || $torneo['banner_mime'] === null) {
+            http_response_code(404);
+            return;
+        }
+        header('Content-Type: ' . $torneo['banner_mime']);
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Content-Length: ' . strlen($torneo['banner_data']));
+        echo $torneo['banner_data'];
     }
 
     /** True si el usuario en sesión organiza el torneo o es administrador. */

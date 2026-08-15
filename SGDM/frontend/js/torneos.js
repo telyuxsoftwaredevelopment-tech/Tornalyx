@@ -61,6 +61,16 @@ function cardHtml(t) {
   lineas.push(`👥 ${cupos} de ${t.max_participantes} inscritos`);
   if (org) lineas.push(`🎽 Organiza: ${esc(org)}`);
 
+  // Con foto de fondo subida, la cabecera crece y muestra un reveal en
+  // vidrio esmerilado al pasar el mouse (o al enfocar con teclado) en vez
+  // del ícono genérico de disciplina, que ya queda cubierto por la foto.
+  const tieneFoto = !!t.banner_url;
+  const sportStyle = tieneFoto
+    ? `background-image:url('${esc(t.banner_url)}')`
+    : `background:${fondoDisciplina(t.disciplina)}`;
+  const descripcion = (t.descripcion || '').trim();
+  const descripcionCorta = descripcion.length > 140 ? descripcion.slice(0, 140) + '…' : descripcion;
+
   return `
     <article class="torneo-card"
              data-id="${t.id}"
@@ -69,8 +79,13 @@ function cardHtml(t) {
              data-sistema="${esc(t.formato)}"
              data-nombre="${esc(String(t.nombre).toLowerCase())}"
              data-fecha="${esc(t.fecha_inicio || '')}">
-      <div class="torneo-card__sport" style="background:${fondoDisciplina(t.disciplina)}">
-        ${TorneoUI.icono(t.disciplina)}
+      <div class="torneo-card__sport${tieneFoto ? ' torneo-card__sport--photo' : ''}" style="${sportStyle}">
+        ${tieneFoto ? '' : TorneoUI.icono(t.disciplina)}
+        ${tieneFoto ? `
+          <div class="torneo-card__reveal">
+            <span class="torneo-card__reveal-disc">${esc(t.disciplina)}</span>
+            ${descripcionCorta ? `<p>${esc(descripcionCorta)}</p>` : ''}
+          </div>` : ''}
       </div>
       <div class="torneo-card__body">
         <div class="torneo-card__meta">

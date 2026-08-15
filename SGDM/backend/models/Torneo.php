@@ -9,6 +9,18 @@ class Torneo extends Model {
     protected string $table = 'torneos';
 
     /**
+     * Columnas de torneos para listados y detalle: todas menos banner_data
+     * (el BLOB de la foto de fondo). Igual que Usuario::buscar() con
+     * avatar_data, incluir el blob acá inflaría cada listado — la imagen
+     * se sirve aparte por GET /api/torneo/{id}/banner, que sí hace su
+     * propio findById() completo.
+     */
+    private const COLUMNAS = 't.id, t.organizador_id, t.nombre, t.descripcion, t.reglamento,
+        t.premios, t.discord_url, t.disciplina, t.formato, t.requiere_equipos, t.estado,
+        t.max_participantes, t.publico, t.banner_url, t.fecha_inicio, t.fecha_fin,
+        t.created_at, t.updated_at';
+
+    /**
      * Lista torneos públicos con datos del organizador.
      *
      * @param array $filtros  ['estado'=>..., 'disciplina'=>..., 'formato'=>...]
@@ -17,7 +29,7 @@ class Torneo extends Model {
     public function listarPublicos(array $filtros = []): array {
         // Los borradores nunca salen en el listado público: son torneos que el
         // organizador todavía está preparando.
-        $sql    = 'SELECT t.*, u.nombre AS org_nombre, u.apellido AS org_apellido, '
+        $sql    = 'SELECT ' . self::COLUMNAS . ', u.nombre AS org_nombre, u.apellido AS org_apellido, '
                 . self::METRICAS_SQL . '
                    FROM torneos t
                    INNER JOIN usuarios u ON u.id = t.organizador_id
@@ -66,7 +78,7 @@ class Torneo extends Model {
      */
     public function listarDeOrganizador(int $organizadorId): array {
         $stmt = $this->db->prepare(
-            'SELECT t.*, ' . self::METRICAS_SQL . '
+            'SELECT ' . self::COLUMNAS . ', ' . self::METRICAS_SQL . '
                FROM torneos t
               WHERE t.organizador_id = ?
               ORDER BY t.created_at DESC'
@@ -82,7 +94,7 @@ class Torneo extends Model {
      */
     public function listarTodosConMetricas(): array {
         $stmt = $this->db->query(
-            'SELECT t.*, ' . self::METRICAS_SQL . '
+            'SELECT ' . self::COLUMNAS . ', ' . self::METRICAS_SQL . '
                FROM torneos t
               ORDER BY t.created_at DESC'
         );
@@ -120,7 +132,7 @@ class Torneo extends Model {
      */
     public function findConOrganizador(int $id): ?array {
         $stmt = $this->db->prepare(
-            'SELECT t.*, u.nombre AS org_nombre, u.apellido AS org_apellido, ' . self::METRICAS_SQL . '
+            'SELECT ' . self::COLUMNAS . ', u.nombre AS org_nombre, u.apellido AS org_apellido, ' . self::METRICAS_SQL . '
                FROM torneos t
                INNER JOIN usuarios u ON u.id = t.organizador_id
               WHERE t.id = ?'

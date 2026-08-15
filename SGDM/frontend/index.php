@@ -132,6 +132,8 @@ $router->get('#^/api/torneo/(\d+)/avisos$#',        static fn($id) => (new Aviso
 $router->post('#^/api/torneo/(\d+)/editar$#',       static fn($id) => (new TorneoController())->actualizar((int) $id));
 $router->post('#^/api/torneo/(\d+)/eliminar$#',     static fn($id) => (new TorneoController())->eliminar((int) $id));
 $router->post('#^/api/torneo/(\d+)/cancelar$#',     static fn($id) => (new TorneoController())->cancelar((int) $id));
+$router->post('#^/api/torneo/(\d+)/banner$#',       static fn($id) => (new TorneoController())->imagen((int) $id));
+$router->get('#^/api/torneo/(\d+)/banner$#',        static fn($id) => (new TorneoController())->servirBanner((int) $id));
 
 // ─── INSCRIPCIONES Y EQUIPOS (API JSON) ────────────────────────
 $router->post('/api/inscripcion',          static fn() => (new InscripcionController())->inscribirse());

@@ -12,6 +12,13 @@
 
 const { Api, Toast, Utils } = window.Tornalyx;
 
+/** Pinta (o limpia) la vista previa de la foto de fondo del torneo. */
+function pintarBannerPreview(url) {
+  const preview = document.getElementById('torneoBannerPreview');
+  if (!preview) return;
+  preview.style.backgroundImage = url ? `url(${encodeURI(url)})` : '';
+}
+
 /* Torneos cargados, en el orden en que se muestran. */
 let torneos = [];
 
@@ -55,12 +62,17 @@ function actualizarTituloFormulario() {
   // cambia si el torneo está publicado, así que se oculta para no confundir.
   const publicarGroup = document.getElementById('publicar')?.closest('.form-group');
   if (publicarGroup) publicarGroup.classList.toggle('hidden', !!editandoId);
+
+  // La foto de fondo recién tiene sentido con un torneo ya creado (necesita
+  // un id real contra el que subir).
+  document.getElementById('torneoBannerRow')?.classList.toggle('hidden', !editandoId);
 }
 
 /** Vuelve el formulario a modo "crear" (se usa al abrirlo desde cero). */
 function resetFormularioCreacion() {
   editandoId = null;
   document.getElementById('createForm')?.reset();
+  pintarBannerPreview(null);
   actualizarTituloFormulario();
 }
 
@@ -71,6 +83,7 @@ function iniciarEdicion(id) {
   if (!torneo || !form) return;
 
   editandoId = torneo.id;
+  pintarBannerPreview(torneo.banner_url);
   const set = (nombre, valor) => {
     const el = form.elements.namedItem(nombre);
     if (el) el.value = valor ?? '';
@@ -337,6 +350,53 @@ function initCreateForm() {
   });
 }
 
+/**
+ * Sube la foto de fondo del torneo que se está editando
+ * (POST /api/torneo/{id}/banner). Solo tiene sentido en modo edición: sin
+ * editandoId no hay id real todavía contra el que subir la imagen.
+ */
+function initBannerUpload() {
+  const input = document.getElementById('torneoBannerInput');
+  const btn   = document.getElementById('torneoBannerBtn');
+  if (!input || !btn) return;
+
+  btn.addEventListener('click', () => input.click());
+
+  input.addEventListener('change', async () => {
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file || !editandoId) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      Toast.error('Formato no admitido. Usá JPG, PNG o WebP.');
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      Toast.error('La imagen no puede superar los 4 MB.');
+      return;
+    }
+
+    const data = new FormData();
+    data.append('banner', file);
+    try {
+      const res = await fetch(`/api/torneo/${editandoId}/banner`, {
+        method: 'POST',
+        body: data,
+        credentials: 'same-origin',
+        headers: Utils.csrfHeaders(),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'No se pudo subir la imagen.');
+      pintarBannerPreview(json.banner_url);
+      const i = torneos.findIndex(t => String(t.id) === String(editandoId));
+      if (i !== -1) torneos[i].banner_url = json.banner_url;
+      Toast.success('Foto de fondo actualizada.');
+    } catch (err) {
+      Toast.error(err.message);
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!document.getElementById('misTorneos') && !document.getElementById('createForm')) return;
 
@@ -357,6 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
   );
 
   initCreateForm();
+  initBannerUpload();
   cargarTorneos();
 });
 

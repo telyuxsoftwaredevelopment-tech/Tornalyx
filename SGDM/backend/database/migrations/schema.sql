@@ -59,7 +59,13 @@ CREATE TABLE IF NOT EXISTS torneos (
     estado          ENUM('borrador','inscripcion','en_curso','finalizado','cancelado') NOT NULL DEFAULT 'borrador',
     max_participantes INT UNSIGNED NOT NULL DEFAULT 16,
     publico         TINYINT(1)   NOT NULL DEFAULT 1,
+    -- Igual que avatar_data/avatar_mime en usuarios: Render free no tiene
+    -- disco persistente, así que la foto de fondo se guarda en la propia
+    -- fila y se sirve vía GET /api/torneo/{id}/banner; banner_url solo
+    -- guarda esa URL (ver add_torneo_banner.sql).
     banner_url      VARCHAR(255) DEFAULT NULL,
+    banner_data     MEDIUMBLOB   DEFAULT NULL,
+    banner_mime     VARCHAR(30)  DEFAULT NULL,
     fecha_inicio    DATE         DEFAULT NULL,
     fecha_fin       DATE         DEFAULT NULL,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
