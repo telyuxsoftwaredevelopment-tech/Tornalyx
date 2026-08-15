@@ -38,6 +38,11 @@ services:
       # SOLO la primera vez (cuando el volumen está vacío).
       # Se carga únicamente el schema (sin datos de prueba). Las migraciones de
       # SGDM/backend/database/migrations/ ya están plegadas en schema.sql.
+      #
+      # Esto es solo un atajo para el primer arranque: como corre una única vez,
+      # NO sirve para incorporar migraciones nuevas a un volumen que ya existe.
+      # De eso se encarga el entrypoint del servicio `app`, que aplica lo
+      # pendiente en CADA arranque (ver SGDM/docker/entrypoint.sh).
       - ./SGDM/backend/database/migrations/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
     healthcheck:
       # `app` espera a que MySQL responda antes de arrancar.

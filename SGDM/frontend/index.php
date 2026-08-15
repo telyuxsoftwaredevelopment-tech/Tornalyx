@@ -32,6 +32,38 @@ require_once __DIR__ . '/../backend/controllers/PerfilController.php';
 require_once __DIR__ . '/../backend/controllers/InscripcionController.php';
 require_once __DIR__ . '/../backend/controllers/PartidoController.php';
 require_once __DIR__ . '/../backend/controllers/AvisoController.php';
+require_once __DIR__ . '/../backend/shared/Migrador.php';
+
+// ──────────────────────────────────────────────────────────────
+// Migraciones automáticas (solo fuera de producción).
+//
+// En un servidor la base la pone al día el entrypoint del contenedor, antes de
+// que Apache acepte una sola petición. En desarrollo local no hay tal arranque
+// —Apache y MySQL se levantan a mano—, así que el único momento en que se puede
+// detectar una migración nueva es la primera petición que la ve.
+//
+// En producción NO se toca el esquema desde acá a propósito: el usuario de la
+// app no tiene privilegios de DDL (ver backend/database/dcl.sql), y hacer DDL
+// dentro del ciclo de una request es una mala idea aunque los tuviera.
+//
+// El sello evita pagar este chequeo en cada request: mientras ningún .sql sea
+// más nuevo que el sello son un par de stat() y no se abre ninguna conexión,
+// preservando que las páginas públicas anden aunque la base esté caída.
+// ──────────────────────────────────────────────────────────────
+$selloMigraciones = __DIR__ . '/../backend/storage/migraciones.sello';
+if (Migrador::hayQueRevisar($selloMigraciones)) {
+    try {
+        require_once __DIR__ . '/../backend/config/database.php';
+        if (strtolower(envOrDefault('APP_ENV', 'development')) !== 'production') {
+            (new Migrador(Migrador::conexionDDL()))->aplicar();
+        }
+        Migrador::sellar($selloMigraciones);
+    } catch (Throwable $e) {
+        // Que la base esté caída o falte un permiso no debe tumbar la app: se
+        // registra y se sigue. Las rutas que necesiten la base fallarán solas.
+        error_log('Migraciones automaticas: ' . $e->getMessage());
+    }
+}
 
 Session::start();
 
