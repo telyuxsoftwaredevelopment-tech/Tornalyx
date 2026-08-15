@@ -11,6 +11,52 @@
   border-radius: 10px;
 }
 
+/* ─── Menú de acciones (3 puntos) ────────────────────────
+   Reemplaza los pares de enlaces sueltos "Editar/Eliminar" en filas de
+   tabla y tarjetas. Se abre/cierra solo con initActionMenus() (main.js),
+   delegado en document: funciona con contenido agregado dinámicamente
+   sin tener que re-enganchar listeners en cada render.
+   Uso:
+   <div class="action-menu">
+     <button type="button" class="action-menu__trigger" aria-haspopup="true" aria-expanded="false" aria-label="Más acciones">
+       <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+     </button>
+     <div class="action-menu__list" role="menu">
+       <button type="button" class="action-menu__item" data-...>...</button>
+       <button type="button" class="action-menu__item action-menu__item--danger" data-...>...</button>
+     </div>
+   </div> */
+.action-menu { position: relative; display: inline-block; }
+.action-menu__trigger {
+  width: 30px; height: 30px; padding: 0; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid transparent; color: var(--muted);
+  cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+}
+.action-menu__trigger svg { width: 16px; height: 16px; fill: currentColor; }
+.action-menu__trigger:hover,
+.action-menu__trigger[aria-expanded="true"] {
+  background: rgba(255,255,255,.06); color: var(--ink); border-color: var(--line);
+}
+.action-menu__list {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 60;
+  min-width: 170px; padding: 6px;
+  background: var(--bg-card); border: 1px solid var(--line);
+  border-radius: 12px; box-shadow: 0 20px 40px -20px rgba(0,0,0,.8);
+  display: none;
+}
+.action-menu.is-open .action-menu__list { display: block; }
+.action-menu__item {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 8px 10px; border-radius: 8px; border: none; background: none;
+  color: var(--muted); font-size: 13px; text-align: left; cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.action-menu__item svg { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.action-menu__item:hover { background: rgba(255,255,255,.05); color: var(--ink); }
+.action-menu__item--danger { color: var(--red-bright); }
+.action-menu__item--danger:hover { background: rgba(236,28,36,.1); color: var(--red-bright); }
+
 /* ─── Cards ──────────────────────────────────────────── */
 .card {
   background: var(--bg-card);
@@ -76,8 +122,40 @@
 }
 .form-control.input-error { border-color: var(--red-bright); }
 .form-control::placeholder { color: var(--muted-2); }
+/* Las casillas de mensaje (reglamento, premios, avisos, bio, etc.) no se
+   pueden agrandar arrastrando: el alto lo define `rows`, no el usuario. */
+textarea.form-control { resize: none; }
 .form-error    { display: block; font-size: 12px; color: var(--red-bright); margin-top: 4px; }
 .form-error.hidden { display: none; }
+
+/* ─── Estado vacío (plantilla reutilizable) ─────────────
+   Uso:
+   <div class="empty-state">
+     <div class="empty-state__icon"><svg>...</svg></div>
+     <h3>Título corto</h3>
+     <p>Una línea explicando por qué no hay nada y qué hacer.</p>
+     <div class="empty-state__action"><a class="btn btn-primary btn-sm" href="...">Acción</a></div>
+   </div>
+   El bloque __action es opcional: se omite si no hay ninguna acción que
+   ofrecer (p. ej. un buscador sin resultados). */
+.empty-state {
+  text-align: center;
+  padding: var(--space-10) var(--space-4);
+  color: var(--muted);
+}
+.empty-state__icon {
+  width: 56px; height: 56px; margin: 0 auto var(--space-4);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,.04);
+  color: var(--muted-2);
+}
+.empty-state__icon svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.empty-state__icon.icon { font-size: 1.75rem; } /* compat: emoji suelto en vez de svg */
+.empty-state h3 { color: var(--ink); font-size: var(--font-size-base); margin-bottom: 6px; }
+.empty-state p  { font-size: var(--font-size-sm); max-width: 40ch; margin: 0 auto; }
+.empty-state__action { margin-top: var(--space-5); }
+/* Compat con el markup viejo (.empty-state .icon suelto, sin envoltorio). */
+.empty-state .icon { font-size: 3rem; margin-bottom: var(--space-4); }
 
 /* ─── Tabla de datos ─────────────────────────────────── */
 .data-table {
@@ -87,7 +165,7 @@
 }
 .data-table th {
   text-align: left;
-  padding: 10px 14px;
+  padding: 8px 14px;
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 1px;
@@ -96,7 +174,7 @@
   border-bottom: 1px solid var(--line);
 }
 .data-table td {
-  padding: 12px 14px;
+  padding: 9px 14px;
   border-bottom: 1px solid var(--line-soft);
   color: var(--ink);
   vertical-align: middle;
@@ -157,33 +235,10 @@
   transition: width .4s ease;
 }
 
-/* ─── KPI Card ───────────────────────────────────────── */
-.kpi-card {
-  background: var(--bg-card);
-  border: 1px solid var(--line-soft);
-  border-radius: 16px;
-  padding: var(--space-5);
-}
-.kpi-card__label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--muted-2);
-  margin-bottom: var(--space-2);
-}
-.kpi-card__value {
-  font-family: var(--head);
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--ink);
-  line-height: 1;
-}
-.kpi-card__sub {
-  font-size: 12px;
-  color: var(--muted);
-  margin-top: var(--space-2);
-}
+/* .kpi-card vive en main.css (con el badge de ícono en la esquina); la
+   definición que había acá quedó vieja y, al cargar components.css
+   después, le ganaba la cascada — pisaba el padding-right reservado
+   para el ícono y el texto del label quedaba por debajo del badge. */
 
 /* ─── Modal ──────────────────────────────────────────── */
 .modal {
@@ -314,3 +369,138 @@
 .status-dot--green  { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
 .status-dot--yellow { background: #eab308; box-shadow: 0 0 6px #eab308; }
 .status-dot--red    { background: var(--red-bright); box-shadow: 0 0 6px var(--red-bright); }
+
+/* ─── Auth flip card (login / registro) ──────────────── */
+/* Ocupa toda la pantalla disponible bajo el navbar (sin tarjeta flotando
+   en un recuadro chico): cada cara tiene la altura completa del viewport,
+   así que no depende de medir el contenido con JS para no cortarlo.
+   .auth-card-flip se ancla con position:absolute+inset:0 a .auth-page (en
+   vez de height:100%): un height:100% no se resuelve de forma confiable
+   contra un contenedor cuyo alto viene de flex:1 varios niveles arriba
+   (el navegador lo trata como "auto" y la tarjeta colapsa al alto de su
+   contenido, dejando espacio vacío debajo). inset:0 la ancla de forma
+   directa al tamaño ya resuelto de .auth-page, sin ese problema. */
+.auth-card-flip {
+  perspective: 1600px;
+  position: absolute;
+  inset: 0;
+  animation: auth-fade-in .6s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes auth-fade-in {
+  from { opacity: 0; transform: translateY(14px) scale(.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* En monitores muy anchos, .auth-face__form crecía sin límite y el
+   formulario (ancho fijo, ver .auth-face__inner) quedaba perdido en medio
+   de un montón de vidrio esmerilado vacío mostrando la foto de fondo. Se
+   limita el ancho total de la tarjeta y se centra — left:0;right:0 ya
+   vienen de inset:0, así que width+margin:auto alcanza para centrar un
+   elemento position:absolute sin pisar el transform de la animación. */
+@media(min-width:1300px) {
+  .auth-card-flip { width:1300px; margin:0 auto; }
+}
+
+.auth-flip {
+  position: relative;
+  width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .8s cubic-bezier(.4,0,.2,1);
+}
+.auth-flip.is-flipped { transform: rotateY(180deg); }
+.auth-flip.no-anim { transition: none; }
+
+.auth-face {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  width: 100%; height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.auth-face--front { position: relative; }
+.auth-face--back {
+  position: absolute; inset: 0;
+  grid-template-columns: 1fr 1.35fr;
+  transform: rotateY(180deg);
+}
+
+/* El formulario centra una columna de ancho fijo dentro del panel; si el
+   contenido (p. ej. el registro completo) no entra en la altura de
+   pantalla, ese panel scrollea de forma independiente del panel promo.
+   El centrado vertical usa margin:auto en .auth-face__inner (no
+   justify-content:center en el contenedor con scroll): así, cuando el
+   contenido no entra, los márgenes colapsan a 0 en vez de dejar el
+   principio del formulario recortado e imposible de scrollear. */
+.auth-face__form {
+  height: 100%;
+  overflow-y: auto;
+  /* Glassmorphism: deja ver la foto de fondo de .auth-page a través del
+     panel. rgba sobre --bg-rgb en vez de --bg sólido, así el vidrio se
+     tiñe solo con el tema activo sin necesitar un color aparte. */
+  background: rgba(var(--bg-rgb), .62);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex; flex-direction: column;
+  padding: var(--space-10) clamp(var(--space-6), 6vw, var(--space-16));
+}
+.auth-face__inner { width: 100%; max-width: 440px; margin: auto; }
+/* Sobre el vidrio esmerilado el botón se mezclaba con el fondo; se le suma
+   un brillo rojo en reposo (no sólo al :hover) para que resalte de entrada. */
+.auth-face__inner .btn-primary {
+  box-shadow:
+    6px 6px 14px rgba(0,0,0,.55),
+    -4px -4px 10px rgba(255,70,75,.1),
+    0 0 26px -4px var(--red-glow);
+}
+.auth-face__inner .btn-primary:hover {
+  box-shadow:
+    8px 8px 18px rgba(0,0,0,.6),
+    -5px -5px 12px rgba(255,80,85,.14),
+    0 0 34px -4px var(--red-glow);
+}
+
+.auth-face__promo {
+  height: 100%;
+  background: linear-gradient(135deg, var(--red-deep), var(--red));
+  color: #fff;
+  padding: var(--space-8);
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center; gap: var(--space-4);
+}
+.auth-face__promo h2 { font-family: var(--head); font-size: var(--font-size-2xl); }
+.auth-face__promo p  { font-size: var(--font-size-sm); opacity: .9; max-width: 26ch; }
+
+.btn-promo {
+  background: transparent;
+  border: 1.5px solid #fff;
+  color: #fff;
+  box-shadow: 0 0 0 5px rgba(255,255,255,.14), 0 0 30px -2px rgba(255,255,255,.6);
+}
+.btn-promo:hover  { background: rgba(255,255,255,.15); border-color: #fff; color: #fff; box-shadow: 0 0 0 6px rgba(255,255,255,.18), 0 0 36px 0 rgba(255,255,255,.75); }
+.btn-promo:active { box-shadow: none; background: rgba(255,255,255,.25); }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-card-flip { animation: none; }
+  .auth-flip { transition: none; }
+}
+
+/* Mobile: el panel promocional colapsa como franja compacta arriba en vez
+   de partir la pantalla en dos; el flip 3D se reemplaza por un toggle
+   simple entre las dos caras (sin rotateY, que no tiene sentido apiladas). */
+@media (max-width: 768px) {
+  /* En mobile no fijamos la tarjeta al tamaño de la pantalla: si el
+     contenido (el registro) no entra, tiene que poder crecer y que
+     scrollee la página entera, no quedar recortada. */
+  .auth-card-flip { position: static; perspective: none; }
+  .auth-flip { transform: none !important; height: auto; transition: none; }
+  .auth-face {
+    position: relative !important;
+    grid-template-columns: 1fr !important;
+    height: auto;
+    transform: none !important;
+    display: none;
+  }
+  .auth-face.is-active { display: grid; }
+  .auth-face__form  { order: 2; height: auto; padding: var(--space-6); }
+  .auth-face__promo { order: 1; height: auto; padding: var(--space-5) var(--space-6); }
+  .auth-face__promo p { display: none; }
+}

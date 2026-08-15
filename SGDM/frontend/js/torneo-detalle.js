@@ -9,6 +9,13 @@
 
 'use strict';
 
+/* Envuelto en IIFE (como el resto de los scripts de página): un
+   `const Api` de nivel superior en dos <script> clásicos que comparten
+   el scope global choca con el `const Api` de main.js y tira
+   "Identifier 'Api' has already been declared", abortando todo el
+   archivo antes de que corra initDetalle. */
+(function () {
+
 const { Api, Toast, Utils } = window.Tornalyx;
 const esc = Utils.escapeHtml;
 
@@ -379,6 +386,29 @@ function renderInfoTab(t) {
     ${canal}`;
 }
 
+/* ─── Placeholder mientras se espera al API ──────────── */
+function skeletonInicial() {
+  const badges = document.getElementById('heroBadges');
+  const nombre = document.getElementById('heroNombre');
+  const fixture = document.getElementById('tab-fixture');
+  if (badges) {
+    badges.innerHTML = '<span class="skeleton" style="height:22px;width:100px;border-radius:999px"></span>'
+      + '<span class="skeleton" style="height:22px;width:80px;border-radius:999px"></span>';
+  }
+  if (nombre) {
+    nombre.innerHTML = '<span class="skeleton" style="display:inline-block;height:1.1em;width:min(420px,60%)"></span>';
+  }
+  if (fixture) {
+    fixture.innerHTML = Array.from({ length: 3 }, () => `
+      <div style="display:flex;justify-content:space-between;gap:var(--space-3);
+                  border:1px solid var(--line);border-radius:12px;
+                  padding:var(--space-3);margin-bottom:var(--space-2)">
+        <span class="skeleton" style="height:16px;width:45%"></span>
+        <span class="skeleton" style="height:16px;width:20%"></span>
+      </div>`).join('');
+  }
+}
+
 /* ─── Carga ────────────────────────────────────────── */
 async function cargar() {
   const id = torneoId();
@@ -409,6 +439,8 @@ async function initDetalle() {
     return;
   }
 
+  skeletonInicial();
+
   try {
     await cargar();
   } catch (err) {
@@ -417,3 +449,5 @@ async function initDetalle() {
 }
 
 document.addEventListener('DOMContentLoaded', initDetalle);
+
+})();

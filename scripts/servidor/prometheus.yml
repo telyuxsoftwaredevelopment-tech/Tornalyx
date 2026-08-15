@@ -1,0 +1,18 @@
+# Tornalyx — configuración de Prometheus.
+# Copiar a /etc/prometheus/prometheus.yml en el servidor real.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Métricas del sistema operativo: CPU, memoria, disco, red.
+  - job_name: "node"
+    static_configs:
+      - targets: ["localhost:9100"]
+
+  # Métricas de MySQL: conexiones, queries lentas, tamaño de tablas, etc.
+  # mysqld_exporter se autentica con tornalyx_monitor (dcl.sql), que solo
+  # tiene SELECT + PROCESS, nunca puede escribir datos de negocio.
+  - job_name: "mysql"
+    static_configs:
+      - targets: ["localhost:9104"]

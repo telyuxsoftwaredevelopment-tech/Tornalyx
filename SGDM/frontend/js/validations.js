@@ -9,14 +9,10 @@
 /* ─── Helpers de autenticación (AJAX) ────────────────── */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/* Redirige al panel según el rol devuelto por el backend. */
+/* Redirige al panel según el rol devuelto por el backend. "Organizador" ya
+   no es un rol de cuenta: cualquier usuario logueado entra a "Mis torneos". */
 function redirectByRole(rol) {
-  const map = {
-    administrador: '/admin/dashboard',
-    organizador:   '/organizador/dashboard',
-    participante:  '/perfil',
-  };
-  window.location.href = map[rol] || '/';
+  window.location.href = rol === 'administrador' ? '/admin/dashboard' : '/organizador/dashboard';
 }
 
 /* Muestra un mensaje de error (toast si existe, alert como fallback). */
@@ -44,6 +40,32 @@ async function postForm(url, data) {
     body: data,
   });
   return res.json();
+}
+
+/* Estado de carga en un botón de submit: cambia el texto y lo deshabilita
+   mientras se espera la respuesta del servidor. */
+function setBtnLoading(btn, loading) {
+  if (!btn) return;
+  if (loading) {
+    btn.dataset.originalText = btn.dataset.originalText || btn.textContent;
+    btn.textContent = btn.dataset.loadingText || 'Un momento…';
+    btn.classList.add('is-loading');
+    btn.disabled = true;
+  } else {
+    btn.textContent = btn.dataset.originalText || btn.textContent;
+    btn.classList.remove('is-loading');
+    btn.disabled = false;
+  }
+}
+
+/* Sacude un elemento para reforzar visualmente un error (p. ej. login
+   fallido). Se saca y se vuelve a poner la clase para poder re-disparar
+   la animación en fallos consecutivos. */
+function shakeEl(el) {
+  if (!el) return;
+  el.classList.remove('auth-shake');
+  void el.offsetWidth; // fuerza reflow
+  el.classList.add('auth-shake');
 }
 
 /* ─── Toggle visibilidad de contraseña ──────────────── */
@@ -116,6 +138,8 @@ function initLoginValidation() {
     }
     if (!valid) return;
 
+    const submitBtn = document.getElementById('loginBtn');
+    setBtnLoading(submitBtn, true);
     try {
       const json = await postForm('/login', new FormData(form));
       if (json.success && json.twofa) {
@@ -128,9 +152,12 @@ function initLoginValidation() {
           msg += ` Intentos restantes: ${json.intentos_restantes}.`;
         }
         authError(msg);
+        shakeEl(document.getElementById('credCard'));
       }
     } catch {
       authError('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setBtnLoading(submitBtn, false);
     }
   });
 
@@ -156,7 +183,44 @@ function showOtpStep(targetMasked) {
   otp.classList.remove('hidden');
   const t = document.getElementById('otpTarget');
   if (t && targetMasked) t.textContent = targetMasked;
-  document.getElementById('codigo')?.focus();
+  document.querySelector('.otp-box')?.focus();
+  startOtpCountdown();
+}
+
+/* Debe coincidir con el TTL fijo que usa AuthController::iniciarMfaEmail
+   ($_SESSION['pending_2fa']['expires'] = time() + 600) tanto al enviar el
+   código como al reenviarlo. Si se recarga la página a mitad del desafío
+   la cuenta vuelve a arrancar en 10:00 aunque el backend tenga menos
+   tiempo real restante: es una aproximación visual, el backend sigue
+   siendo la autoridad sobre la expiración real. */
+const OTP_TTL_SECONDS = 600;
+let otpCountdownId = null;
+
+function startOtpCountdown() {
+  stopOtpCountdown();
+  const bar   = document.getElementById('otpTimerBar');
+  const label = document.getElementById('otpTimerLabel');
+  if (!bar || !label) return;
+  const deadline = Date.now() + OTP_TTL_SECONDS * 1000;
+
+  function tick() {
+    const remaining = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+    bar.style.width = (remaining / OTP_TTL_SECONDS * 100) + '%';
+    bar.classList.toggle('is-low', remaining <= 120 && remaining > 30);
+    bar.classList.toggle('is-critical', remaining <= 30);
+    const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+    const s = String(remaining % 60).padStart(2, '0');
+    label.textContent = remaining > 0
+      ? `El código vence en ${m}:${s}`
+      : 'El código venció. Reenvialo para recibir uno nuevo.';
+    if (remaining <= 0) stopOtpCountdown();
+  }
+  tick();
+  otpCountdownId = setInterval(tick, 1000);
+}
+
+function stopOtpCountdown() {
+  if (otpCountdownId) { clearInterval(otpCountdownId); otpCountdownId = null; }
 }
 
 function initOtpFlow() {
@@ -169,6 +233,45 @@ function initOtpFlow() {
     else authError(m);
   };
   const hideErr = () => errEl?.classList.add('hidden');
+
+  /* ── Casilleros del código: cada dígito en su propia caja, con
+     autoavance/retroceso/pegado. El valor combinado vive en el input
+     oculto #codigo, que es lo único que lee el resto del flujo. */
+  const boxes  = Array.from(document.querySelectorAll('.otp-box'));
+  const hidden = document.getElementById('codigo');
+  const track  = Array.from(document.getElementById('otpTrack')?.children || []);
+
+  function syncOtpBoxes() {
+    if (!hidden) return;
+    const value = boxes.map(b => b.value).join('');
+    hidden.value = value;
+    boxes.forEach(b => b.classList.toggle('is-filled', !!b.value));
+    track.forEach((seg, i) => seg.classList.toggle('is-lit', i < value.length));
+  }
+
+  function clearOtpBoxes() {
+    boxes.forEach(b => b.value = '');
+    syncOtpBoxes();
+  }
+
+  boxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/[^0-9]/g, '').slice(-1);
+      if (box.value && boxes[i + 1]) boxes[i + 1].focus();
+      syncOtpBoxes();
+    });
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && boxes[i - 1]) boxes[i - 1].focus();
+    });
+    box.addEventListener('paste', (e) => {
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+      if (!text) return;
+      e.preventDefault();
+      text.slice(0, boxes.length).split('').forEach((d, j) => { if (boxes[j]) boxes[j].value = d; });
+      syncOtpBoxes();
+      (boxes[Math.min(text.length, boxes.length - 1)])?.focus();
+    });
+  });
 
   /* Al cargar, consultar si hay un desafío MFA pendiente (p. ej. tras
      registrarse y ser redirigido). Reemplaza al script inline que la CSP
@@ -193,12 +296,22 @@ function initOtpFlow() {
     }
     const data = new FormData();
     data.append('codigo', codigo);
+    const submitBtn = document.getElementById('otpBtn');
+    setBtnLoading(submitBtn, true);
     try {
       const json = await postForm('/login/verificar', data);
-      if (json.success) redirectByRole(json.rol);
-      else showErr(json.error || 'Código incorrecto.');
+      if (json.success) {
+        redirectByRole(json.rol);
+      } else {
+        showErr(json.error || 'Código incorrecto.');
+        shakeEl(document.getElementById('otpCard'));
+        clearOtpBoxes();
+        boxes[0]?.focus();
+      }
     } catch {
       showErr('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setBtnLoading(submitBtn, false);
     }
   });
 
@@ -211,6 +324,7 @@ function initOtpFlow() {
       const json = await postForm('/login/reenviar', new FormData());
       if (json.success) {
         if (window.Tornalyx?.Toast) window.Tornalyx.Toast.success('Código reenviado.');
+        clearOtpBoxes();
         if (json.target_masked) showOtpStep(json.target_masked);
         startResendCooldown(60);
       } else {
@@ -226,10 +340,12 @@ function initOtpFlow() {
     e.preventDefault();
     document.getElementById('otpCard')?.classList.add('hidden');
     document.getElementById('credCard')?.classList.remove('hidden');
-    const codigo = document.getElementById('codigo');
-    if (codigo) codigo.value = '';
+    clearOtpBoxes();
     hideErr();
+    stopOtpCountdown();
   });
+
+  syncOtpBoxes();
 }
 
 /* Deshabilita el enlace "Reenviar" durante unos segundos. */
@@ -257,16 +373,18 @@ function initPasswordStrength() {
   const passInput = document.getElementById('passReg');
   if (!passInput) return;
 
+  const card  = document.getElementById('strengthCard');
+  const icon  = document.getElementById('strengthIcon');
   const fill  = document.getElementById('strengthFill');
   const label = document.getElementById('strengthLabel');
   if (!fill || !label) return;
 
   const levels = [
-    { w: '0%',    color: 'transparent',              text: 'Ingresa una contraseña' },
-    { w: '25%',   color: 'var(--red-bright)',         text: 'Débil' },
-    { w: '50%',   color: 'var(--color-warning,#f59e0b)', text: 'Regular' },
-    { w: '75%',   color: '#eab308',                  text: 'Buena' },
-    { w: '100%',  color: '#22c55e',                  text: 'Fuerte' }
+    { w: '0%',   tier: 'var(--muted-2)',                icon: '🔓', text: 'Ingresa una contraseña' },
+    { w: '25%',  tier: 'var(--red-bright)',              icon: '📎', text: 'Débil — se descifra al toque' },
+    { w: '50%',  tier: 'var(--color-warning,#f59e0b)',   icon: '🔑', text: 'Regular' },
+    { w: '75%',  tier: '#eab308',                        icon: '🔒', text: 'Buena' },
+    { w: '100%', tier: '#22c55e',                        icon: '🛡️', text: 'Fuerte' }
   ];
 
   passInput.addEventListener('input', function () {
@@ -278,9 +396,13 @@ function initPasswordStrength() {
     if (/[^A-Za-z0-9]/.test(val)) score++;
     const lv = levels[score] || levels[0];
     fill.style.width      = lv.w;
-    fill.style.background = lv.color;
+    fill.style.background = lv.tier;
     label.textContent     = lv.text;
-    label.style.color     = lv.color;
+    if (icon) icon.textContent = lv.icon;
+    if (card) {
+      card.style.setProperty('--tier', lv.tier);
+      card.toggleAttribute('data-tier', !!val);
+    }
   });
 }
 
@@ -309,6 +431,70 @@ function initPasswordRequirements() {
 
   input.addEventListener('input', evaluate);
   evaluate(); // estado inicial
+}
+
+/* ─── Sugerencias de dominio de email ─────────────────── */
+const EMAIL_DOMAINS = ['gmail.com', 'hotmail.com', 'outlook.com', 'yahoo.com', 'icloud.com'];
+
+function initEmailDomainSuggest() {
+  document.querySelectorAll('input[type="email"]').forEach(input => {
+    const box = document.getElementById(input.id + 'Suggest');
+    if (!box) return;
+
+    function render() {
+      const val = input.value;
+      const at  = val.indexOf('@');
+      if (at === -1) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const typed   = val.slice(at + 1).toLowerCase();
+      const opciones = EMAIL_DOMAINS.filter(d => d.startsWith(typed) && d !== typed);
+      if (!opciones.length) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      box.innerHTML = opciones.map(d => `<button type="button">${val.slice(0, at + 1)}${d}</button>`).join('');
+      box.classList.remove('hidden');
+    }
+
+    input.addEventListener('input', render);
+    input.addEventListener('blur', () => setTimeout(() => box.classList.add('hidden'), 150));
+    box.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      input.value = btn.textContent;
+      box.classList.add('hidden');
+      input.dispatchEvent(new Event('input'));
+      input.focus();
+    });
+  });
+}
+
+/* ─── Avatar con iniciales en vivo (panel promo de registro) ── */
+function initPromoAvatar() {
+  const nombre   = document.getElementById('nombre');
+  const apellido = document.getElementById('apellido');
+  const avatar   = document.getElementById('promoAvatar');
+  if (!nombre || !apellido || !avatar) return;
+
+  const update = () => {
+    const iniciales = ((nombre.value.trim()[0] || '') + (apellido.value.trim()[0] || '')).toUpperCase();
+    avatar.textContent = iniciales || '?';
+  };
+  nombre.addEventListener('input', update);
+  apellido.addEventListener('input', update);
+}
+
+/* ─── Check en vivo: "confirmar contraseña" coincide ──── */
+function initPasswordConfirmCheck() {
+  const pass    = document.getElementById('passReg');
+  const confirm = document.getElementById('passConfirm');
+  const hint    = document.getElementById('confirmHint');
+  if (!pass || !confirm || !hint) return;
+
+  const evaluate = () => {
+    if (!confirm.value) { hint.textContent = ''; hint.className = 'confirm-hint'; return; }
+    const coincide = confirm.value === pass.value;
+    hint.textContent = coincide ? '✓ Coinciden' : 'Todavía no coinciden';
+    hint.className = 'confirm-hint ' + (coincide ? 'ok' : 'no');
+  };
+  confirm.addEventListener('input', evaluate);
+  pass.addEventListener('input', evaluate);
 }
 
 /* ─── Envío del formulario de Registro (AJAX) ────────── */
@@ -349,6 +535,18 @@ function initRegistroSubmit() {
       fecha?.focus();
       return;
     }
+    // El año de <input type="date"> no está acotado en todos los navegadores
+    // (se puede escribir "20001-07-13" a mano): sin este chequeo el backend
+    // lo rechaza recién después del viaje al servidor. El regex exige año de
+    // EXACTAMENTE 4 dígitos: con eso, comparar como string contra otra fecha
+    // ISO de 4 dígitos es válido (mismo largo, mismo formato).
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha.value)
+        || fecha.value < '1900-01-01'
+        || fecha.value > new Date().toISOString().slice(0, 10)) {
+      authError('La fecha de nacimiento no es válida.');
+      fecha.focus();
+      return;
+    }
     /* Validaciones de cliente que el backend no puede inferir */
     if ((pass?.value || '') !== (passConfirm?.value || '')) {
       authError('Las contraseñas no coinciden.');
@@ -359,14 +557,23 @@ function initRegistroSubmit() {
       return;
     }
 
-    /* Los campos viven fuera del <form>; se recogen por name. */
+    /* Los campos viven fuera del <form>; se recogen por name, buscando
+       dentro de la cara de registro. Buscar en document sin acotar agarraba
+       el campo equivocado: "email" y "password" existen en las DOS caras
+       de la tarjeta (login y registro), y al estar el login primero en el
+       DOM, document.querySelector devolvía sus inputs vacíos en vez de los
+       que el usuario completó acá, mandando el registro con email/password
+       en blanco (de ahí el "Todos los campos son obligatorios"). */
+    const scope = document.getElementById('authFaceSignup') || document;
     const data = new FormData();
     ['nombre', 'apellido', 'email', 'password', 'fecha_nacimiento', 'rol']
       .forEach(name => {
-        const el = document.querySelector(`[name="${name}"]`);
+        const el = scope.querySelector(`[name="${name}"]`);
         if (el) data.append(name, el.value);
       });
 
+    const submitBtn = document.getElementById('registroBtn');
+    setBtnLoading(submitBtn, true);
     try {
       const json = await postForm('/registro', data);
       if (json.success && json.twofa) {
@@ -379,9 +586,17 @@ function initRegistroSubmit() {
         redirectByRole(json.rol);
       } else {
         authError(json.error || 'No se pudo crear la cuenta.');
+        /* No se sacude .auth-face--back directamente: ya tiene su propio
+           transform:rotateY(180deg) en desktop, y la animación de shake
+           (que solo anima translateX) lo pisaría y "desflipearía" la
+           tarjeta por un instante. El panel interno no tiene transform
+           propio, así que es seguro sacudirlo a él. */
+        shakeEl(document.querySelector('#authFaceSignup .auth-face__inner'));
       }
     } catch {
       authError('Error de conexión. Intentá de nuevo.');
+    } finally {
+      setBtnLoading(submitBtn, false);
     }
   });
 }
@@ -412,6 +627,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initOtpFlow();
   initPasswordStrength();
   initPasswordRequirements();
+  initPasswordConfirmCheck();
+  initEmailDomainSuggest();
+  initPromoAvatar();
   initRegistroSubmit();
   initRealtimeValidation();
 });

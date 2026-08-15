@@ -18,157 +18,32 @@
 .hero-text .lead { margin:0; max-width:52ch; }
 .hero-cta { margin-top:32px; animation:fade-up .6s .28s cubic-bezier(.22,1,.36,1) both; }
 
-@media(min-width:960px) {
-  /* La columna del texto pesa un poco más: el mockup acompaña, no compite. */
-  .hero-top { grid-template-columns:1.05fr .95fr; gap:56px; }
-}
-
-/* ─── Vista previa de la interfaz (mockup del hero) ───── */
-.hero-visual {
-  animation:fade-up .6s .36s cubic-bezier(.22,1,.36,1) both;
-  perspective:1200px;
-}
-.mockup {
+/* ─── Vista previa a la derecha del hero (columna 2 de .hero-top) ─────
+   Mobile-first: apilada debajo del texto por defecto (.hero-top sigue en
+   una sola columna); pasa a dos columnas recién en escritorio. El fondo
+   de la sección sigue siendo el sólido de siempre: la imagen es un
+   elemento contenido, no un background que lo tape. ─────────────────── */
+.hero-media {
+  animation:fade-up .6s .2s cubic-bezier(.22,1,.36,1) both;
+  border-radius:20px;
   border:1px solid var(--line);
-  border-radius:18px;
-  overflow:hidden;
-  background:linear-gradient(160deg,rgba(26,16,18,.92),rgba(11,7,8,.92));
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  box-shadow:
-    0 30px 70px -30px rgba(0,0,0,.9),
-    0 0 60px -30px var(--red-glow);
-  animation:mockup-flota 6s ease-in-out infinite;
-}
-[data-theme="light"] .mockup {
-  background:linear-gradient(160deg,rgba(255,255,255,.9),rgba(238,240,242,.9));
-  box-shadow:
-    0 30px 70px -35px rgba(120,120,130,.55),
-    0 0 60px -30px var(--red-glow);
-}
-@keyframes mockup-flota {
-  0%,100% { transform:translateY(0); }
-  50%     { transform:translateY(-9px); }
-}
-
-/* Barra de ventana */
-.mockup__bar {
-  display:flex; align-items:center; gap:12px;
-  padding:11px 16px;
-  border-bottom:1px solid var(--line-soft);
-  background:rgba(255,255,255,.02);
-}
-.mockup__dots { display:flex; gap:6px; }
-.mockup__dots i {
-  width:9px; height:9px; border-radius:50%;
-  background:var(--line);
-}
-.mockup__dots i:first-child { background:var(--red-deep); }
-.mockup__title {
-  font-family:var(--font-heading); font-size:12px; font-weight:600;
-  color:var(--muted);
-}
-
-.mockup__body { padding:var(--space-5); }
-.mockup__head {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:var(--space-5);
-}
-.mockup__ronda {
-  font-family:var(--font-heading); font-weight:700; font-size:15px;
-  color:var(--ink);
-}
-.mockup__estado {
-  font-size:11px; font-weight:600;
-  padding:4px 10px; border-radius:999px;
-  color:#0e9f6e;
-  background:rgba(14,159,110,.14);
-  border:1px solid rgba(14,159,110,.3);
-}
-
-/* ─── Llaves del torneo ───────────────────────────────── */
-.llaves { display:flex; align-items:center; gap:34px; }
-.llaves__col { flex:1; display:flex; flex-direction:column; gap:16px; position:relative; }
-.llaves__col--final { justify-content:center; }
-.llaves__label {
-  font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px;
-  text-transform:uppercase; color:var(--muted-2);
-  margin-bottom:6px;
-}
-
-.llave {
-  border:1px solid var(--line);
-  border-radius:10px;
-  overflow:hidden;
   background:var(--bg-2);
-  position:relative;
+  overflow:hidden;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6), 0 0 32px -6px var(--red-glow);
 }
-.llave__eq {
-  display:flex; align-items:center; justify-content:space-between;
-  gap:10px;
-  padding:8px 11px;
-  font-size:12px; color:var(--muted);
-  border-bottom:1px solid var(--line-soft);
-}
-.llave__eq:last-child { border-bottom:none; }
-.llave__eq b {
-  font-family:var(--font-heading); font-size:12px;
-  color:var(--muted-2);
-}
-/* El que pasa de ronda queda marcado en rojo, como en el fixture real. */
-.llave__eq.is-win { color:var(--ink); font-weight:600; }
-.llave__eq.is-win b { color:var(--red-bright); }
-
-/* Conectores: una línea sale de cada llave y se une antes de la final.
-   Van en --muted-2 rebajado: --line queda casi invisible sobre la tarjeta. */
-.llaves__col:first-child .llave::after,
-.llaves__col:first-child::after,
-.llaves__col--final .llave::before {
-  content:"";
-  position:absolute;
-  background:var(--muted-2);
-  opacity:.5;
-}
-.llaves__col:first-child .llave::after {
-  top:50%; left:100%;
-  width:17px; height:1px;
-}
-.llaves__col:first-child::after {
-  left:calc(100% + 17px);
-  top:25%; bottom:25%;
-  width:1px;
-}
-.llaves__col--final .llave::before {
-  top:50%; right:100%;
-  width:17px; height:1px;
+.hero-media img {
+  display:block;
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
 }
 
-.mockup__pie {
-  display:flex; align-items:flex-end; justify-content:space-between;
-  gap:var(--space-4);
-  margin-top:var(--space-5);
-  padding-top:var(--space-4);
-  border-top:1px solid var(--line-soft);
-}
-.mockup__pie-lbl { display:block; font-size:10px; color:var(--muted-2); text-transform:uppercase; letter-spacing:.5px; }
-.mockup__pie-val { display:block; font-size:12px; color:var(--ink); margin-top:3px; }
-.mockup__cupos {
-  font-family:var(--font-heading); font-size:12px; font-weight:600;
-  color:var(--muted);
-  white-space:nowrap;
+@media(min-width:860px) {
+  .hero-top { grid-template-columns:1.1fr 1fr; }
 }
 
-/* En pantallas chicas el mockup se achica para no empujar el contenido. */
-@media(max-width:520px) {
-  .llaves { gap:24px; }
-  .llave__eq { padding:7px 9px; font-size:11px; }
-  .llaves__col:first-child .llave::after,
-  .llaves__col--final .llave::before { width:12px; }
-  .llaves__col:first-child::after { left:calc(100% + 12px); }
-}
-
-/* Con "reducir animaciones" el mockup queda quieto. */
-html.a11y-motion .mockup { animation:none; }
+/* Menos aire entre el hero y la sección siguiente. */
+.hero { padding-bottom:clamp(32px,5vw,64px); }
 
 /* ─── Audiencias: foto a la izquierda, texto a la derecha ─ */
 .audiencias-grid {
@@ -189,7 +64,17 @@ html.a11y-motion .mockup { animation:none; }
   border:1px solid var(--line);
   background:var(--bg-2);
   overflow:hidden;
+  box-shadow:0 0 32px -6px var(--red-glow);
 }
+/* Corner brackets, mismo motivo que .hero-value — sentados 10px adentro
+   del borde para no quedar recortados por el overflow:hidden del frame. */
+.galeria__slides::before,
+.galeria__slides::after {
+  content:""; position:absolute; z-index:2;
+  width:16px; height:16px; pointer-events:none;
+}
+.galeria__slides::before { top:10px; left:10px; border-top:2px solid var(--red); border-left:2px solid var(--red); }
+.galeria__slides::after { bottom:10px; right:10px; border-bottom:2px solid var(--red); border-right:2px solid var(--red); }
 .galeria__slide {
   position:absolute; inset:0;
   margin:0;

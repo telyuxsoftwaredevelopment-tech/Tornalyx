@@ -3,6 +3,7 @@ require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../models/Estadistica.php';
 require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../models/DocAcceso.php';
+require_once __DIR__ . '/../models/Migracion.php';
 require_once __DIR__ . '/../shared/Session.php';
 require_once __DIR__ . '/../shared/Mailer.php';
 
@@ -13,7 +14,7 @@ require_once __DIR__ . '/../shared/Mailer.php';
 class AdminController extends Controller {
 
     /** Roles válidos para filtrar el listado de usuarios. */
-    private const ROLES = ['participante', 'organizador', 'administrador'];
+    private const ROLES = ['participante', 'administrador'];
 
     /** Estados válidos para una cuenta de usuario (coinciden con el ENUM). */
     private const ESTADOS_USUARIO = ['activo', 'suspendido', 'pendiente'];
@@ -40,6 +41,28 @@ class AdminController extends Controller {
             'stats'     => $this->estadisticaModel->resumenGeneral(),
             'actividad' => $this->estadisticaModel->actividadReciente(),
         ]);
+    }
+
+    /**
+     * Chequeo de salud del esquema (GET /api/admin/salud): compara las
+     * migraciones add_*.sql del repo contra schema_migrations y avisa si
+     * falta correr alguna en esta base (ver add_schema_migrations.sql).
+     * Solo para administradores.
+     */
+    public function salud(): void {
+        if (!$this->requireApiRole(['administrador'])) {
+            return;
+        }
+
+        try {
+            $faltantes = (new Migracion())->faltantes();
+        } catch (Throwable $e) {
+            // schema_migrations todavía no existe en esta base: es en sí
+            // misma una migración pendiente (add_schema_migrations.sql).
+            $faltantes = ['schema_migrations (correr add_schema_migrations.sql)'];
+        }
+
+        $this->jsonSuccess(['migraciones_faltantes' => $faltantes]);
     }
 
     /**
@@ -320,17 +343,6 @@ class AdminController extends Controller {
             return 'La contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas y números.';
         }
         return null;
-    }
-
-    /**
-     * Valida una fecha de nacimiento: formato YYYY-MM-DD, existente y no futura.
-     */
-    private function esFechaNacValida(string $fecha): bool {
-        $d = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
-        if ($d === false || $d->format('Y-m-d') !== $fecha) {
-            return false;
-        }
-        return $d <= new DateTimeImmutable('today');
     }
 
     /**

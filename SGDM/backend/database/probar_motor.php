@@ -72,19 +72,19 @@ function titulo(string $texto): void {
 }
 
 /**
- * Devuelve el id de un organizador con el que crear los torneos. Si la base
- * todavía no tiene ninguno (instalación limpia), crea uno de demostración.
+ * Devuelve el id de un usuario con el que crear los torneos como su
+ * organizador (torneos.organizador_id: un rol por torneo, no de cuenta).
+ * Si la base todavía no tiene ningún usuario (instalación limpia), crea uno
+ * de demostración.
  */
 function organizadorDemo(PDO $pdo): int {
-    $id = $pdo->query(
-        "SELECT id FROM usuarios WHERE rol IN ('organizador','administrador') ORDER BY id LIMIT 1"
-    )->fetchColumn();
+    $id = $pdo->query('SELECT id FROM usuarios ORDER BY id LIMIT 1')->fetchColumn();
     if ($id) {
         return (int) $id;
     }
     $stmt = $pdo->prepare(
         "INSERT INTO usuarios (nombre, apellido, email, password, fecha_nac, rol, estado)
-         VALUES ('Organizador', 'Demo', ?, ?, '1990-01-01', 'organizador', 'activo')"
+         VALUES ('Organizador', 'Demo', ?, ?, '1990-01-01', 'participante', 'activo')"
     );
     $stmt->execute([
         'organizador' . DOMINIO_DEMO,

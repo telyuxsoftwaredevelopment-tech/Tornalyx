@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tornalyx | Panel Organizador</title>
+  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <title>Tornalyx | Mis torneos</title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../../css/main.css" />
+  <link rel="stylesheet" href="../../css/main.css?v=5" />
   <link rel="stylesheet" href="../../css/components.css" />
   <link rel="stylesheet" href="../../css/dashboard.css" />
   <style>
@@ -56,6 +57,7 @@
     .user-avatar {
       width:34px; height:34px; border-radius:50%;
       background:var(--red);
+      background-size:cover; background-position:center;
       display:flex; align-items:center; justify-content:center;
       font-weight:700; font-size:12px; color:#fff; flex:none; font-family:var(--head);
     }
@@ -77,10 +79,21 @@
       display:flex; align-items:center; justify-content:space-between; gap:var(--space-4);
     }
     .topbar-left { display:flex; align-items:center; gap:var(--space-3); }
+    /* ☰ anima a ✕ al abrir (mismo tratamiento que .burger en las páginas
+       públicas), para dar feedback visual del estado del sidebar. */
     .menu-toggle {
-      display:none; background:none; border:none; cursor:pointer;
-      color:var(--muted); font-size:1.2rem; padding:6px; border-radius:8px;
+      display:none; flex-direction:column; gap:4px;
+      background:none; border:none; cursor:pointer;
+      padding:8px; border-radius:8px;
     }
+    .menu-toggle span {
+      display:block; width:20px; height:2px;
+      background:var(--muted); border-radius:2px;
+      transition:transform .25s ease, opacity .2s;
+    }
+    .menu-toggle.open span:nth-child(1) { transform:translateY(6px) rotate(45deg); }
+    .menu-toggle.open span:nth-child(2) { opacity:0; }
+    .menu-toggle.open span:nth-child(3) { transform:translateY(-6px) rotate(-45deg); }
     @media(max-width:768px) {
       .sidebar { transform:translateX(-100%); }
       .sidebar.open { transform:translateX(0); }
@@ -92,21 +105,8 @@
     .section-panel { display:none; }
     .section-panel.active { display:block; }
 
-    .kpi-grid {
-      display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-      gap:var(--space-4); margin-bottom:var(--space-6);
-    }
-    .kpi-card {
-      background:var(--bg-card); border:1px solid var(--line);
-      border-radius:16px; padding:var(--space-5); transition:border-color .2s;
-    }
-    .kpi-card:hover { border-color:var(--red-deep); }
-    .kpi-card__label { font-size:var(--font-size-sm); color:var(--muted); margin-bottom:var(--space-2); }
-    .kpi-card__value {
-      font-family:var(--head); font-size:2.25rem; font-weight:800; line-height:1;
-      color:var(--red-bright); margin-bottom:6px;
-    }
-    .kpi-card__delta { font-size:12px; color:var(--muted-2); font-family:var(--mono); }
+    /* .kpi-grid / .kpi-card viven en main.css (compartido con el panel
+       de admin, con ícono en la esquina superior derecha). */
 
     /* Progress bars */
     .progress-bar { height:6px; background:var(--line); border-radius:3px; overflow:hidden; margin-top:6px; }
@@ -202,9 +202,11 @@
         <div class="user-avatar" data-user-avatar>ML</div>
         <div>
           <div class="user-name" data-user-name>…</div>
-          <div class="user-role" data-user-role>organizador</div>
+          <a class="user-role" href="/perfil" style="text-decoration:none">Mi perfil</a>
         </div>
-        <a href="/logout" style="margin-left:auto;color:var(--muted-2)" title="Cerrar sesión">🚪</a>
+        <a href="/logout" style="margin-left:auto;color:var(--muted-2);display:inline-flex" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+        </a>
       </div>
     </div>
   </aside>
@@ -212,10 +214,21 @@
   <div class="app-main">
     <header class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" id="menuToggle" aria-label="Menú">☰</button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="sidebar">
+          <span></span><span></span><span></span>
+        </button>
         <span id="topbarTitle" style="font-family:var(--head);font-weight:700;color:var(--ink)">Mis torneos</span>
       </div>
-      <div style="display:flex;align-items:center;gap:var(--space-3)">
+      <div id="topbarActions" style="display:flex;align-items:center;gap:var(--space-3)">
+        <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
+          <input type="checkbox" class="theme-toggle__input" />
+          <span class="theme-toggle__track">
+            <span class="theme-toggle__thumb">
+              <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
+            </span>
+          </span>
+        </label>
         <a href="/torneos" class="btn btn-ghost btn-sm">Ver sitio</a>
         <a class="btn btn-primary btn-sm" data-goto="crear" id="createBtn">+ Crear torneo</a>
       </div>
@@ -234,16 +247,19 @@
 
         <div class="kpi-grid" data-reveal>
           <div class="kpi-card">
+            <span class="kpi-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4h10v3a5 5 0 0 1-10 0V4Z"/><path d="M7 5H4.5A2.5 2.5 0 0 0 7 7.5"/><path d="M17 5h2.5A2.5 2.5 0 0 1 17 7.5"/><path d="M12 11v4"/><path d="M9 19h6"/><path d="M10.5 15h3l.8 4h-4.6l.8-4Z"/></svg></span>
             <div class="kpi-card__label">Torneos activos</div>
             <div class="kpi-card__value" id="kpiActivos">—</div>
             <div class="kpi-card__delta" id="kpiActivosDelta"></div>
           </div>
           <div class="kpi-card">
+            <span class="kpi-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.6.4 4.5 2.6 4.5 5.3"/></svg></span>
             <div class="kpi-card__label">Participantes confirmados</div>
             <div class="kpi-card__value" id="kpiParticipantes">—</div>
             <div class="kpi-card__delta" id="kpiParticipantesDelta"></div>
           </div>
           <div class="kpi-card">
+            <span class="kpi-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 5h13l-3 4 3 4H5"/></svg></span>
             <div class="kpi-card__label">Partidos jugados</div>
             <div class="kpi-card__value" id="kpiPartidos">—</div>
             <div class="kpi-card__delta" id="kpiPartidosDelta"></div>
@@ -268,6 +284,19 @@
           <div class="card__body">
             <form id="createForm" novalidate>
               <h3 style="color:var(--ink);margin-bottom:var(--space-4)">Información básica</h3>
+              <!-- Solo visible al editar un torneo existente: recién ahí hay un id
+                   real contra el que subir la imagen (organizador.js la muestra/oculta). -->
+              <div class="form-group hidden" id="torneoBannerRow">
+                <label class="form-label">Foto de fondo</label>
+                <div style="display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap">
+                  <div id="torneoBannerPreview" style="width:100px;height:66px;border-radius:10px;background:var(--bg-2);background-size:cover;background-position:center;border:1px solid var(--line);flex:none"></div>
+                  <div>
+                    <input type="file" id="torneoBannerInput" accept="image/jpeg,image/png,image/webp" class="hidden" />
+                    <button type="button" class="btn btn-ghost btn-sm" id="torneoBannerBtn">Cambiar foto</button>
+                    <div style="font-size:12px;color:var(--muted-2);margin-top:6px">JPG, PNG o WebP · máx. 4 MB</div>
+                  </div>
+                </div>
+              </div>
               <div class="form-group">
                 <label class="form-label" for="torneoNombre">Nombre del torneo</label>
                 <input class="form-control" type="text" id="torneoNombre" name="nombre"
@@ -316,23 +345,23 @@
               <div class="form-group">
                 <label class="form-label" for="descripcion">Descripción del torneo</label>
                 <textarea class="form-control" id="descripcion" name="descripcion" rows="3" maxlength="2000"
-                  placeholder="Contá de qué se trata el torneo" style="resize:vertical"></textarea>
+                  placeholder="Contá de qué se trata el torneo"></textarea>
               </div>
               <div class="form-group">
                 <label class="form-label" for="reglamento">Reglamento oficial</label>
                 <textarea class="form-control" id="reglamento" name="reglamento" rows="4" maxlength="8000"
-                  placeholder="Reglas de juego, sanciones, criterios de desempate…" style="resize:vertical"></textarea>
+                  placeholder="Reglas de juego, sanciones, criterios de desempate…"></textarea>
               </div>
               <div class="form-grid-2">
                 <div class="form-group">
                   <label class="form-label" for="premios">Premios</label>
                   <textarea class="form-control" id="premios" name="premios" rows="2" maxlength="2000"
-                    placeholder="ej: 1° copa + $10.000 · 2° medalla" style="resize:vertical"></textarea>
+                    placeholder="ej: 1° copa + $10.000 · 2° medalla"></textarea>
                 </div>
                 <div class="form-group">
                   <label class="form-label" for="discordUrl">Canal oficial (Discord, WhatsApp…)</label>
                   <input class="form-control" type="url" id="discordUrl" name="discord_url"
-                         placeholder="https://discord.gg/…" />
+                         maxlength="255" placeholder="https://discord.gg/…" />
                 </div>
               </div>
               <div class="form-grid-2">
@@ -455,7 +484,7 @@
               <div class="form-group">
                 <label class="form-label" for="avisoCuerpo">Mensaje</label>
                 <textarea class="form-control" id="avisoCuerpo" rows="3" maxlength="2000"
-                          placeholder="Contale a los participantes qué cambió" style="resize:vertical"></textarea>
+                          placeholder="Contale a los participantes qué cambió"></textarea>
               </div>
               <button type="submit" class="btn btn-primary">Publicar aviso</button>
             </form>
@@ -467,7 +496,7 @@
     </main>
   </div>
 
-  <script src="../../js/main.js"></script>
+  <script src="../../js/main.js?v=5"></script>
   <script src="../../js/dashboard.js"></script>
   <script src="../../js/torneo-ui.js"></script>
   <script src="../../js/organizador.js"></script>

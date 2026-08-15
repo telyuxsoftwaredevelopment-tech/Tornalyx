@@ -26,6 +26,21 @@ function avatarHtml(j, clase = 'jugador-avatar') {
     : `<span class="${clase}">${esc(iniciales(j))}</span>`;
 }
 
+/** Íconos de redes sociales del jugador, los que tenga cargados. */
+const REDES_ICONS = {
+  twitter_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg>',
+  facebook_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 21v-7h2.5l.5-3H14V9a1.5 1.5 0 0 1 1.5-1.5H17V4.6C16.5 4.5 15.6 4.4 14.7 4.4c-2.5 0-4.2 1.6-4.2 4.4V11H8v3h2.5v7"/></svg>',
+  instagram_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1"/></svg>',
+};
+const REDES_LABELS = { twitter_url: 'X / Twitter', facebook_url: 'Facebook', instagram_url: 'Instagram' };
+
+function redesHtml(j) {
+  return Object.keys(REDES_ICONS)
+    .filter(k => j[k])
+    .map(k => `<a href="${esc(j[k])}" target="_blank" rel="noopener noreferrer" aria-label="${REDES_LABELS[k]}" title="${REDES_LABELS[k]}">${REDES_ICONS[k]}</a>`)
+    .join('');
+}
+
 /** Fecha y hora local de un enfrentamiento. */
 function fechaHora(valor) {
   if (!valor) return 'Horario a confirmar';
@@ -36,11 +51,47 @@ function fechaHora(valor) {
   });
 }
 
+/* ─── Placeholders mientras se espera al API ─────────── */
+function skeletonJugadorCard() {
+  return `
+    <div class="jugador-card" aria-hidden="true" style="cursor:default">
+      <span class="skeleton" style="width:48px;height:48px;border-radius:50%;flex:none"></span>
+      <span style="flex:1">
+        <span class="skeleton" style="display:block;height:14px;width:60%;margin-bottom:8px"></span>
+        <span class="skeleton" style="display:block;height:11px;width:40%"></span>
+      </span>
+    </div>`;
+}
+
+function skeletonFicha() {
+  const stats = Array.from({ length: 5 }, () => '<span class="skeleton" style="height:36px"></span>').join('');
+  return `
+    <div class="card" aria-hidden="true">
+      <div class="card__body">
+        <div style="display:flex;align-items:center;gap:var(--space-4)">
+          <span class="skeleton" style="width:64px;height:64px;border-radius:50%;flex:none"></span>
+          <div style="flex:1">
+            <span class="skeleton" style="display:block;height:20px;width:50%;margin-bottom:8px"></span>
+            <span class="skeleton" style="display:block;height:14px;width:30%"></span>
+          </div>
+        </div>
+      </div>
+      <div class="card__footer" style="display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-2)">
+        ${stats}
+      </div>
+    </div>`;
+}
+
 /* ─── Listado de resultados ────────────────────────── */
 function renderResultados(jugadores) {
   const cont = $('resultados');
   if (!jugadores.length) {
-    cont.innerHTML = '<p style="color:var(--muted);font-size:var(--font-size-sm)">No se encontraron jugadores con ese nombre.</p>';
+    cont.innerHTML = `
+      <div class="empty-state" style="padding:var(--space-8) var(--space-4)">
+        <div class="icon">🔍</div>
+        <h3 style="color:var(--ink);margin-bottom:8px;font-size:var(--font-size-base)">Sin resultados</h3>
+        <p style="font-size:var(--font-size-sm)">No se encontraron jugadores con ese nombre.</p>
+      </div>`;
     return;
   }
   cont.innerHTML = jugadores.map(j => `
@@ -68,6 +119,7 @@ function renderFicha(data) {
   const j = data.jugador;
   const r = data.resumen || {};
   const nombre = `${j.nombre} ${j.apellido || ''}`.trim();
+  const redes = redesHtml(j);
 
   const stats = [
     [r.pj || 0, 'Jugados'],
@@ -116,6 +168,7 @@ function renderFicha(data) {
           </div>
         </div>
         ${j.bio ? `<p class="prosa" style="margin-top:var(--space-4)">${esc(j.bio)}</p>` : ''}
+        ${redes ? `<div class="profile-redes">${redes}</div>` : ''}
       </div>
       <div class="card__footer" style="display:grid;grid-template-columns:repeat(5,1fr);gap:var(--space-2)">
         ${stats.map(([v, l]) => `
@@ -142,7 +195,7 @@ function renderFicha(data) {
 }
 
 async function abrirFicha(id) {
-  $('ficha').innerHTML = '<p style="color:var(--muted)">Cargando ficha…</p>';
+  $('ficha').innerHTML = skeletonFicha();
   try {
     renderFicha(await Api.get('/api/jugador/' + id));
   } catch (err) {
@@ -156,6 +209,7 @@ async function buscar(q) {
     $('resultados').innerHTML = '<p style="color:var(--muted);font-size:var(--font-size-sm)">Escribí al menos 2 letras para buscar.</p>';
     return;
   }
+  $('resultados').innerHTML = Array.from({ length: 3 }, skeletonJugadorCard).join('');
   try {
     const data = await Api.get('/api/jugadores?q=' + encodeURIComponent(q.trim()));
     renderResultados(data.jugadores || []);

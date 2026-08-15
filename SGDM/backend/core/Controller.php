@@ -90,4 +90,37 @@ abstract class Controller {
         }
         return true;
     }
+
+    /**
+     * Exige sesión activa, sin restricción de rol.
+     *
+     * Los roles de torneo (organizador/participante) ya no son un rol de
+     * cuenta: se derivan de torneos.organizador_id y de inscripciones. Los
+     * endpoints que dependen de esa pertenencia validan la propiedad ellos
+     * mismos (p. ej. puedeGestionar()); acá solo se exige estar logueado.
+     */
+    protected function requireApiLogin(): bool {
+        if (!Session::isLoggedIn()) {
+            $this->jsonError('Tu sesión expiró. Iniciá sesión de nuevo.', ['login' => true], 401);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Valida una fecha de nacimiento: formato YYYY-MM-DD, existente, no
+     * futura y con año dentro de un rango humano razonable. `Y` en
+     * DateTime::createFromFormat acepta años de más de 4 dígitos (p. ej.
+     * "20001-07-13" por un typo pasa el formato igual), y sin el piso de
+     * 1900 el INSERT/UPDATE explota contra la columna DATE de la base.
+     * Usado por el registro público y el alta/edición de usuarios del admin.
+     */
+    protected function esFechaNacValida(string $fecha): bool {
+        $d = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
+        if ($d === false || $d->format('Y-m-d') !== $fecha) {
+            return false;
+        }
+        $anio = (int) $d->format('Y');
+        return $anio >= 1900 && $d <= new DateTimeImmutable('today');
+    }
 }

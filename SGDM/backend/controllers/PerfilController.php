@@ -13,9 +13,6 @@ require_once __DIR__ . '/../shared/Session.php';
  */
 class PerfilController extends Controller {
 
-    /** Roles que pueden operar sobre su propio perfil. */
-    private const ROLES = ['participante', 'organizador', 'administrador'];
-
     /** Límite de la biografía, en palabras. */
     private const BIO_MAX_PALABRAS = 500;
 
@@ -29,11 +26,8 @@ class PerfilController extends Controller {
         'image/webp' => 'webp',
     ];
 
-    /** Carpeta física (dentro de frontend/) donde se guardan los avatares. */
-    private const AVATAR_DIR = __DIR__ . '/../../frontend/uploads/avatars';
-
-    /** Prefijo público con el que se sirve esa carpeta. */
-    private const AVATAR_URL = '/uploads/avatars';
+    /** Ruta pública donde se sirve el avatar de un usuario (ver servirAvatar). */
+    private const AVATAR_URL = '/api/perfil/avatar';
 
     private Usuario $usuarioModel;
     private Torneo  $torneoModel;
@@ -49,7 +43,7 @@ class PerfilController extends Controller {
      * torneos + equipos + estadísticas agregadas, todo desde la base.
      */
     public function datos(): void {
-        if (!$this->requireApiRole(self::ROLES)) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $userId  = (int) Session::getUserId();
@@ -85,7 +79,7 @@ class PerfilController extends Controller {
      * Actualiza datos personales, bio y ubicación (POST /api/perfil/actualizar).
      */
     public function actualizar(): void {
-        if (!$this->requireApiRole(self::ROLES)) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $userId = (int) Session::getUserId();
@@ -96,6 +90,9 @@ class PerfilController extends Controller {
         $fechaNac  = trim((string) (filter_input(INPUT_POST, 'fecha_nac', FILTER_DEFAULT) ?? ''));
         $ubicacion = trim((string) (filter_input(INPUT_POST, 'ubicacion', FILTER_DEFAULT) ?? ''));
         $bio       = trim((string) (filter_input(INPUT_POST, 'bio',       FILTER_DEFAULT) ?? ''));
+        $twitter   = trim((string) (filter_input(INPUT_POST, 'twitter_url',   FILTER_DEFAULT) ?? ''));
+        $facebook  = trim((string) (filter_input(INPUT_POST, 'facebook_url',  FILTER_DEFAULT) ?? ''));
+        $instagram = trim((string) (filter_input(INPUT_POST, 'instagram_url', FILTER_DEFAULT) ?? ''));
 
         if ($nombre === '' || $apellido === '' || $email === '' || $fechaNac === '') {
             $this->jsonError('Nombre, apellido, correo y fecha de nacimiento son obligatorios.');
@@ -109,8 +106,7 @@ class PerfilController extends Controller {
             $this->jsonError('Correo electrónico inválido.');
             return;
         }
-        $d = DateTimeImmutable::createFromFormat('!Y-m-d', $fechaNac);
-        if ($d === false || $d->format('Y-m-d') !== $fechaNac) {
+        if (!$this->esFechaNacValida($fechaNac)) {
             $this->jsonError('La fecha de nacimiento no es válida.');
             return;
         }
@@ -130,14 +126,23 @@ class PerfilController extends Controller {
             $this->jsonError('Ese correo ya está en uso por otra cuenta.', [], 409);
             return;
         }
+        foreach (['twitter_url' => $twitter, 'facebook_url' => $facebook, 'instagram_url' => $instagram] as $campo => $valor) {
+            if ($valor !== '' && !$this->esUrlValida($valor)) {
+                $this->jsonError('El enlace de ' . $campo . ' debe ser una URL http(s) válida.');
+                return;
+            }
+        }
 
         $this->usuarioModel->actualizar($userId, [
-            'nombre'    => $nombre,
-            'apellido'  => $apellido,
-            'email'     => $email,
-            'fecha_nac' => $fechaNac,
-            'ubicacion' => $ubicacion !== '' ? $ubicacion : null,
-            'bio'       => $bio !== '' ? $bio : null,
+            'nombre'        => $nombre,
+            'apellido'      => $apellido,
+            'email'         => $email,
+            'fecha_nac'     => $fechaNac,
+            'ubicacion'     => $ubicacion !== '' ? $ubicacion : null,
+            'bio'           => $bio !== '' ? $bio : null,
+            'twitter_url'   => $twitter   !== '' ? $twitter   : null,
+            'facebook_url'  => $facebook  !== '' ? $facebook  : null,
+            'instagram_url' => $instagram !== '' ? $instagram : null,
         ]);
 
         // El nav y los saludos usan el nombre guardado en sesión.
@@ -151,7 +156,7 @@ class PerfilController extends Controller {
      * Cambia la contraseña verificando la actual (POST /api/perfil/password).
      */
     public function password(): void {
-        if (!$this->requireApiRole(self::ROLES)) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $userId  = (int) Session::getUserId();
@@ -178,11 +183,13 @@ class PerfilController extends Controller {
 
     /**
      * Sube o reemplaza la foto de perfil (POST /api/perfil/avatar).
-     * Valida tipo real (finfo + getimagesize) y tamaño; guarda con nombre
-     * aleatorio bajo public/uploads/avatars y borra la foto anterior.
+     * Valida tipo real (finfo + getimagesize) y tamaño; se guarda como BLOB
+     * en la propia fila del usuario (no en disco: Render free no tiene
+     * almacenamiento persistente, cualquier archivo escrito en frontend/
+     * desaparece en el próximo redeploy) y se sirve vía servirAvatar().
      */
     public function avatar(): void {
-        if (!$this->requireApiRole(self::ROLES)) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $userId = (int) Session::getUserId();
@@ -204,31 +211,40 @@ class PerfilController extends Controller {
             return;
         }
 
-        if (!is_dir(self::AVATAR_DIR) && !mkdir(self::AVATAR_DIR, 0755, true)) {
-            $this->jsonError('No se pudo guardar la imagen. Intentá más tarde.', [], 500);
+        $datos = file_get_contents($file['tmp_name']);
+        if ($datos === false) {
+            $this->jsonError('No se pudo leer la imagen. Intentá más tarde.', [], 500);
             return;
         }
 
-        $nombre  = 'u' . $userId . '-' . bin2hex(random_bytes(8)) . '.' . self::AVATAR_MIMES[$mime];
-        $destino = self::AVATAR_DIR . '/' . $nombre;
-        if (!move_uploaded_file($file['tmp_name'], $destino)) {
-            $this->jsonError('No se pudo guardar la imagen. Intentá más tarde.', [], 500);
-            return;
-        }
-
-        // Borrar la foto anterior solo si vivía en nuestra carpeta de avatares.
-        $usuario  = $this->usuarioModel->findById($userId);
-        $anterior = (string) ($usuario['avatar_url'] ?? '');
-        if (str_starts_with($anterior, self::AVATAR_URL . '/')) {
-            $fisico = self::AVATAR_DIR . '/' . basename($anterior);
-            if (is_file($fisico)) {
-                @unlink($fisico);
-            }
-        }
-
-        $url = self::AVATAR_URL . '/' . $nombre;
-        $this->usuarioModel->actualizar($userId, ['avatar_url' => $url]);
+        // La URL cambia con cada subida (cache-busting): el navegador
+        // cachea agresivo las imágenes, y sin esto seguiría mostrando la
+        // vieja aunque la fila ya tenga la nueva.
+        $url = self::AVATAR_URL . '/' . $userId . '?v=' . time();
+        $this->usuarioModel->actualizar($userId, [
+            'avatar_data' => $datos,
+            'avatar_mime' => $mime,
+            'avatar_url'  => $url,
+        ]);
         $this->jsonSuccess(['avatar_url' => $url]);
+    }
+
+    /**
+     * Sirve el avatar de un usuario guardado en la base (GET
+     * /api/perfil/avatar/{id}). Pública y sin autenticación: es la misma
+     * imagen que ya se ve en la ficha pública del jugador y en los
+     * resultados de búsqueda, no hay nada que proteger.
+     */
+    public function servirAvatar(int $id): void {
+        $usuario = $this->usuarioModel->findById($id);
+        if (!$usuario || $usuario['avatar_data'] === null || $usuario['avatar_mime'] === null) {
+            http_response_code(404);
+            return;
+        }
+        header('Content-Type: ' . $usuario['avatar_mime']);
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Content-Length: ' . strlen($usuario['avatar_data']));
+        echo $usuario['avatar_data'];
     }
 
     /**
@@ -259,14 +275,17 @@ class PerfilController extends Controller {
 
         $this->jsonSuccess([
             'jugador' => [
-                'id'         => (int) $u['id'],
-                'nombre'     => $u['nombre'],
-                'apellido'   => $u['apellido'],
-                'rol'        => $u['rol'],
-                'bio'        => $u['bio']        ?? null,
-                'ubicacion'  => $u['ubicacion']  ?? null,
-                'avatar_url' => $u['avatar_url'] ?? null,
-                'created_at' => $u['created_at'] ?? null,
+                'id'            => (int) $u['id'],
+                'nombre'        => $u['nombre'],
+                'apellido'      => $u['apellido'],
+                'rol'           => $u['rol'],
+                'bio'           => $u['bio']           ?? null,
+                'ubicacion'     => $u['ubicacion']     ?? null,
+                'avatar_url'    => $u['avatar_url']    ?? null,
+                'twitter_url'   => $u['twitter_url']   ?? null,
+                'facebook_url'  => $u['facebook_url']  ?? null,
+                'instagram_url' => $u['instagram_url'] ?? null,
+                'created_at'    => $u['created_at']    ?? null,
             ],
             'torneos'   => $this->torneoModel->listarDeParticipante($id),
             'equipos'   => $this->torneoModel->equiposDeUsuario($id),
@@ -280,16 +299,32 @@ class PerfilController extends Controller {
      */
     private function usuarioPublico(array $u): array {
         return [
-            'id'         => (int) ($u['id'] ?? 0),
-            'nombre'     => $u['nombre']     ?? '',
-            'apellido'   => $u['apellido']   ?? '',
-            'email'      => $u['email']      ?? '',
-            'rol'        => $u['rol']        ?? '',
-            'fecha_nac'  => $u['fecha_nac']  ?? null,
-            'ubicacion'  => $u['ubicacion']  ?? null,
-            'bio'        => $u['bio']        ?? null,
-            'avatar_url' => $u['avatar_url'] ?? null,
-            'created_at' => $u['created_at'] ?? null,
+            'id'            => (int) ($u['id'] ?? 0),
+            'nombre'        => $u['nombre']        ?? '',
+            'apellido'      => $u['apellido']      ?? '',
+            'email'         => $u['email']         ?? '',
+            'rol'           => $u['rol']           ?? '',
+            'fecha_nac'     => $u['fecha_nac']     ?? null,
+            'ubicacion'     => $u['ubicacion']     ?? null,
+            'bio'           => $u['bio']           ?? null,
+            'avatar_url'    => $u['avatar_url']    ?? null,
+            'twitter_url'   => $u['twitter_url']   ?? null,
+            'facebook_url'  => $u['facebook_url']  ?? null,
+            'instagram_url' => $u['instagram_url'] ?? null,
+            'created_at'    => $u['created_at']    ?? null,
         ];
+    }
+
+    /**
+     * True si $url es una URL http(s) sintácticamente válida. Mismo criterio
+     * que discord_url en TorneoController::validarCampos(): FILTER_VALIDATE_URL
+     * por sí solo acepta esquemas como "javascript:" o "data:" como válidos,
+     * así que sin el chequeo de esquema alguien podría guardar
+     * "javascript:alert(1)" como red social y el front lo volcaría tal cual
+     * en el href del ícono.
+     */
+    private function esUrlValida(string $url): bool {
+        return filter_var($url, FILTER_VALIDATE_URL) !== false
+            && preg_match('#^https?://#i', $url) === 1;
     }
 }

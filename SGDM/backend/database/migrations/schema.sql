@@ -20,12 +20,25 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email        VARCHAR(120) NOT NULL UNIQUE,
     password     VARCHAR(255) NOT NULL,          -- bcrypt hash
     fecha_nac    DATE         NOT NULL,
-    rol          ENUM('participante','organizador','administrador') NOT NULL DEFAULT 'participante',
+    -- 'organizador' ya no es un rol de cuenta: se es organizador de un torneo
+    -- puntual vía torneos.organizador_id (ver add_rol_torneo_simplificado.sql).
+    rol          ENUM('participante','administrador') NOT NULL DEFAULT 'participante',
     estado       ENUM('activo','suspendido','pendiente') NOT NULL DEFAULT 'activo',
     avatar_url   VARCHAR(255) DEFAULT NULL,
+    -- Foto de perfil guardada en la propia fila (ver add_avatar_blob.sql;
+    -- mantener en sincronía). Render free no tiene disco persistente, así
+    -- que el archivo no puede vivir en frontend/uploads: se sirve desde acá
+    -- vía GET /api/perfil/avatar/{id}, y avatar_url solo guarda esa URL.
+    avatar_data  MEDIUMBLOB   DEFAULT NULL,
+    avatar_mime  VARCHAR(30)  DEFAULT NULL,
     -- Perfil público (ver add_perfil.sql; mantener en sincronía)
     bio          TEXT         DEFAULT NULL,
     ubicacion    VARCHAR(120) DEFAULT NULL,
+    -- Redes sociales, opcionales (ver add_redes_sociales.sql; mantener en
+    -- sincronía). Se muestran como íconos clickeables en el perfil.
+    twitter_url   VARCHAR(255) DEFAULT NULL,
+    facebook_url  VARCHAR(255) DEFAULT NULL,
+    instagram_url VARCHAR(255) DEFAULT NULL,
     created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email  (email),
@@ -51,7 +64,13 @@ CREATE TABLE IF NOT EXISTS torneos (
     estado          ENUM('borrador','inscripcion','en_curso','finalizado','cancelado') NOT NULL DEFAULT 'borrador',
     max_participantes INT UNSIGNED NOT NULL DEFAULT 16,
     publico         TINYINT(1)   NOT NULL DEFAULT 1,
+    -- Igual que avatar_data/avatar_mime en usuarios: Render free no tiene
+    -- disco persistente, así que la foto de fondo se guarda en la propia
+    -- fila y se sirve vía GET /api/torneo/{id}/banner; banner_url solo
+    -- guarda esa URL (ver add_torneo_banner.sql).
     banner_url      VARCHAR(255) DEFAULT NULL,
+    banner_data     MEDIUMBLOB   DEFAULT NULL,
+    banner_mime     VARCHAR(30)  DEFAULT NULL,
     fecha_inicio    DATE         DEFAULT NULL,
     fecha_fin       DATE         DEFAULT NULL,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

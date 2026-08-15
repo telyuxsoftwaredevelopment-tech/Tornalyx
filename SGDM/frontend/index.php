@@ -127,11 +127,14 @@ $router->get('/api/me',           static fn() => (new AuthController())->me());
 // estuviera dentro de frontend/, la regla de URLs bonitas del .htaccess lo
 // serviría como estático sin pasar por ningún control de acceso.
 $router->get('/perfil', static function () {
-    Session::requireRole(['participante', 'organizador', 'administrador']);
+    Session::requireRole(['participante', 'administrador']);
     readfile(__DIR__ . '/../backend/vistas/perfil.html');
 });
 $router->get('/organizador/dashboard', static function () {
-    Session::requireRole(['organizador', 'administrador']);
+    // "Mis torneos": cualquier usuario logueado puede crear y gestionar
+    // torneos, el rol de organizador ya no es una cuenta global sino una
+    // pertenencia por torneo (torneos.organizador_id).
+    Session::requireRole(['participante', 'administrador']);
     readfile(__DIR__ . '/../backend/vistas/organizador-dashboard.html');
 });
 $router->get('/admin/dashboard', static function () {
@@ -144,6 +147,7 @@ $router->get('/api/perfil',             static fn() => (new PerfilController())-
 $router->post('/api/perfil/actualizar', static fn() => (new PerfilController())->actualizar());
 $router->post('/api/perfil/password',   static fn() => (new PerfilController())->password());
 $router->post('/api/perfil/avatar',     static fn() => (new PerfilController())->avatar());
+$router->get('#^/api/perfil/avatar/(\d+)$#', static fn($id) => (new PerfilController())->servirAvatar((int) $id));
 
 // ─── TORNEOS (API JSON) ────────────────────────────────────────
 $router->get('/api/torneos',           static fn() => (new TorneoController())->index());
@@ -157,6 +161,11 @@ $router->get('#^/api/torneo/(\d+)/partidos$#',      static fn($id) => (new Parti
 $router->get('#^/api/torneo/(\d+)/equipos$#',       static fn($id) => (new InscripcionController())->equipos((int) $id));
 $router->get('#^/api/torneo/(\d+)/inscripciones$#', static fn($id) => (new InscripcionController())->listar((int) $id));
 $router->get('#^/api/torneo/(\d+)/avisos$#',        static fn($id) => (new AvisoController())->deTorneo((int) $id));
+$router->post('#^/api/torneo/(\d+)/editar$#',       static fn($id) => (new TorneoController())->actualizar((int) $id));
+$router->post('#^/api/torneo/(\d+)/eliminar$#',     static fn($id) => (new TorneoController())->eliminar((int) $id));
+$router->post('#^/api/torneo/(\d+)/cancelar$#',     static fn($id) => (new TorneoController())->cancelar((int) $id));
+$router->post('#^/api/torneo/(\d+)/banner$#',       static fn($id) => (new TorneoController())->imagen((int) $id));
+$router->get('#^/api/torneo/(\d+)/banner$#',        static fn($id) => (new TorneoController())->servirBanner((int) $id));
 
 // ─── INSCRIPCIONES Y EQUIPOS (API JSON) ────────────────────────
 $router->post('/api/inscripcion',          static fn() => (new InscripcionController())->inscribirse());
@@ -181,6 +190,7 @@ $router->get('#^/api/jugador/(\d+)$#',    static fn($id) => (new PerfilControlle
 
 // ─── ADMIN (API JSON) ──────────────────────────────────────────
 $router->get('/api/admin/stats',    static fn() => (new AdminController())->stats());
+$router->get('/api/admin/salud',    static fn() => (new AdminController())->salud());
 $router->get('/api/admin/usuarios', static fn() => (new AdminController())->usuarios());
 $router->post('/api/admin/usuario/crear',      static fn() => (new AdminController())->crearUsuario());
 $router->post('/api/admin/usuario/actualizar', static fn() => (new AdminController())->actualizarUsuario());

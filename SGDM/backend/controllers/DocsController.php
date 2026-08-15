@@ -37,11 +37,12 @@ class DocsController extends Controller {
     /**
      * Acceso restringido: TODA la documentación exige sesión + aprobación (por el
      * enlace del correo al aprobador) + verificación por código enviado al correo.
-     * Al ser "todas", cualquier materia nueva que se agregue a MATERIAS queda
-     * protegida automáticamente, sin tener que mantener una lista aparte.
+     * Al ser "todas", cualquier materia nueva que se agregue a MATERIAS (o
+     * enlace nuevo a ENLACES_EXTERNOS) queda protegida automáticamente, sin
+     * tener que mantener una lista aparte.
      */
     private function esRestringida(string $slug): bool {
-        return isset(self::MATERIAS[$slug]);
+        return isset(self::MATERIAS[$slug]) || isset(self::ENLACES_EXTERNOS[$slug]);
     }
 
     /** Minutos que dura el acceso verificado por código antes de re-pedirlo. */
@@ -66,6 +67,22 @@ class DocsController extends Controller {
             'nombre' => 'Tutoría',
             'desc'   => 'Nombre y logo del grupo, logotipo de la aplicación, pensamiento S.C.A.M.P.E.R y actas de reunión.',
             'url'    => 'https://docs.google.com/document/d/e/2PACX-1vS98n_oJKtySAZNbLRjHq3VANtgaDZU0mIyjxhuomDXjs_k-n59_8cyMiZIaEzQ6OO6xvjPNX74wasi/pub',
+        ],
+    ];
+
+    /**
+     * Materias cuya documentación vive en un sitio externo (no un Google Doc
+     * publicado), por ejemplo una presentación. A diferencia de MATERIAS, acá
+     * no hay fetch/saneado ni caché: pasan por el mismo gate de acceso
+     * restringido (login + aprobación + código) y, una vez autorizado, el
+     * controlador redirige (302) directo al sitio externo — ver el bloque
+     * `enlace` en show().
+     */
+    private const ENLACES_EXTERNOS = [
+        'sistemas' => [
+            'nombre' => 'Sistemas',
+            'desc'   => 'Presentación del proyecto para la materia Sistemas.',
+            'url'    => 'https://sistemas-presentacion.onrender.com/#1',
         ],
     ];
 
@@ -97,16 +114,40 @@ class DocsController extends Controller {
      * el documento de una materia concreta.
      */
     public function show(): void {
-        $slug = isset($_GET['materia']) ? (string) $_GET['materia'] : '';
+        $slug   = isset($_GET['materia']) ? (string) $_GET['materia'] : '';
+        $enlace = isset($_GET['enlace'])  ? (string) $_GET['enlace']  : '';
 
-        // Estado 1 · sin materia válida → grilla de materias.
-        if (!isset(self::MATERIAS[$slug])) {
+        // Estado 1 · sin materia ni enlace válido → grilla de materias.
+        if (!isset(self::MATERIAS[$slug]) && !isset(self::ENLACES_EXTERNOS[$enlace])) {
             $this->render('documentacion', [
                 'title'    => 'Tornalyx | Documentación',
                 'materias' => self::MATERIAS,
+                'enlaces'  => self::ENLACES_EXTERNOS,
                 'materia'  => null,
             ]);
             return;
+        }
+
+        // Estado 2b · enlace externo: mismo gate que una materia; autorizado,
+        // se redirige directo al sitio externo (no es un Google Doc, no hay
+        // nada que cachear ni sanear acá).
+        if ($enlace !== '' && isset(self::ENLACES_EXTERNOS[$enlace])) {
+            $externo = self::ENLACES_EXTERNOS[$enlace];
+            $gate = $this->evaluarAcceso($enlace);
+            if ($gate !== null) {
+                $this->render('documentacion', [
+                    'title'       => 'Tornalyx | ' . $externo['nombre'],
+                    'materias'    => self::MATERIAS,
+                    'materia'     => $externo,
+                    'materiaSlug' => $enlace,
+                    'gate'        => $gate,
+                    'csrf'        => Session::csrfToken(),
+                    'flash'       => $this->tomarFlash(),
+                ]);
+                return;
+            }
+            header('Location: ' . $externo['url']);
+            exit;
         }
 
         // Estado 2 · materia elegida.

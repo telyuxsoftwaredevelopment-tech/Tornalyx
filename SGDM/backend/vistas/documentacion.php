@@ -10,7 +10,7 @@
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
   <link rel="stylesheet" href="../css/variables.css" />
-  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/main.css?v=5" />
   <link rel="stylesheet" href="../css/components.css" />
   <style>
     .doc-page { padding:var(--space-10) var(--space-4) var(--space-16); }
@@ -22,6 +22,7 @@
     .doc-materias { display:grid; grid-template-columns:1fr; gap:var(--space-4); max-width:960px; margin:0 auto; }
     .doc-materia {
       display:flex; flex-direction:column; gap:6px;
+      justify-content:space-between;
       padding:var(--space-6); background:var(--bg-card);
       border:1px solid var(--line-soft); border-radius:16px;
       text-decoration:none; transition:border-color var(--transition-fast), transform var(--transition-fast);
@@ -109,18 +110,26 @@
           'tutoria'             => '<svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4Z"/><path d="M7 9v5c0 1.5 2.2 3 5 3s5-1.5 5-3V9"/><path d="M21 7v6"/></svg>',
         ];
       ?>
-      <div class="doc-head">
+      <div class="doc-head" data-reveal>
         <p class="eyebrow eyebrow-center">Documentación del proyecto</p>
         <h1>Materias del proyecto</h1>
         <p class="doc-sub">Elegí una materia para ver su documentación dentro de la plataforma.</p>
       </div>
       <div class="doc-materias">
         <?php foreach ($materias as $slug => $m): ?>
-          <a class="doc-materia" href="/documentacion?materia=<?= e($slug) ?>">
+          <a class="doc-materia" href="/documentacion?materia=<?= e($slug) ?>" data-reveal>
             <span class="doc-materia__ic"><?= $iconos[$slug] ?? '' ?></span>
             <span class="doc-materia__nombre"><?= e($m['nombre']) ?></span>
             <span class="doc-materia__desc"><?= e($m['desc']) ?></span>
             <span class="doc-materia__go">Ver documento →</span>
+          </a>
+        <?php endforeach; ?>
+        <?php foreach (($enlaces ?? []) as $slug => $en): ?>
+          <a class="doc-materia" href="/documentacion?enlace=<?= e($slug) ?>" target="_blank" rel="noopener" data-reveal>
+            <span class="doc-materia__ic"><?= $iconos[$slug] ?? '<svg viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>' ?></span>
+            <span class="doc-materia__nombre"><?= e($en['nombre']) ?></span>
+            <span class="doc-materia__desc"><?= e($en['desc']) ?></span>
+            <span class="doc-materia__go">Ver presentación ↗</span>
           </a>
         <?php endforeach; ?>
       </div>
@@ -236,6 +245,6 @@
     </div>
   </footer>
 
-  <script src="../js/main.js"></script>
+  <script src="../js/main.js?v=5"></script>
 </body>
 </html>

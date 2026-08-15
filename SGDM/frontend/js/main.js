@@ -35,6 +35,117 @@ function initMobileNav() {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 }
 
+/* ─── Bottom Nav (mobile, páginas públicas) ──────────── */
+/* Desliza el pill de fondo hasta el tab con aria-current="page". Como acá
+   no hay SPA (cada tab es una carga de página nueva), la animación se
+   simula: se guarda el índice del tab activo en sessionStorage, y al
+   entrar a la página siguiente el pill arranca en la posición vieja (sin
+   transición) y en el frame siguiente se anima hacia la nueva. Así cada
+   navegación se siente como un slide, no como un salto. */
+function initBottomNav() {
+  const nav = document.querySelector('.bottom-nav');
+  if (!nav) return;
+  const pill  = nav.querySelector('.bottom-nav__pill');
+  const items = Array.from(nav.querySelectorAll('.bottom-nav__item'));
+  const activeIndex = items.findIndex(a => a.getAttribute('aria-current') === 'page');
+  if (!pill || activeIndex === -1) return;
+
+  const place = (index, animate) => {
+    const item = items[index];
+    if (!item) return;
+    pill.style.transition = animate ? '' : 'none';
+    pill.style.width = (item.offsetWidth - 8) + 'px';
+    pill.style.transform = `translateX(${item.offsetLeft + 4}px)`;
+  };
+
+  const STORAGE_KEY = 'tornalyx-bottomnav-idx';
+  let prevIndex = -1;
+  try { prevIndex = parseInt(sessionStorage.getItem(STORAGE_KEY), 10); } catch { /* privado / bloqueado */ }
+
+  if (Number.isInteger(prevIndex) && prevIndex >= 0 && prevIndex !== activeIndex) {
+    place(prevIndex, false);
+    requestAnimationFrame(() => requestAnimationFrame(() => place(activeIndex, true)));
+  } else {
+    place(activeIndex, false);
+  }
+
+  try { sessionStorage.setItem(STORAGE_KEY, String(activeIndex)); } catch { /* privado / bloqueado */ }
+
+  window.addEventListener('resize', () => place(activeIndex, false));
+
+  initArrastreBottomNav(nav, items, pill, activeIndex, place);
+}
+
+/* Arrastrar el dedo (o el mouse) sobre la barra desliza el pill en tiempo
+   real, tab por tab; soltar sobre un tab distinto navega ahí, soltar sobre
+   el mismo o afuera lo devuelve a su lugar. Un tap simple (sin arrastre
+   real, movimiento menor al umbral) no pasa por acá: el <a> navega solo,
+   como siempre — por eso solo se llama preventDefault() una vez confirmado
+   el arrastre, nunca en el pointerdown. */
+function initArrastreBottomNav(nav, items, pill, activeIndex, place) {
+  const UMBRAL = 10; // px de movimiento antes de considerarlo arrastre y no tap
+  let inicio = null;
+  let arrastrando = false;
+  let idPuntero = null;
+  let destino = activeIndex;
+  let ultimoFueArrastre = false;
+
+  const indiceBajoPuntero = (clientX) => {
+    let mejor = destino;
+    items.forEach((item, i) => {
+      const r = item.getBoundingClientRect();
+      if (clientX >= r.left && clientX < r.right) mejor = i;
+    });
+    return mejor;
+  };
+
+  nav.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    inicio = { x: e.clientX, y: e.clientY };
+    arrastrando = false;
+    idPuntero = e.pointerId;
+    destino = activeIndex;
+  });
+
+  nav.addEventListener('pointermove', e => {
+    if (inicio === null || e.pointerId !== idPuntero) return;
+    if (!arrastrando) {
+      if (Math.abs(e.clientX - inicio.x) < UMBRAL && Math.abs(e.clientY - inicio.y) < UMBRAL) return;
+      arrastrando = true;
+    }
+    e.preventDefault();
+    destino = indiceBajoPuntero(e.clientX);
+    place(destino, false);
+    items.forEach((item, i) => item.classList.toggle('bottom-nav__item--targeted', i === destino));
+  });
+
+  const soltar = e => {
+    if (inicio === null || e.pointerId !== idPuntero) return;
+    ultimoFueArrastre = arrastrando;
+    if (arrastrando) {
+      items.forEach(item => item.classList.remove('bottom-nav__item--targeted'));
+      if (destino !== activeIndex && items[destino] && items[destino].href) {
+        window.location.href = items[destino].href;
+      } else {
+        place(activeIndex, true);
+      }
+    }
+    inicio = null;
+    arrastrando = false;
+    idPuntero = null;
+  };
+
+  nav.addEventListener('pointerup', soltar);
+  nav.addEventListener('pointercancel', soltar);
+
+  // Sin esto, tras un arrastre real el navegador todavía dispara un
+  // "click" sobre el tab donde arrancó el gesto (no donde se soltó),
+  // navegando dos veces o al lugar equivocado.
+  nav.addEventListener('click', e => {
+    if (ultimoFueArrastre) { e.preventDefault(); ultimoFueArrastre = false; }
+  });
+}
+
 /* ─── Scroll Reveal ─────────────────────────────────── */
 function initScrollReveal() {
   if ('IntersectionObserver' in window) {
@@ -76,6 +187,15 @@ const Toast = {
       zIndex: '9999', maxWidth: '360px'
     });
     document.body.appendChild(this.container);
+
+    /* Los estilos inline no pueden declarar @keyframes; se inyecta una vez
+       para la barra de cuenta regresiva de cada toast. */
+    if (!document.getElementById('toast-keyframes')) {
+      const style = document.createElement('style');
+      style.id = 'toast-keyframes';
+      style.textContent = '@keyframes toast-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }';
+      document.head.appendChild(style);
+    }
   },
 
   show(message, type = 'info', duration = 4000) {
@@ -90,6 +210,7 @@ const Toast = {
     const toast = document.createElement('div');
     toast.setAttribute('role', 'alert');
     Object.assign(toast.style, {
+      position: 'relative', overflow: 'hidden',
       padding: '0.75rem 1rem', borderRadius: '10px',
       border: `1px solid ${c.border}`, background: c.bg, color: c.text,
       fontSize: '0.875rem', fontWeight: '500',
@@ -98,18 +219,51 @@ const Toast = {
       transition: 'all 250ms ease', cursor: 'pointer'
     });
     toast.textContent = message;
+
+    /* Barra de vigencia: se pausa (visual y realmente) si el mouse está
+       encima, para no perderse un mensaje largo a mitad de lectura. */
+    const bar = document.createElement('div');
+    Object.assign(bar.style, {
+      position: 'absolute', left: '0', bottom: '0', width: '100%', height: '2px',
+      background: c.border, transformOrigin: 'left',
+    });
+    toast.appendChild(bar);
+
     this.container.appendChild(toast);
     requestAnimationFrame(() => {
       toast.style.opacity = '1';
       toast.style.transform = 'translateX(0)';
     });
+
     const remove = () => {
       toast.style.opacity = '0';
       toast.style.transform = 'translateX(1rem)';
       setTimeout(() => toast.remove(), 300);
     };
+
+    let restante = duration;
+    let inicio = Date.now();
+    let timer = null;
+    const programar = (ms) => {
+      inicio = Date.now();
+      restante = ms;
+      timer = setTimeout(remove, ms);
+    };
+    const pausar = () => {
+      clearTimeout(timer);
+      restante -= Date.now() - inicio;
+      bar.style.animationPlayState = 'paused';
+    };
+    const reanudar = () => {
+      bar.style.animationPlayState = 'running';
+      programar(restante);
+    };
+
+    bar.style.animation = `toast-countdown ${duration}ms linear forwards`;
+    toast.addEventListener('mouseenter', pausar);
+    toast.addEventListener('mouseleave', reanudar);
     toast.addEventListener('click', remove);
-    setTimeout(remove, duration);
+    programar(duration);
   },
 
   success: (msg) => Toast.show(msg, 'success'),
@@ -367,11 +521,11 @@ async function initAuthNav() {
   } catch { return; }
   if (!me || !me.success) return;
 
-  const panelUrl = {
-    administrador: '/admin/dashboard',
-    organizador:   '/organizador/dashboard',
-  }[me.rol] || '/perfil';
-  const panelTxt = me.rol === 'participante' ? 'Mi perfil' : 'Mi panel';
+  // "Organizador" ya no es un rol de cuenta: cualquier logueado entra a
+  // "Mis torneos" (ahí puede crear el primero si todavía no organizó
+  // ninguno). El administrador tiene, además, su panel de cuentas aparte.
+  const panelUrl = me.rol === 'administrador' ? '/admin/dashboard' : '/organizador/dashboard';
+  const panelTxt = me.rol === 'administrador' ? 'Mi panel' : 'Mis torneos';
 
   /* Avatar del usuario: su foto de perfil o, si no subió ninguna, sus
      iniciales sobre el rojo de marca. Reemplaza al botón "Entrar". */
@@ -389,10 +543,32 @@ async function initAuthNav() {
     return a;
   };
 
-  /* En desktop el acceso a la cuenta pasa a ser la foto; en el menú móvil
-     conviene el texto, que es más claro con el menú desplegado. */
+  /* Tab "Cuenta" de la bottom nav: mismo criterio que el avatar de arriba,
+     pero sin reemplazar el <a> entero (rompería el pill de initBottomNav,
+     que mide sus posiciones por índice) — sólo se le cambia el ícono
+     interno. Va antes del reemplazo genérico de a[href="/login"] de abajo
+     para que ese selector ya no lo encuentre (le cambiamos el href acá). */
+  document.querySelectorAll('.bottom-nav__account[href="/login"]').forEach(a => {
+    a.href = panelUrl;
+    a.title = panelTxt;
+    a.setAttribute('aria-label', panelTxt);
+    const icono = a.querySelector('.bottom-nav__icon');
+    if (!icono) return;
+    const av = document.createElement('span');
+    av.className = 'bottom-nav__avatar';
+    if (me.avatar_url) {
+      av.style.backgroundImage = `url(${encodeURI(me.avatar_url)})`;
+    } else {
+      av.textContent = ((me.nombre || '')[0] || '') + ((me.apellido || '')[0] || '');
+    }
+    icono.replaceWith(av);
+  });
+
+  /* En desktop el acceso a la cuenta del nav pasa a ser la foto; cualquier
+     otro botón/enlace "Entrar" de la página (hero, footer, CTAs sueltos)
+     pasa a llevar al panel en vez de mandar de nuevo al login. */
   document.querySelectorAll('.nav-right a[href="/login"]').forEach(a => a.replaceWith(avatar()));
-  document.querySelectorAll('.mobile-nav a[href="/login"]').forEach(a => {
+  document.querySelectorAll('a[href="/login"]').forEach(a => {
     a.href = panelUrl;
     a.textContent = panelTxt;
   });
@@ -450,16 +626,29 @@ function initAccessibility() {
     document.body.prepend(skip);
   }
 
-  /* El disparador es un enlace más del menú ("Accesibilidad", junto a
-     Documentación). El panel vive en <body> con posición fija para que no
-     lo recorte el navbar y sea el mismo en escritorio y en móvil. */
-  const navLinks = document.querySelector('.nav .nav-links');
-  const widget   = document.createElement('div');
-  widget.className = navLinks ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
+  /* El disparador es siempre un ícono (nunca la palabra "Accesibilidad"),
+     ubicado dentro de la barra superior de la página, sea cual sea su
+     forma: el menú público (.nav-links), la franja de cuenta del login
+     (.nav-right) o la topbar de los paneles privados (#topbarActions).
+     Solo si una página no tiene ninguna barra cae al botón flotante. */
+  const navBar = document.querySelector('.nav .nav-links')
+    || document.querySelector('.nav .nav-right, .nav .nav-right-static')
+    || document.getElementById('topbarActions');
+  const widget = document.createElement('div');
+  widget.className = navBar ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
+  // El nombre accesible viaja por aria-label/title para lectores de pantalla.
+  const A11Y_ICON_SVG = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/>
+      <circle cx="12" cy="7.2" r="1.3" fill="currentColor" stroke="none"/>
+      <path d="M6.5 9.2c3.6 1.1 7.4 1.1 11 0"/>
+      <path d="M12 10.4v4.1M12 14.5l-2.6 5M12 14.5l2.6 5"/>
+    </svg>`;
   widget.innerHTML = `
     <button type="button" class="a11y-btn" id="a11yBtn" aria-expanded="false"
-            aria-controls="a11yPanel" title="Opciones de accesibilidad">
-      Accesibilidad
+            aria-controls="a11yPanel" aria-label="Accesibilidad" title="Opciones de accesibilidad">
+      ${A11Y_ICON_SVG}
     </button>`;
 
   const panel = document.createElement('div');
@@ -491,26 +680,54 @@ function initAccessibility() {
       </label>`;
 
   document.body.appendChild(panel);
-  if (navLinks) {
-    navLinks.appendChild(widget);          // queda a continuación de Documentación
+  if (navBar) {
+    navBar.appendChild(widget);            // último ítem de esa barra
   } else {
-    document.body.appendChild(widget);     // páginas sin menú: botón flotante
+    document.body.appendChild(widget);     // páginas sin ninguna barra: botón flotante
   }
 
   const btn = widget.querySelector('#a11yBtn');
 
-  /* Mismo panel desde el menú móvil, donde .nav-links está oculto. */
+  /* Mismo panel desde el menú móvil, donde .nav-links está oculto. Ícono
+     también acá (no la palabra), con aria-label para lectores de pantalla. */
   const abrirDesdeMobile = document.createElement('a');
   abrirDesdeMobile.href = '#';
-  abrirDesdeMobile.textContent = 'Accesibilidad';
+  abrirDesdeMobile.setAttribute('aria-label', 'Accesibilidad');
+  abrirDesdeMobile.title = 'Opciones de accesibilidad';
+  abrirDesdeMobile.style.display = 'inline-flex';
+  abrirDesdeMobile.style.width = '22px';
+  abrirDesdeMobile.style.height = '22px';
+  abrirDesdeMobile.innerHTML = A11Y_ICON_SVG;
   document.querySelectorAll('.mobile-nav').forEach(nav => {
     const copia = abrirDesdeMobile.cloneNode(true);
     copia.addEventListener('click', e => {
       e.preventDefault();
+      // Sin esto, el click sigue subiendo hasta el listener de "click
+      // afuera cierra" de más abajo (.mobile-nav no es descendiente de
+      // `widget` ni de `panel`) y cierra el panel en el mismo evento
+      // que lo abre.
+      e.stopPropagation();
       document.getElementById('mobileClose')?.click();
       togglePanel(true);
     });
     nav.insertBefore(copia, nav.querySelector('.theme-toggle'));
+  });
+
+  /* Mismo criterio en las páginas que reemplazaron el menú móvil por la
+     bottom nav: el disparador vive en la tira de utilidades del header
+     (#navUtility), no hay drawer que cerrar antes de abrir el panel.
+     stopPropagation: #navUtility no es descendiente de `widget` ni de
+     `panel`, así que sin esto el listener de "click afuera cierra" (más
+     abajo) lo trataría como un click externo y cerraría el panel en el
+     mismo evento que lo abre. */
+  document.querySelectorAll('.nav-utility').forEach(host => {
+    const copia = abrirDesdeMobile.cloneNode(true);
+    copia.addEventListener('click', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      togglePanel(true);
+    });
+    host.appendChild(copia);
   });
 
   const aplicar = () => {
@@ -630,22 +847,63 @@ async function initCurrentUser() {
   fill('[data-user-nombre]',   nombre);
   fill('[data-user-apellido]', apellido);
   fill('[data-user-role]',     me.rol || '');
-  fill('[data-user-avatar]',   initials || (nombre[0] || '').toUpperCase());
   fill('[data-user-email]',    me.email || '');
+
+  /* Avatar: foto real si subió una (mismo criterio que perfil.js), si no
+     las iniciales sobre el rojo de marca que ya trae el CSS de fondo. */
+  document.querySelectorAll('[data-user-avatar]').forEach(el => {
+    if (me.avatar_url) {
+      el.textContent = '';
+      el.style.backgroundImage = `url(${encodeURI(me.avatar_url)})`;
+    } else {
+      el.style.backgroundImage = '';
+      el.textContent = initials || (nombre[0] || '').toUpperCase();
+    }
+  });
   document.querySelectorAll('[data-user-welcome]').forEach(el => {
     el.textContent = 'Bienvenido/a, ' + (nombre || full);
+  });
+}
+
+/* ─── Menú de acciones (3 puntos) ─────────────────────── */
+/* Delegado en document: abre/cierra sin importar si el .action-menu se
+   agregó al DOM después (filas de tabla, tarjetas pintadas por JS). */
+function initActionMenus() {
+  const cerrarTodos = except => {
+    document.querySelectorAll('.action-menu.is-open').forEach(m => {
+      if (m === except) return;
+      m.classList.remove('is-open');
+      m.querySelector('.action-menu__trigger')?.setAttribute('aria-expanded', 'false');
+    });
+  };
+
+  document.addEventListener('click', e => {
+    const trigger = e.target.closest('.action-menu__trigger');
+    if (!trigger) { cerrarTodos(); return; }
+
+    const menu = trigger.closest('.action-menu');
+    const abrir = !menu.classList.contains('is-open');
+    cerrarTodos(abrir ? menu : null);
+    menu.classList.toggle('is-open', abrir);
+    trigger.setAttribute('aria-expanded', String(abrir));
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') cerrarTodos();
   });
 }
 
 /* ─── Init global ────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
+  initBottomNav();
   initScrollReveal();
   initTabs();
   initImageFallbacks();
   initTabShortcuts();
   initThemeToggle();
   initAccessibility();
+  initActionMenus();
   initAuthNav();
   Toast.init();
   Modal.init();

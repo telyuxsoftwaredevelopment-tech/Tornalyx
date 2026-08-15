@@ -1,0 +1,26 @@
+# Tornalyx — jails de fail2ban.
+# Copiar a /etc/fail2ban/jail.d/tornalyx.local en el servidor real
+# (lo hace scripts/servidor/instalar-seguridad.sh). Los jails base de
+# fail2ban ya cubren sshd; acá se ajustan sus parámetros y se agregan los
+# de Apache. Actúa como IPS: no solo detecta, banea la IP vía iptables.
+
+[sshd]
+enabled  = true
+port     = 22
+maxretry = 4
+findtime = 10m
+bantime  = 1h
+
+[apache-auth]
+enabled  = true
+port     = http,https
+logpath  = /var/log/apache2/error.log
+maxretry = 5
+findtime = 10m
+bantime  = 30m
+
+[apache-badbots]
+enabled  = true
+port     = http,https
+logpath  = /var/log/apache2/access.log
+bantime  = 1d

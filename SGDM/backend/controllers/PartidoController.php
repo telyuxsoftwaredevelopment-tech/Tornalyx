@@ -53,7 +53,7 @@ class PartidoController extends Controller {
      * En liga crea el calendario completo; en eliminación y suizo, una ronda.
      */
     public function generar(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $torneoId = filter_input(INPUT_POST, 'torneo_id', FILTER_VALIDATE_INT);
@@ -105,7 +105,7 @@ class PartidoController extends Controller {
      * Programa fecha, hora y lugar de un partido (POST /api/partido/programar).
      */
     public function programar(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $partidoId = filter_input(INPUT_POST, 'partido_id', FILTER_VALIDATE_INT);
@@ -147,7 +147,7 @@ class PartidoController extends Controller {
      * pendiente, en juego, finalizado o aplazado.
      */
     public function estado(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $partidoId = filter_input(INPUT_POST, 'partido_id', FILTER_VALIDATE_INT);
@@ -174,7 +174,7 @@ class PartidoController extends Controller {
      * y recalcula la tabla de posiciones del torneo.
      */
     public function resultado(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $partidoId = filter_input(INPUT_POST, 'partido_id',      FILTER_VALIDATE_INT);
@@ -223,7 +223,7 @@ class PartidoController extends Controller {
      * (POST /api/partido/asistencia).
      */
     public function asistencia(): void {
-        if (!$this->requireApiRole(['participante', 'organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $partidoId = filter_input(INPUT_POST, 'partido_id', FILTER_VALIDATE_INT);
@@ -279,13 +279,19 @@ class PartidoController extends Controller {
         return $torneo;
     }
 
-    /** Valida 'YYYY-MM-DDTHH:MM' o 'YYYY-MM-DD HH:MM(:SS)'. */
+    /**
+     * Valida 'YYYY-MM-DDTHH:MM' o 'YYYY-MM-DD HH:MM(:SS)', con año dentro de
+     * un rango razonable. `Y` acepta años de más de 4 dígitos (un typo pasa
+     * el formato igual) y sin este piso el UPDATE explota contra la columna
+     * DATETIME de la base recién al guardar.
+     */
     private function esFechaHoraValida(string $valor): bool {
         $valor = str_replace('T', ' ', $valor);
         foreach (['!Y-m-d H:i', '!Y-m-d H:i:s'] as $formato) {
             $d = DateTimeImmutable::createFromFormat($formato, $valor);
             if ($d !== false) {
-                return true;
+                $anio = (int) $d->format('Y');
+                return $anio >= 1900 && $anio <= 2200;
             }
         }
         return false;

@@ -25,7 +25,7 @@ class AvisoController extends Controller {
      * los que todavía no leyó.
      */
     public function mios(): void {
-        if (!$this->requireApiRole(['participante', 'organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $usuarioId = (int) Session::getUserId();
@@ -39,7 +39,7 @@ class AvisoController extends Controller {
      * Marca todos los avisos como leídos (POST /api/avisos/leer).
      */
     public function marcarLeidos(): void {
-        if (!$this->requireApiRole(['participante', 'organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $this->avisoModel->marcarLeidos((int) Session::getUserId());
@@ -62,7 +62,7 @@ class AvisoController extends Controller {
      * El organizador publica una novedad (POST /api/aviso/publicar).
      */
     public function publicar(): void {
-        if (!$this->requireApiRole(['organizador', 'administrador'])) {
+        if (!$this->requireApiLogin()) {
             return;
         }
         $torneoId = filter_input(INPUT_POST, 'torneo_id', FILTER_VALIDATE_INT);

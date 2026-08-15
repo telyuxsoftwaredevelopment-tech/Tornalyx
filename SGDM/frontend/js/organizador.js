@@ -12,8 +12,19 @@
 
 const { Api, Toast, Utils } = window.Tornalyx;
 
+/** Pinta (o limpia) la vista previa de la foto de fondo del torneo. */
+function pintarBannerPreview(url) {
+  const preview = document.getElementById('torneoBannerPreview');
+  if (!preview) return;
+  preview.style.backgroundImage = url ? `url(${encodeURI(url)})` : '';
+}
+
 /* Torneos cargados, en el orden en que se muestran. */
 let torneos = [];
+
+/* Id del torneo que se está editando, o null si el formulario está en modo
+   "crear". Lo usa initCreateForm() para decidir a qué endpoint mandar. */
+let editandoId = null;
 
 /**
  * Muestra u oculta el formulario de creación cuando vive dentro de un panel
@@ -37,6 +48,88 @@ function abrirCreacion() {
     window.setSection('crear');
   } else {
     mostrarCreateCard(true);
+  }
+}
+
+/** Título y botón del formulario según esté creando o editando un torneo. */
+function actualizarTituloFormulario() {
+  const h1  = document.querySelector('#panel-crear h1, #createCard h3');
+  const btn = document.querySelector('#createForm button[type="submit"]');
+  if (h1)  h1.textContent  = editandoId ? 'Editar torneo' : 'Crear torneo';
+  if (btn) btn.textContent = editandoId ? 'Guardar cambios' : 'Crear torneo';
+
+  // "Al crearlo" (publicar/borrador) solo aplica al crear: editar ajustes no
+  // cambia si el torneo está publicado, así que se oculta para no confundir.
+  const publicarGroup = document.getElementById('publicar')?.closest('.form-group');
+  if (publicarGroup) publicarGroup.classList.toggle('hidden', !!editandoId);
+
+  // La foto de fondo recién tiene sentido con un torneo ya creado (necesita
+  // un id real contra el que subir).
+  document.getElementById('torneoBannerRow')?.classList.toggle('hidden', !editandoId);
+}
+
+/** Vuelve el formulario a modo "crear" (se usa al abrirlo desde cero). */
+function resetFormularioCreacion() {
+  editandoId = null;
+  document.getElementById('createForm')?.reset();
+  pintarBannerPreview(null);
+  actualizarTituloFormulario();
+}
+
+/** Carga los datos de un torneo propio en el formulario para editarlo. */
+function iniciarEdicion(id) {
+  const torneo = torneos.find(t => String(t.id) === String(id));
+  const form = document.getElementById('createForm');
+  if (!torneo || !form) return;
+
+  editandoId = torneo.id;
+  pintarBannerPreview(torneo.banner_url);
+  const set = (nombre, valor) => {
+    const el = form.elements.namedItem(nombre);
+    if (el) el.value = valor ?? '';
+  };
+  set('nombre', torneo.nombre);
+  set('disciplina', torneo.disciplina);
+  set('formato', torneo.formato);
+  set('max_participantes', torneo.max_participantes);
+  set('fecha_inicio', torneo.fecha_inicio);
+  set('fecha_fin', torneo.fecha_fin);
+  set('descripcion', torneo.descripcion);
+  set('reglamento', torneo.reglamento);
+  set('premios', torneo.premios);
+  set('discord_url', torneo.discord_url);
+  set('requiere_equipos', torneo.requiere_equipos ? '1' : '0');
+  set('publicar', torneo.publico ? '1' : '0');
+
+  actualizarTituloFormulario();
+  abrirCreacion();
+}
+
+/**
+ * Elimina un torneo propio. Si el backend responde que ya tiene actividad
+ * (inscriptos o partidos), ofrece cancelarlo en su lugar.
+ */
+async function eliminarTorneo(id) {
+  if (!confirm('¿Eliminar este torneo? Esta acción no se puede deshacer.')) return;
+
+  try {
+    const res = await Api.post(`/api/torneo/${id}/eliminar`, {});
+    Toast.success(res.mensaje || 'Torneo eliminado.');
+    torneos = torneos.filter(t => String(t.id) !== String(id));
+    renderTorneos();
+  } catch (err) {
+    if (err.data && err.data.sugerir_cancelar
+        && confirm(err.message + '\n\n¿Querés cancelarlo en su lugar?')) {
+      try {
+        const res = await Api.post(`/api/torneo/${id}/cancelar`, {});
+        Toast.success(res.mensaje || 'Torneo cancelado.');
+        await cargarTorneos();
+      } catch (err2) {
+        Toast.error(err2.message);
+      }
+      return;
+    }
+    Toast.error(err.message);
   }
 }
 
@@ -87,9 +180,38 @@ function torneoItemHtml(t) {
         <span style="font-size:12px;color:var(--muted-2);font-family:var(--mono)">${esc(barraValor)}</span>
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:${barraAncho}%"></div></div>
-      <div style="margin-top:var(--space-3);display:flex;gap:var(--space-2)">
+      <div style="margin-top:var(--space-3);display:flex;justify-content:space-between;align-items:center;gap:var(--space-2)">
         <a class="btn btn-ghost btn-sm" href="/torneo-detalle?id=${t.id}">Ver detalle</a>
+        <div class="action-menu">
+          <button type="button" class="action-menu__trigger" aria-haspopup="true" aria-expanded="false" aria-label="Más acciones para ${esc(t.nombre)}">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+          </button>
+          <div class="action-menu__list" role="menu">
+            <button type="button" class="action-menu__item" role="menuitem" data-editar="${t.id}">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              Editar ajustes
+            </button>
+            <button type="button" class="action-menu__item action-menu__item--danger" role="menuitem" data-eliminar="${t.id}">
+              <svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              Eliminar
+            </button>
+          </div>
+        </div>
       </div>
+    </div>`;
+}
+
+/** Placeholder de una card de torneo mientras se espera al API. */
+function skeletonTorneoItem() {
+  return `
+    <div class="torneo-item" aria-hidden="true">
+      <div class="torneo-item__head">
+        <div style="flex:1">
+          <span class="skeleton" style="display:block;height:16px;width:55%;margin-bottom:8px"></span>
+          <span class="skeleton" style="display:block;height:12px;width:35%"></span>
+        </div>
+      </div>
+      <span class="skeleton" style="display:block;height:8px;width:100%;margin-top:12px"></span>
     </div>`;
 }
 
@@ -110,6 +232,10 @@ function renderTorneos() {
     );
   } else {
     cont.innerHTML = torneos.map(torneoItemHtml).join('');
+    cont.querySelectorAll('[data-editar]').forEach(b =>
+      b.addEventListener('click', () => iniciarEdicion(b.dataset.editar)));
+    cont.querySelectorAll('[data-eliminar]').forEach(b =>
+      b.addEventListener('click', () => eliminarTorneo(b.dataset.eliminar)));
   }
 
   renderKpis();
@@ -151,7 +277,7 @@ function renderSelectores() {
 async function cargarTorneos() {
   const cont = document.getElementById('misTorneos');
   if (cont) {
-    cont.innerHTML = '<div class="torneo-item" style="color:var(--muted)">Cargando torneos…</div>';
+    cont.innerHTML = Array.from({ length: 3 }, skeletonTorneoItem).join('');
   }
   try {
     const data = await Api.get('/api/torneos/mios');
@@ -176,7 +302,7 @@ function marcarError(campo) {
   el.addEventListener('input', () => { el.style.borderColor = ''; }, { once: true });
 }
 
-/** Conecta el formulario de creación con POST /api/torneo/crear. */
+/** Conecta el formulario con POST /api/torneo/crear o .../{id}/editar. */
 function initCreateForm() {
   const form = document.getElementById('createForm');
   if (!form) return;
@@ -184,25 +310,32 @@ function initCreateForm() {
   form.addEventListener('submit', async e => {
     e.preventDefault();
 
+    const editando  = editandoId;
     const submitBtn = form.querySelector('button[type="submit"]');
     const original  = submitBtn ? submitBtn.textContent : '';
     if (submitBtn) {
       submitBtn.disabled = true;      // Evita el doble envío (torneo duplicado).
-      submitBtn.textContent = 'Creando…';
+      submitBtn.textContent = editando ? 'Guardando…' : 'Creando…';
     }
 
     const campos = Object.fromEntries(new FormData(form).entries());
 
     try {
-      const data = await Api.post('/api/torneo/crear', campos);
-      Toast.success(data.mensaje || 'Torneo creado.');
+      const url  = editando ? `/api/torneo/${editando}/editar` : '/api/torneo/crear';
+      const data = await Api.post(url, campos);
+      Toast.success(data.mensaje || (editando ? 'Torneo actualizado.' : 'Torneo creado.'));
       if (data.torneo) {
-        torneos.unshift(data.torneo);   // El listado va por fecha de creación desc.
+        if (editando) {
+          const i = torneos.findIndex(t => String(t.id) === String(editando));
+          if (i !== -1) torneos[i] = data.torneo; else torneos.unshift(data.torneo);
+        } else {
+          torneos.unshift(data.torneo); // El listado va por fecha de creación desc.
+        }
         renderTorneos();
       } else {
         await cargarTorneos();
       }
-      form.reset();
+      resetFormularioCreacion();
       mostrarCreateCard(false);          // Repliega el formulario (panel del admin).
       window.setSection(seccionDeLista());
     } catch (err) {
@@ -217,6 +350,53 @@ function initCreateForm() {
   });
 }
 
+/**
+ * Sube la foto de fondo del torneo que se está editando
+ * (POST /api/torneo/{id}/banner). Solo tiene sentido en modo edición: sin
+ * editandoId no hay id real todavía contra el que subir la imagen.
+ */
+function initBannerUpload() {
+  const input = document.getElementById('torneoBannerInput');
+  const btn   = document.getElementById('torneoBannerBtn');
+  if (!input || !btn) return;
+
+  btn.addEventListener('click', () => input.click());
+
+  input.addEventListener('change', async () => {
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file || !editandoId) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      Toast.error('Formato no admitido. Usá JPG, PNG o WebP.');
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      Toast.error('La imagen no puede superar los 4 MB.');
+      return;
+    }
+
+    const data = new FormData();
+    data.append('banner', file);
+    try {
+      const res = await fetch(`/api/torneo/${editandoId}/banner`, {
+        method: 'POST',
+        body: data,
+        credentials: 'same-origin',
+        headers: Utils.csrfHeaders(),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'No se pudo subir la imagen.');
+      pintarBannerPreview(json.banner_url);
+      const i = torneos.findIndex(t => String(t.id) === String(editandoId));
+      if (i !== -1) torneos[i].banner_url = json.banner_url;
+      Toast.success('Foto de fondo actualizada.');
+    } catch (err) {
+      Toast.error(err.message);
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!document.getElementById('misTorneos') && !document.getElementById('createForm')) return;
 
@@ -224,11 +404,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-toggle-create]').forEach(btn =>
     btn.addEventListener('click', () => {
       const card = document.getElementById('createCard');
-      mostrarCreateCard(card ? card.classList.contains('hidden') : true);
+      const mostrar = card ? card.classList.contains('hidden') : true;
+      if (mostrar) resetFormularioCreacion();
+      mostrarCreateCard(mostrar);
     })
   );
 
+  /* Entradas al formulario "en limpio" (no vía Editar): topbar, sidebar y
+     el enlace del estado vacío. Vuelven el formulario a modo creación. */
+  document.querySelectorAll('[data-goto="crear"], .sidebar__item[data-section="crear"]').forEach(el =>
+    el.addEventListener('click', resetFormularioCreacion)
+  );
+
   initCreateForm();
+  initBannerUpload();
   cargarTorneos();
 });
 

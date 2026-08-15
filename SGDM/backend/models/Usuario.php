@@ -31,7 +31,7 @@ class Usuario extends Model {
      * @param string $email
      * @param string $password   Contraseña en texto plano.
      * @param string $fechaNac   YYYY-MM-DD
-     * @param string $rol        'participante' | 'organizador'
+     * @param string $rol        'participante' | 'administrador'
      * @return int ID del nuevo usuario.
      */
     public function registrar(

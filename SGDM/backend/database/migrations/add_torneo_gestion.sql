@@ -9,11 +9,14 @@
 
 USE tornalyx_db;
 
-ALTER TABLE torneos
-    ADD COLUMN reglamento       TEXT         NULL DEFAULT NULL AFTER descripcion,
-    ADD COLUMN premios          TEXT         NULL DEFAULT NULL AFTER reglamento,
-    ADD COLUMN discord_url      VARCHAR(255) NULL DEFAULT NULL AFTER premios,
-    ADD COLUMN requiere_equipos TINYINT(1)   NOT NULL DEFAULT 0 AFTER formato;
+-- TiDB no resuelve "AFTER <col>" contra una columna agregada en el mismo
+-- ALTER TABLE (a diferencia de MySQL): valida los AFTER contra el estado
+-- de la tabla antes del statement, no incrementalmente. Por eso van en
+-- ALTER separados en vez de uno solo con las cuatro columnas.
+ALTER TABLE torneos ADD COLUMN reglamento       TEXT         NULL DEFAULT NULL AFTER descripcion;
+ALTER TABLE torneos ADD COLUMN premios          TEXT         NULL DEFAULT NULL AFTER reglamento;
+ALTER TABLE torneos ADD COLUMN discord_url      VARCHAR(255) NULL DEFAULT NULL AFTER premios;
+ALTER TABLE torneos ADD COLUMN requiere_equipos TINYINT(1)   NOT NULL DEFAULT 0 AFTER formato;
 
 -- ──────────────────────────────────────────────────────────────
 -- TABLA: asistencias  (confirmación previa a cada enfrentamiento)

@@ -36,14 +36,11 @@ COPY SGDM/docker/vhost.conf /etc/apache2/sites-available/000-default.conf
 # Código de la aplicación.
 COPY . /var/www/html/
 
-# El entrypoint aplica las migraciones pendientes antes de levantar Apache, de
-# modo que una base ya existente no se quede con el esquema viejo (el init de
-# MySQL solo corre con el volumen vacío). Ver SGDM/docker/entrypoint.sh.
-RUN chmod +x /var/www/html/SGDM/docker/entrypoint.sh
-ENTRYPOINT ["/var/www/html/SGDM/docker/entrypoint.sh"]
-CMD ["apache2-foreground"]
-
-# storage/throttle debe ser escribible por Apache (control de fuerza bruta).
+# storage/throttle debe ser escribible por Apache (control de fuerza bruta);
+# sin este chown, Apache corre como www-data y no tiene permiso de escritura
+# en lo que copió el COPY de arriba. Los avatares NO usan disco (Render free
+# no tiene almacenamiento persistente): se guardan como BLOB en la base,
+# ver add_avatar_blob.sql y PerfilController::avatar()/servirAvatar().
 RUN mkdir -p /var/www/html/SGDM/backend/storage/throttle \
     && chown -R www-data:www-data /var/www/html/SGDM/backend/storage
 
