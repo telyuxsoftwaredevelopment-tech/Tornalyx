@@ -20,7 +20,8 @@
   const ROUTES = { login: '/login', signup: '/registro' };
 
   function modeFromPath(path) {
-    return path.replace(/\/+$/, '') === '/registro' ? 'signup' : 'login';
+    const clean = (path || '').toLowerCase().replace(/\/+$/, '');
+    return clean.endsWith('/registro') ? 'signup' : 'login';
   }
 
   function focusFirstField(panel) {

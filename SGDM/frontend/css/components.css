@@ -390,26 +390,27 @@ textarea.form-control { resize: none; }
 }
 
 .auth-container {
-  background: rgba(var(--bg-rgb), .65);
+  background: rgba(15, 15, 22, 0.78);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
-              0 0 40px -10px rgba(236, 28, 36, 0.15);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.85),
+              0 0 45px -10px rgba(236, 28, 36, 0.25);
   position: relative;
   overflow: hidden;
   width: 100%;
   max-width: 1040px;
-  min-height: 680px;
+  min-height: 660px;
+  height: 680px;
   max-height: 90vh;
-  display: flex;
 }
 
 .form-container {
   position: absolute;
   top: 0;
   height: 100%;
+  width: 50%;
   transition: all 0.65s cubic-bezier(0.65, 0, 0.35, 1);
   overflow-y: auto;
   overflow-x: hidden;
@@ -422,10 +423,11 @@ textarea.form-control { resize: none; }
   width: 6px;
 }
 .form-container::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 999px;
 }
 
+/* Panel Iniciar Sesión (lado izquierdo por defecto) */
 .sign-in-container {
   left: 0;
   width: 50%;
@@ -434,6 +436,7 @@ textarea.form-control { resize: none; }
   pointer-events: auto;
 }
 
+/* Panel Registro (oculto detrás a la izquierda por defecto) */
 .sign-up-container {
   left: 0;
   width: 50%;
@@ -442,11 +445,12 @@ textarea.form-control { resize: none; }
   pointer-events: none;
 }
 
-/* Estado activo: cuando se desliza a Registro */
+/* Estado activo: cuando se conmuta a Registro (.right-panel-active) */
 .auth-container.right-panel-active .sign-in-container {
   transform: translateX(100%);
   opacity: 0;
   pointer-events: none;
+  z-index: 1;
 }
 
 .auth-container.right-panel-active .sign-up-container {
@@ -485,22 +489,22 @@ textarea.form-control { resize: none; }
 }
 
 .overlay {
-  background: linear-gradient(135deg, #180305 0%, #3b0a0e 45%, #991016 100%);
+  background: linear-gradient(135deg, #180305 0%, #400a0e 45%, #b31018 100%);
   position: relative;
   left: -100%;
   height: 100%;
   width: 200%;
   transform: translateX(0);
   transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
-  box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.6);
 }
 
 .overlay::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 75% 30%, rgba(236, 28, 36, 0.35) 0%, transparent 60%),
-              radial-gradient(circle at 25% 70%, rgba(180, 15, 22, 0.3) 0%, transparent 55%);
+  background: radial-gradient(circle at 75% 30%, rgba(236, 28, 36, 0.4) 0%, transparent 60%),
+              radial-gradient(circle at 25% 70%, rgba(180, 15, 22, 0.35) 0%, transparent 55%);
   pointer-events: none;
 }
 
@@ -510,22 +514,22 @@ textarea.form-control { resize: none; }
 
 .overlay-panel {
   position: absolute;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   padding: 0 var(--space-8);
   text-align: center;
-  top: 0;
   height: 100%;
   width: 50%;
-  transform: translateX(0);
   transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
   color: #ffffff;
-  z-index: 1;
+  z-index: 10;
 }
 
 .overlay-left {
+  left: 0;
   transform: translateX(-20%);
 }
 
@@ -544,27 +548,28 @@ textarea.form-control { resize: none; }
 
 .overlay-panel h2 {
   font-family: var(--head);
-  font-size: clamp(1.8rem, 2.8vw, 2.3rem);
+  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
   font-weight: 800;
   letter-spacing: -0.5px;
   margin-bottom: var(--space-3);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
 
 .overlay-panel p {
   font-size: var(--font-size-sm);
   line-height: 1.6;
-  opacity: 0.92;
+  opacity: 0.95;
   max-width: 32ch;
   margin-bottom: var(--space-6);
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 /* ─── Botón Ghost (Exacto del video de referencia) ─── */
 .ghost-btn {
   padding: 14px 40px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
   background: transparent;
   color: #ffffff;
   font-size: 0.95rem;
@@ -576,6 +581,7 @@ textarea.form-control { resize: none; }
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .ghost-btn:hover {
@@ -583,7 +589,7 @@ textarea.form-control { resize: none; }
   color: #0f1015;
   border-color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
 }
 
 .ghost-btn:active {
@@ -596,6 +602,7 @@ textarea.form-control { resize: none; }
   max-width: 420px;
   margin: auto;
 }
+
 
 /* =====================================================
    ANIMACIÓN 2: OTP VERIFICATION ORBITAL v3 (Component 89)
