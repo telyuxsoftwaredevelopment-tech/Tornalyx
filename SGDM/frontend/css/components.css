@@ -370,137 +370,481 @@ textarea.form-control { resize: none; }
 .status-dot--yellow { background: #eab308; box-shadow: 0 0 6px #eab308; }
 .status-dot--red    { background: var(--red-bright); box-shadow: 0 0 6px var(--red-bright); }
 
-/* ─── Auth flip card (login / registro) ──────────────── */
-/* Ocupa toda la pantalla disponible bajo el navbar (sin tarjeta flotando
-   en un recuadro chico): cada cara tiene la altura completa del viewport,
-   así que no depende de medir el contenido con JS para no cortarlo.
-   .auth-card-flip se ancla con position:absolute+inset:0 a .auth-page (en
-   vez de height:100%): un height:100% no se resuelve de forma confiable
-   contra un contenedor cuyo alto viene de flex:1 varios niveles arriba
-   (el navegador lo trata como "auto" y la tarjeta colapsa al alto de su
-   contenido, dejando espacio vacío debajo). inset:0 la ancla de forma
-   directa al tamaño ya resuelto de .auth-page, sin ese problema. */
-.auth-card-flip {
-  perspective: 1600px;
+/* =====================================================
+   ANIMACIÓN 1: SLIDING OVERLAY AUTH PANEL (Login / Registro)
+   Efecto de doble panel deslizante con overlay dinámico
+   ===================================================== */
+.auth-sliding-wrapper {
   position: absolute;
   inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
   animation: auth-fade-in .6s cubic-bezier(.22,1,.36,1) both;
 }
+
 @keyframes auth-fade-in {
-  from { opacity: 0; transform: translateY(14px) scale(.99); }
+  from { opacity: 0; transform: translateY(16px) scale(.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
-/* En monitores muy anchos, .auth-face__form crecía sin límite y el
-   formulario (ancho fijo, ver .auth-face__inner) quedaba perdido en medio
-   de un montón de vidrio esmerilado vacío mostrando la foto de fondo. Se
-   limita el ancho total de la tarjeta y se centra — left:0;right:0 ya
-   vienen de inset:0, así que width+margin:auto alcanza para centrar un
-   elemento position:absolute sin pisar el transform de la animación. */
-@media(min-width:1300px) {
-  .auth-card-flip { width:1300px; margin:0 auto; }
-}
 
-.auth-flip {
+.auth-container {
+  background: rgba(var(--bg-rgb), .65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
+              0 0 40px -10px rgba(236, 28, 36, 0.15);
   position: relative;
-  width: 100%; height: 100%;
-  transform-style: preserve-3d;
-  transition: transform .8s cubic-bezier(.4,0,.2,1);
-}
-.auth-flip.is-flipped { transform: rotateY(180deg); }
-.auth-flip.no-anim { transition: none; }
-
-.auth-face {
-  display: grid;
-  grid-template-columns: 1.35fr 1fr;
-  width: 100%; height: 100%;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.auth-face--front { position: relative; }
-.auth-face--back {
-  position: absolute; inset: 0;
-  grid-template-columns: 1fr 1.35fr;
-  transform: rotateY(180deg);
+  overflow: hidden;
+  width: 100%;
+  max-width: 1040px;
+  min-height: 680px;
+  max-height: 90vh;
+  display: flex;
 }
 
-/* El formulario centra una columna de ancho fijo dentro del panel; si el
-   contenido (p. ej. el registro completo) no entra en la altura de
-   pantalla, ese panel scrollea de forma independiente del panel promo.
-   El centrado vertical usa margin:auto en .auth-face__inner (no
-   justify-content:center en el contenedor con scroll): así, cuando el
-   contenido no entra, los márgenes colapsan a 0 en vez de dejar el
-   principio del formulario recortado e imposible de scrollear. */
-.auth-face__form {
+.form-container {
+  position: absolute;
+  top: 0;
   height: 100%;
+  transition: all 0.65s cubic-bezier(0.65, 0, 0.35, 1);
   overflow-y: auto;
-  /* Glassmorphism: deja ver la foto de fondo de .auth-page a través del
-     panel. rgba sobre --bg-rgb en vez de --bg sólido, así el vidrio se
-     tiñe solo con el tema activo sin necesitar un color aparte. */
-  background: rgba(var(--bg-rgb), .62);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  display: flex; flex-direction: column;
-  padding: var(--space-10) clamp(var(--space-6), 6vw, var(--space-16));
-}
-.auth-face__inner { width: 100%; max-width: 440px; margin: auto; }
-/* Sobre el vidrio esmerilado el botón se mezclaba con el fondo; se le suma
-   un brillo rojo en reposo (no sólo al :hover) para que resalte de entrada. */
-.auth-face__inner .btn-primary {
-  box-shadow:
-    6px 6px 14px rgba(0,0,0,.55),
-    -4px -4px 10px rgba(255,70,75,.1),
-    0 0 26px -4px var(--red-glow);
-}
-.auth-face__inner .btn-primary:hover {
-  box-shadow:
-    8px 8px 18px rgba(0,0,0,.6),
-    -5px -5px 12px rgba(255,80,85,.14),
-    0 0 34px -4px var(--red-glow);
+  overflow-x: hidden;
+  padding: clamp(var(--space-6), 4vw, var(--space-10));
+  display: flex;
+  flex-direction: column;
 }
 
-.auth-face__promo {
+.form-container::-webkit-scrollbar {
+  width: 6px;
+}
+.form-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+}
+
+.sign-in-container {
+  left: 0;
+  width: 50%;
+  z-index: 2;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sign-up-container {
+  left: 0;
+  width: 50%;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Estado activo: cuando se desliza a Registro */
+.auth-container.right-panel-active .sign-in-container {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-container.right-panel-active .sign-up-container {
+  transform: translateX(100%);
+  opacity: 1;
+  z-index: 5;
+  pointer-events: auto;
+  animation: auth-slide-show 0.65s;
+}
+
+@keyframes auth-slide-show {
+  0%, 49.99% {
+    opacity: 0;
+    z-index: 1;
+  }
+  50%, 100% {
+    opacity: 1;
+    z-index: 5;
+  }
+}
+
+/* ─── Contenedor del Overlay Deslizante ─── */
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
   height: 100%;
-  background: linear-gradient(135deg, var(--red-deep), var(--red));
-  color: #fff;
-  padding: var(--space-8);
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  text-align: center; gap: var(--space-4);
+  overflow: hidden;
+  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+  z-index: 100;
 }
-.auth-face__promo h2 { font-family: var(--head); font-size: var(--font-size-2xl); }
-.auth-face__promo p  { font-size: var(--font-size-sm); opacity: .9; max-width: 26ch; }
 
-.btn-promo {
+.auth-container.right-panel-active .overlay-container {
+  transform: translateX(-100%);
+}
+
+.overlay {
+  background: linear-gradient(135deg, #180305 0%, #3b0a0e 45%, #991016 100%);
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+}
+
+.overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 75% 30%, rgba(236, 28, 36, 0.35) 0%, transparent 60%),
+              radial-gradient(circle at 25% 70%, rgba(180, 15, 22, 0.3) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.auth-container.right-panel-active .overlay {
+  transform: translateX(50%);
+}
+
+.overlay-panel {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 var(--space-8);
+  text-align: center;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  transform: translateX(0);
+  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+  color: #ffffff;
+  z-index: 1;
+}
+
+.overlay-left {
+  transform: translateX(-20%);
+}
+
+.auth-container.right-panel-active .overlay-left {
+  transform: translateX(0);
+}
+
+.overlay-right {
+  right: 0;
+  transform: translateX(0);
+}
+
+.auth-container.right-panel-active .overlay-right {
+  transform: translateX(20%);
+}
+
+.overlay-panel h2 {
+  font-family: var(--head);
+  font-size: clamp(1.8rem, 2.8vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: var(--space-3);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.overlay-panel p {
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  opacity: 0.92;
+  max-width: 32ch;
+  margin-bottom: var(--space-6);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ─── Botón Ghost (Exacto del video de referencia) ─── */
+.ghost-btn {
+  padding: 14px 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
   background: transparent;
-  border: 1.5px solid #fff;
-  color: #fff;
-  box-shadow: 0 0 0 5px rgba(255,255,255,.14), 0 0 30px -2px rgba(255,255,255,.6);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
-.btn-promo:hover  { background: rgba(255,255,255,.15); border-color: #fff; color: #fff; box-shadow: 0 0 0 6px rgba(255,255,255,.18), 0 0 36px 0 rgba(255,255,255,.75); }
-.btn-promo:active { box-shadow: none; background: rgba(255,255,255,.25); }
 
+.ghost-btn:hover {
+  background: #ffffff;
+  color: #0f1015;
+  border-color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.ghost-btn:active {
+  transform: translateY(0);
+}
+
+/* Adaptación interna del formulario */
+.auth-form-body {
+  width: 100%;
+  max-width: 420px;
+  margin: auto;
+}
+
+/* =====================================================
+   ANIMACIÓN 2: OTP VERIFICATION ORBITAL v3 (Component 89)
+   Circuito orbital animado con trayectoria SVG y slots en órbita
+   ===================================================== */
+:root {
+  --otp-ice: #dceaff;
+  --otp-ok: #2ee6a8;
+  --otp-bad: #ff4d6a;
+}
+
+.otp-orbit-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  padding: var(--space-2) 0;
+}
+
+.otp-orbit {
+  position: relative;
+  width: 250px;
+  height: 250px;
+  margin: var(--space-4) auto var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Anillo SVG de órbita */
+.orbit__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  animation: orbit-rotate 35s linear infinite;
+}
+
+@keyframes orbit-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.orbit__path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.18);
+  stroke-dasharray: 3 8;
+  stroke-width: 1.5;
+  transition: stroke 0.3s ease;
+}
+
+[data-theme="light"] .orbit__path {
+  stroke: rgba(0, 0, 0, 0.18);
+}
+
+.otp-orbit.is-active .orbit__path {
+  stroke: var(--red-bright);
+}
+.otp-orbit.is-ok .orbit__path {
+  stroke: var(--otp-ok);
+}
+.otp-orbit.is-error .orbit__path {
+  stroke: var(--otp-bad);
+}
+
+/* Hub central (núcleo del reactor) */
+.orbit__hub {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(236, 28, 36, 0.25) 0%, rgba(0, 0, 0, 0.4) 80%);
+  border: 1.5px solid rgba(236, 28, 36, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 25px rgba(236, 28, 36, 0.25);
+  animation: hub-pulse 2.5s ease-in-out infinite alternate;
+  color: var(--red-bright);
+  font-size: 1.1rem;
+}
+
+@keyframes hub-pulse {
+  0%   { transform: scale(0.94); box-shadow: 0 0 15px rgba(236, 28, 36, 0.2); }
+  100% { transform: scale(1.06); box-shadow: 0 0 32px rgba(236, 28, 36, 0.5); }
+}
+
+.otp-orbit.is-ok .orbit__hub {
+  border-color: var(--otp-ok);
+  color: var(--otp-ok);
+  background: radial-gradient(circle, rgba(46, 230, 168, 0.3) 0%, rgba(0, 0, 0, 0.4) 80%);
+  box-shadow: 0 0 35px rgba(46, 230, 168, 0.5);
+}
+
+.otp-orbit.is-error .orbit__hub {
+  border-color: var(--otp-bad);
+  color: var(--otp-bad);
+  background: radial-gradient(circle, rgba(255, 77, 106, 0.3) 0%, rgba(0, 0, 0, 0.4) 80%);
+  box-shadow: 0 0 35px rgba(255, 77, 106, 0.5);
+}
+
+/* Casilleros orbitales (Slots) */
+.orbit__slots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orbit__slot {
+  position: absolute;
+  width: 44px;
+  height: 48px;
+  left: calc(50% - 22px);
+  top: calc(50% - 24px);
+  pointer-events: auto;
+  transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+}
+
+.orbit__slot-input {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: var(--bg-2);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0;
+  outline: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  transition: all 0.25s ease;
+}
+
+.orbit__slot-input:focus {
+  border-color: var(--red-bright);
+  box-shadow: 0 0 0 3px rgba(236, 28, 36, 0.25), 0 0 20px rgba(236, 28, 36, 0.35);
+  transform: scale(1.1);
+}
+
+.orbit__slot.is-filled .orbit__slot-input {
+  border-color: var(--red-bright);
+  background: var(--bg-card);
+  color: var(--ink);
+  box-shadow: 0 0 14px rgba(236, 28, 36, 0.2);
+}
+
+.otp-orbit.is-ok .orbit__slot-input {
+  border-color: var(--otp-ok) !important;
+  color: var(--otp-ok) !important;
+  box-shadow: 0 0 16px rgba(46, 230, 168, 0.35) !important;
+}
+
+.otp-orbit.is-error .orbit__slot-input {
+  border-color: var(--otp-bad) !important;
+  color: var(--otp-bad) !important;
+  box-shadow: 0 0 16px rgba(255, 77, 106, 0.35) !important;
+}
+
+/* Cuenta regresiva y resend estilizado */
+.otp-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: var(--space-4);
+}
+
+/* ─── Modo Mobile & Reducción de movimiento ─── */
 @media (prefers-reduced-motion: reduce) {
-  .auth-card-flip { animation: none; }
-  .auth-flip { transition: none; }
+  .auth-container, .form-container, .overlay-container, .overlay, .overlay-panel, .ghost-btn, .orbit__ring, .orbit__hub, .orbit__slot {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
-/* Mobile: el panel promocional colapsa como franja compacta arriba en vez
-   de partir la pantalla en dos; el flip 3D se reemplaza por un toggle
-   simple entre las dos caras (sin rotateY, que no tiene sentido apiladas). */
-@media (max-width: 768px) {
-  /* En mobile no fijamos la tarjeta al tamaño de la pantalla: si el
-     contenido (el registro) no entra, tiene que poder crecer y que
-     scrollee la página entera, no quedar recortada. */
-  .auth-card-flip { position: static; perspective: none; }
-  .auth-flip { transform: none !important; height: auto; transition: none; }
-  .auth-face {
-    position: relative !important;
-    grid-template-columns: 1fr !important;
-    height: auto;
-    transform: none !important;
+@media (max-width: 820px) {
+  .auth-sliding-wrapper {
+    position: static;
+    padding: var(--space-4) var(--space-2);
+  }
+  .auth-container {
+    flex-direction: column;
+    min-height: auto;
+    max-height: none;
+    border-radius: 20px;
+  }
+  .overlay-container {
     display: none;
   }
-  .auth-face.is-active { display: grid; }
-  .auth-face__form  { order: 2; height: auto; padding: var(--space-6); }
-  .auth-face__promo { order: 1; height: auto; padding: var(--space-5) var(--space-6); }
-  .auth-face__promo p { display: none; }
+  .form-container {
+    position: static;
+    width: 100% !important;
+    transform: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    display: none;
+    padding: var(--space-6) var(--space-4);
+  }
+  .auth-container:not(.right-panel-active) .sign-in-container {
+    display: flex;
+  }
+  .auth-container.right-panel-active .sign-up-container {
+    display: flex;
+  }
+  .mobile-auth-switch {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: var(--space-4) var(--space-4) 0;
+    width: 100%;
+  }
+  .mobile-switch-btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .mobile-switch-btn.active {
+    background: var(--red-bright);
+    border-color: var(--red-bright);
+    color: #ffffff;
+    box-shadow: 0 0 15px var(--red-glow);
+  }
+  .otp-orbit {
+    width: 220px;
+    height: 220px;
+  }
 }
+
+@media (min-width: 821px) {
+  .mobile-auth-switch {
+    display: none;
+  }
+}
+

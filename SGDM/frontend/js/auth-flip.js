@@ -1,15 +1,21 @@
 /* =====================================================
    TORNALYX – auth-flip.js
-   Flip 3D entre las tarjetas de Login y Registro
+   Control del Panel Deslizante (Sliding Overlay)
+   Login ⇆ Registro con animación de transición fluida
    ===================================================== */
 
 'use strict';
 
 (function () {
-  const flipEl  = document.getElementById('authFlip');
-  const frontEl = document.getElementById('authFaceLogin');
-  const backEl  = document.getElementById('authFaceSignup');
-  if (!flipEl || !frontEl || !backEl) return;
+  const container = document.getElementById('authContainer');
+  const signInBtn = document.getElementById('signInBtn');
+  const signUpBtn = document.getElementById('signUpBtn');
+  const mobileSignInTab = document.getElementById('mobileSignInTab');
+  const mobileSignUpTab = document.getElementById('mobileSignUpTab');
+  const signInPanel = document.getElementById('authFaceLogin');
+  const signUpPanel = document.getElementById('authFaceSignup');
+
+  if (!container) return;
 
   const ROUTES = { login: '/login', signup: '/registro' };
 
@@ -17,30 +23,20 @@
     return path.replace(/\/+$/, '') === '/registro' ? 'signup' : 'login';
   }
 
-  function setInert(el, hidden) {
-    el.toggleAttribute('inert', hidden);
-    el.setAttribute('aria-hidden', String(hidden));
-  }
-
-  function focusFirstField(el) {
-    const field = el.querySelector('input:not([type="hidden"])');
+  function focusFirstField(panel) {
+    if (!panel) return;
+    const field = panel.querySelector('input:not([type="hidden"]):not([disabled])');
     if (field) field.focus({ preventScroll: true });
   }
 
-  function applyMode(mode, { animate = true, focus = false, push = false } = {}) {
-    const flipped = mode === 'signup';
+  function setMode(mode, { push = false, focus = false } = {}) {
+    const isSignUp = mode === 'signup';
 
-    if (!animate) flipEl.classList.add('no-anim');
+    container.classList.toggle('right-panel-active', isSignUp);
 
-    flipEl.classList.toggle('is-flipped', flipped);
-    frontEl.classList.toggle('is-active', !flipped);
-    backEl.classList.toggle('is-active', flipped);
-    setInert(frontEl, flipped);
-    setInert(backEl, !flipped);
-
-    if (!animate) {
-      void flipEl.offsetHeight; // fuerza reflow antes de reactivar la transición
-      flipEl.classList.remove('no-anim');
+    if (mobileSignInTab && mobileSignUpTab) {
+      mobileSignInTab.classList.toggle('active', !isSignUp);
+      mobileSignUpTab.classList.toggle('active', isSignUp);
     }
 
     if (push) {
@@ -51,19 +47,37 @@
     }
 
     if (focus) {
-      setTimeout(() => focusFirstField(flipped ? backEl : frontEl), animate ? 420 : 0);
+      setTimeout(() => {
+        focusFirstField(isSignUp ? signUpPanel : signInPanel);
+      }, 350);
     }
   }
 
-  document.querySelectorAll('[data-auth-toggle]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      applyMode(btn.dataset.authToggle, { animate: true, focus: true, push: true });
+  // Eventos de botones Desktop Overlay
+  signUpBtn?.addEventListener('click', () => setMode('signup', { push: true, focus: true }));
+  signInBtn?.addEventListener('click', () => setMode('login', { push: true, focus: true }));
+
+  // Eventos de tabs Mobile
+  mobileSignUpTab?.addEventListener('click', () => setMode('signup', { push: true, focus: true }));
+  mobileSignInTab?.addEventListener('click', () => setMode('login', { push: true, focus: true }));
+
+  // Disparadores genéricos data-auth-toggle
+  document.querySelectorAll('[data-auth-toggle]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const targetMode = el.dataset.authToggle;
+      if (targetMode) {
+        e.preventDefault();
+        setMode(targetMode, { push: true, focus: true });
+      }
     });
   });
 
+  // Navegación con historial (Atrás / Adelante del navegador)
   window.addEventListener('popstate', () => {
-    applyMode(modeFromPath(location.pathname), { animate: true, focus: true, push: false });
+    setMode(modeFromPath(location.pathname), { push: false });
   });
 
-  applyMode(modeFromPath(location.pathname), { animate: false });
+  // Inicializar estado según la ruta actual
+  setMode(modeFromPath(location.pathname), { push: false });
 })();
+

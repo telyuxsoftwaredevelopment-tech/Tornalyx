@@ -210,208 +210,244 @@
   </header>
 
   <main class="auth-page">
-      <div class="auth-card-flip">
-        <div class="auth-flip" id="authFlip">
+    <div class="auth-sliding-wrapper">
+      <div class="auth-container" id="authContainer">
 
-          <!-- Cara frontal: Iniciar sesión -->
-          <div class="auth-face auth-face--front" id="authFaceLogin">
-            <div class="auth-face__form">
-             <div class="auth-face__inner">
+        <!-- Switch para pantallas móviles -->
+        <div class="mobile-auth-switch">
+          <button type="button" class="mobile-switch-btn active" id="mobileSignInTab">Iniciar sesión</button>
+          <button type="button" class="mobile-switch-btn" id="mobileSignUpTab">Crear cuenta</button>
+        </div>
+
+        <!-- ─── Panel 1: Iniciar Sesión / OTP (Sign In) ─── -->
+        <div class="form-container sign-in-container" id="authFaceLogin">
+          <div class="auth-form-body">
+
+            <!-- Estado 1: Formulario de credenciales -->
+            <div id="credCard">
               <div class="auth-face__heading">
                 <h1>Iniciar sesión</h1>
-                <p>Ingresa tus credenciales para acceder al sistema</p>
+                <p>Ingresa tus credenciales para acceder a la plataforma</p>
               </div>
 
               <div class="alert alert-error hidden" id="loginError" role="alert">
                 Correo electrónico o contraseña incorrectos. Intentos restantes: <strong id="attemptsLeft">3</strong>.
               </div>
 
-              <div id="credCard">
-                <!-- El token CSRF se envía como header X-CSRF-Token (cookie XSRF-TOKEN)
-                     desde validations.js → postForm(). -->
-                <form id="loginForm" action="/login" method="POST" novalidate>
-                  <div class="form-group" data-reveal>
-                    <label class="form-label" for="email">Correo electrónico</label>
-                    <input class="form-control" type="email" id="email" name="email"
-                           placeholder="tu@correo.com" autocomplete="email" required aria-required="true" />
-                    <div class="email-suggest hidden" id="emailSuggest" role="listbox" aria-label="Sugerencias de dominio"></div>
-                    <span class="form-error hidden" id="emailError">Ingresa un correo válido.</span>
-                  </div>
+              <form id="loginForm" action="/login" method="POST" novalidate>
+                <div class="form-group" data-reveal>
+                  <label class="form-label" for="email">Correo electrónico</label>
+                  <input class="form-control" type="email" id="email" name="email"
+                         placeholder="tu@correo.com" autocomplete="email" required aria-required="true" />
+                  <div class="email-suggest hidden" id="emailSuggest" role="listbox" aria-label="Sugerencias de dominio"></div>
+                  <span class="form-error hidden" id="emailError">Ingresa un correo válido.</span>
+                </div>
 
-                  <div class="form-group" data-reveal>
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)">
-                      <label class="form-label" for="password" style="margin:0">Contraseña</label>
-                      <a href="#" class="link-red" style="font-size:12px">¿Olvidaste tu contraseña?</a>
-                    </div>
-                    <div class="password-wrapper">
-                      <input class="form-control" type="password" id="password" name="password"
-                             placeholder="••••••••" autocomplete="current-password" required
-                             aria-required="true" style="padding-right:44px" />
-                      <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar contraseña">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                      </button>
-                    </div>
-                    <span class="form-error hidden" id="passwordError">La contraseña es obligatoria.</span>
+                <div class="form-group" data-reveal>
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-2)">
+                    <label class="form-label" for="password" style="margin:0">Contraseña</label>
+                    <a href="#" class="link-red" style="font-size:12px">¿Olvidaste tu contraseña?</a>
                   </div>
-
-                  <div class="form-group" data-reveal>
-                    <label class="check-label">
-                      <input type="checkbox" name="remember" />
-                      Recordar mi sesión
-                    </label>
-                  </div>
-
-                  <div data-reveal>
-                    <button type="submit" class="btn btn-primary btn-full" id="loginBtn" data-loading-text="Verificando…">
-                      Iniciar sesión
+                  <div class="password-wrapper">
+                    <input class="form-control" type="password" id="password" name="password"
+                           placeholder="••••••••" autocomplete="current-password" required
+                           aria-required="true" style="padding-right:44px" />
+                    <button type="button" class="password-toggle" id="togglePassword" aria-label="Mostrar contraseña">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
                     </button>
                   </div>
-                </form>
+                  <span class="form-error hidden" id="passwordError">La contraseña es obligatoria.</span>
+                </div>
 
-                <p class="text-center" style="font-size:12px;color:var(--muted-2);margin-top:var(--space-4)">
-                  Al iniciar sesión aceptás nuestros <a href="/terminos" class="link-red">Términos de uso</a> y <a href="/privacidad" class="link-red">Política de privacidad</a>.
-                </p>
-              </div>
+                <div class="form-group" data-reveal>
+                  <label class="check-label">
+                    <input type="checkbox" name="remember" />
+                    Recordar mi sesión
+                  </label>
+                </div>
 
-              <!-- Paso 2: ingresar el código recibido. Oculto hasta que se envíe. -->
-              <div class="hidden" id="otpCard">
-                <div class="alert alert-error hidden" id="otpError" role="alert"></div>
-
-                <p style="font-size:var(--font-size-sm);color:var(--muted);margin-bottom:var(--space-2)">
-                  Te enviamos un código de verificación de 6 dígitos a
-                  <strong id="otpTarget" style="color:var(--ink)">tu destino</strong>.
-                  Ingrésalo para continuar.
-                </p>
-
-                <div class="otp-timer" aria-hidden="true"><div class="otp-timer__bar" id="otpTimerBar"></div></div>
-                <p class="otp-timer__label" id="otpTimerLabel"></p>
-
-                <form id="otpForm" novalidate style="margin-top:var(--space-4)">
-                  <div class="form-group">
-                    <label class="form-label" id="otpBoxesLabel">Código de verificación</label>
-                    <div class="otp-boxes" id="otpBoxes" role="group" aria-labelledby="otpBoxesLabel">
-                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1 de 6" />
-                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2 de 6" />
-                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3 de 6" />
-                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4 de 6" />
-                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 5 de 6" />
-                      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 6 de 6" />
-                    </div>
-                    <div class="otp-track" id="otpTrack" aria-hidden="true">
-                      <span class="otp-track__seg"></span><span class="otp-track__seg"></span><span class="otp-track__seg"></span>
-                      <span class="otp-track__seg"></span><span class="otp-track__seg"></span><span class="otp-track__seg"></span>
-                    </div>
-                    <input type="hidden" id="codigo" name="codigo" />
-                  </div>
-
-                  <button type="submit" class="btn btn-primary btn-full" id="otpBtn" data-loading-text="Verificando…">
-                    Verificar
+                <div data-reveal>
+                  <button type="submit" class="btn btn-primary btn-full" id="loginBtn" data-loading-text="Verificando…">
+                    Iniciar sesión
                   </button>
-                </form>
-
-                <div class="divider">o</div>
-
-                <p class="text-center" style="font-size:var(--font-size-sm);color:var(--muted)">
-                  ¿No recibiste el código?
-                  <a href="#" class="link-red" id="resendBtn" style="font-weight:600">Reenviar</a>
-                  <span id="resendCooldown" style="color:var(--muted-2)"></span>
-                </p>
-                <p class="text-center" style="margin-top:var(--space-3)">
-                  <a href="#" class="link-red" id="backToLogin" style="font-size:12px">Volver al inicio de sesión</a>
-                </p>
-              </div>
-             </div>
-            </div>
-
-            <div class="auth-face__promo">
-              <h2>¿Nuevo en Tornalyx?</h2>
-              <p>Creá tu cuenta gratis y empezá a competir en torneos.</p>
-              <button type="button" class="btn btn-promo" data-auth-toggle="signup">Crear cuenta →</button>
-            </div>
-          </div>
-
-          <!-- Cara trasera: Crear cuenta -->
-          <div class="auth-face auth-face--back" id="authFaceSignup">
-            <div class="auth-face__promo">
-              <span class="promo-avatar" id="promoAvatar" aria-hidden="true">?</span>
-              <h2>¿Ya tenés cuenta?</h2>
-              <p>Iniciá sesión para gestionar tus torneos.</p>
-              <button type="button" class="btn btn-promo" data-auth-toggle="login">Iniciar sesión →</button>
-            </div>
-
-            <div class="auth-face__form">
-             <div class="auth-face__inner">
-              <div class="auth-face__heading">
-                <h1>Crear cuenta</h1>
-                <p>Completá tus datos para unirte a Tornalyx</p>
-              </div>
-
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)" data-reveal>
-                <div class="form-group">
-                  <label class="form-label" for="nombre">Nombre</label>
-                  <input class="form-control" type="text" id="nombre" name="nombre" placeholder="Carlos" maxlength="60" required />
                 </div>
-                <div class="form-group">
-                  <label class="form-label" for="apellido">Apellido</label>
-                  <input class="form-control" type="text" id="apellido" name="apellido" placeholder="García" maxlength="60" required />
-                </div>
+              </form>
+
+              <p class="text-center" style="font-size:12px;color:var(--muted-2);margin-top:var(--space-4)">
+                Al iniciar sesión aceptás nuestros <a href="/terminos" class="link-red">Términos de uso</a> y <a href="/privacidad" class="link-red">Política de privacidad</a>.
+              </p>
+            </div>
+
+            <!-- Estado 2: Verificación OTP Orbital v3 (Component 89) -->
+            <div class="hidden" id="otpCard">
+              <div class="auth-face__heading" style="margin-bottom:var(--space-2)">
+                <h1>Verificación OTP</h1>
+                <p style="font-size:var(--font-size-sm);color:var(--muted);margin-top:4px">
+                  Ingresá el código de seguridad enviado a<br>
+                  <strong id="otpTarget" style="color:var(--ink)">tu correo</strong>
+                </p>
               </div>
-              <div class="form-group" data-reveal>
-                <label class="form-label" for="emailReg">Correo electrónico</label>
-                <input class="form-control" type="email" id="emailReg" name="email" placeholder="tu@correo.com" maxlength="120" required />
-                <div class="email-suggest hidden" id="emailRegSuggest" role="listbox" aria-label="Sugerencias de dominio"></div>
-              </div>
-              <div class="form-group" data-reveal>
-                <label class="form-label" for="passReg">Contraseña</label>
-                <input class="form-control" type="password" id="passReg" name="password" placeholder="Mínimo 8 caracteres" required />
-                <div class="strength-card" id="strengthCard">
-                  <span class="strength-card__icon" id="strengthIcon" aria-hidden="true">🔓</span>
-                  <div class="strength-card__body">
-                    <span class="strength-label" id="strengthLabel">Ingresa una contraseña</span>
-                    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+
+              <div class="alert alert-error hidden" id="otpError" role="alert"></div>
+
+              <form id="otpForm" novalidate>
+                <!-- Anillo y Slots Orbitales v3 -->
+                <div class="otp-orbit-wrap">
+                  <div class="otp-orbit" id="otpOrbit">
+                    <svg class="orbit__ring" viewBox="0 0 250 250" aria-hidden="true">
+                      <circle class="orbit__path" cx="125" cy="125" r="92" vector-effect="non-scaling-stroke" />
+                    </svg>
+                    <div class="orbit__hub" id="orbitHub" aria-hidden="true">🔒</div>
+                    
+                    <div class="orbit__slots" id="otpBoxes" role="group" aria-label="Código de verificación de 6 dígitos">
+                      <div class="orbit__slot" data-index="0">
+                        <input class="orbit__slot-input otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1" />
+                      </div>
+                      <div class="orbit__slot" data-index="1">
+                        <input class="orbit__slot-input otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2" />
+                      </div>
+                      <div class="orbit__slot" data-index="2">
+                        <input class="orbit__slot-input otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3" />
+                      </div>
+                      <div class="orbit__slot" data-index="3">
+                        <input class="orbit__slot-input otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4" />
+                      </div>
+                      <div class="orbit__slot" data-index="4">
+                        <input class="orbit__slot-input otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 5" />
+                      </div>
+                      <div class="orbit__slot" data-index="5">
+                        <input class="orbit__slot-input otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 6" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <input type="hidden" id="codigo" name="codigo" />
+
+                  <!-- Temporizador de expiración -->
+                  <div class="otp-status-badge">
+                    <span class="status-dot status-dot--green" id="otpTimerDot"></span>
+                    <span id="otpTimerLabel">Calculando vigencia…</span>
                   </div>
                 </div>
-                <ul class="pass-reqs" id="passReqs" aria-label="Requisitos de la contraseña">
-                  <li data-req="length"><span class="req-ico" aria-hidden="true"></span>Al menos 8 caracteres</li>
-                  <li data-req="upper"><span class="req-ico" aria-hidden="true"></span>Una letra mayúscula (A-Z)</li>
-                  <li data-req="lower"><span class="req-ico" aria-hidden="true"></span>Una letra minúscula (a-z)</li>
-                  <li data-req="number"><span class="req-ico" aria-hidden="true"></span>Un número (0-9)</li>
-                </ul>
-              </div>
-              <div class="form-group" data-reveal>
-                <label class="form-label" for="passConfirm">Confirmar contraseña</label>
-                <input class="form-control" type="password" id="passConfirm" placeholder="Repite la contraseña" required />
-                <span class="confirm-hint" id="confirmHint"></span>
-              </div>
-              <div class="form-group" data-reveal>
-                <label class="form-label" for="fechaNac">Fecha de nacimiento</label>
-                <input class="form-control" type="date" id="fechaNac" name="fecha_nacimiento"
-                       min="1900-01-01" required />
-              </div>
 
-              <input type="hidden" name="rol" value="participante" />
+                <button type="submit" class="btn btn-primary btn-full" id="otpBtn" data-loading-text="Verificando…">
+                  Verificar código
+                </button>
+              </form>
 
-              <div class="form-group" style="margin-top:var(--space-5)" data-reveal>
-                <label class="check-label">
-                  <input type="checkbox" id="terminos" name="terminos" required />
-                  <span>Acepto los <a href="/terminos" target="_blank" rel="noopener" class="link-red">Términos de uso</a> y la <a href="/privacidad" target="_blank" rel="noopener" class="link-red">Política de privacidad</a> de Tornalyx.</span>
-                </label>
-              </div>
+              <div class="divider">o</div>
 
-              <div data-reveal>
-                <button type="submit" class="btn btn-primary btn-full" id="registroBtn" form="registroForm" data-loading-text="Creando cuenta…">Crear cuenta</button>
-              </div>
-
-              <form id="registroForm" action="/registro" method="POST" style="display:none"></form>
-             </div>
+              <p class="text-center" style="font-size:var(--font-size-sm);color:var(--muted)">
+                ¿No recibiste el código?
+                <a href="#" class="link-red" id="resendBtn" style="font-weight:600">Reenviar</a>
+                <span id="resendCooldown" style="color:var(--muted-2)"></span>
+              </p>
+              <p class="text-center" style="margin-top:var(--space-3)">
+                <a href="#" class="link-red" id="backToLogin" style="font-size:12px">← Volver al inicio de sesión</a>
+              </p>
             </div>
-          </div>
 
+          </div>
         </div>
+
+        <!-- ─── Panel 2: Crear Cuenta (Sign Up) ─── -->
+        <div class="form-container sign-up-container" id="authFaceSignup">
+          <div class="auth-form-body">
+            <div class="auth-face__heading">
+              <h1>Crear cuenta</h1>
+              <p>Completá tus datos para unirte a Tornalyx</p>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)" data-reveal>
+              <div class="form-group">
+                <label class="form-label" for="nombre">Nombre</label>
+                <input class="form-control" type="text" id="nombre" name="nombre" placeholder="Carlos" maxlength="60" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="apellido">Apellido</label>
+                <input class="form-control" type="text" id="apellido" name="apellido" placeholder="García" maxlength="60" required />
+              </div>
+            </div>
+
+            <div class="form-group" data-reveal>
+              <label class="form-label" for="emailReg">Correo electrónico</label>
+              <input class="form-control" type="email" id="emailReg" name="email" placeholder="tu@correo.com" maxlength="120" required />
+              <div class="email-suggest hidden" id="emailRegSuggest" role="listbox" aria-label="Sugerencias de dominio"></div>
+            </div>
+
+            <div class="form-group" data-reveal>
+              <label class="form-label" for="passReg">Contraseña</label>
+              <input class="form-control" type="password" id="passReg" name="password" placeholder="Mínimo 8 caracteres" required />
+              <div class="strength-card" id="strengthCard">
+                <span class="strength-card__icon" id="strengthIcon" aria-hidden="true">🔓</span>
+                <div class="strength-card__body">
+                  <span class="strength-label" id="strengthLabel">Ingresa una contraseña</span>
+                  <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                </div>
+              </div>
+              <ul class="pass-reqs" id="passReqs" aria-label="Requisitos de la contraseña">
+                <li data-req="length"><span class="req-ico" aria-hidden="true"></span>Al menos 8 caracteres</li>
+                <li data-req="upper"><span class="req-ico" aria-hidden="true"></span>Una letra mayúscula (A-Z)</li>
+                <li data-req="lower"><span class="req-ico" aria-hidden="true"></span>Una letra minúscula (a-z)</li>
+                <li data-req="number"><span class="req-ico" aria-hidden="true"></span>Un número (0-9)</li>
+              </ul>
+            </div>
+
+            <div class="form-group" data-reveal>
+              <label class="form-label" for="passConfirm">Confirmar contraseña</label>
+              <input class="form-control" type="password" id="passConfirm" placeholder="Repite la contraseña" required />
+              <span class="confirm-hint" id="confirmHint"></span>
+            </div>
+
+            <div class="form-group" data-reveal>
+              <label class="form-label" for="fechaNac">Fecha de nacimiento</label>
+              <input class="form-control" type="date" id="fechaNac" name="fecha_nacimiento"
+                     min="1900-01-01" required />
+            </div>
+
+            <input type="hidden" name="rol" value="participante" />
+
+            <div class="form-group" style="margin-top:var(--space-4)" data-reveal>
+              <label class="check-label">
+                <input type="checkbox" id="terminos" name="terminos" required />
+                <span>Acepto los <a href="/terminos" target="_blank" rel="noopener" class="link-red">Términos de uso</a> y la <a href="/privacidad" target="_blank" rel="noopener" class="link-red">Política de privacidad</a>.</span>
+              </label>
+            </div>
+
+            <div data-reveal style="margin-top:var(--space-4)">
+              <button type="submit" class="btn btn-primary btn-full" id="registroBtn" form="registroForm" data-loading-text="Creando cuenta…">Crear cuenta</button>
+            </div>
+
+            <form id="registroForm" action="/registro" method="POST" style="display:none"></form>
+          </div>
+        </div>
+
+        <!-- ─── Panel 3: Overlay Deslizante (Sliding Overlay) ─── -->
+        <div class="overlay-container">
+          <div class="overlay">
+            
+            <!-- Overlay Izquierdo (visible en modo Registro) -->
+            <div class="overlay-panel overlay-left">
+              <h2>¡Bienvenido de nuevo!</h2>
+              <p>Para mantenerte conectado con tus torneos, estadísticas y rivales, iniciá sesión con tu cuenta.</p>
+              <button type="button" class="ghost-btn" id="signInBtn" data-auth-toggle="login">Iniciar sesión</button>
+            </div>
+
+            <!-- Overlay Derecho (visible en modo Login) -->
+            <div class="overlay-panel overlay-right">
+              <h2>¡Hola, competidor!</h2>
+              <p>Ingresá tus datos personales y empezá tu camino hacia la gloria en los torneos de Tornalyx.</p>
+              <button type="button" class="ghost-btn" id="signUpBtn" data-auth-toggle="signup">Crear cuenta</button>
+            </div>
+
+          </div>
+        </div>
+
       </div>
+    </div>
   </main>
 
   <script src="../js/main.js?v=5"></script>

@@ -173,9 +173,9 @@ function initLoginValidation() {
   }
 }
 
-/* ─── MFA: verificar código (2FA por email) ─── */
+/* ─── MFA: verificar código (2FA por email) con Animación OTP Orbital v3 ─── */
 
-/* Oculta los pasos previos y muestra el paso del código. */
+/* Oculta los pasos previos, posiciona los slots en órbita y ejecuta la animación de entrada */
 function showOtpStep(targetMasked) {
   const otp = document.getElementById('otpCard');
   if (!otp) return;
@@ -183,36 +183,40 @@ function showOtpStep(targetMasked) {
   otp.classList.remove('hidden');
   const t = document.getElementById('otpTarget');
   if (t && targetMasked) t.textContent = targetMasked;
-  document.querySelector('.otp-box')?.focus();
+  
+  if (window.animateOtpOrbit) {
+    window.animateOtpOrbit();
+  }
+  
+  setTimeout(() => {
+    document.querySelector('.orbit__slot-input')?.focus();
+  }, 400);
+
   startOtpCountdown();
 }
 
-/* Debe coincidir con el TTL fijo que usa AuthController::iniciarMfaEmail
-   ($_SESSION['pending_2fa']['expires'] = time() + 600) tanto al enviar el
-   código como al reenviarlo. Si se recarga la página a mitad del desafío
-   la cuenta vuelve a arrancar en 10:00 aunque el backend tenga menos
-   tiempo real restante: es una aproximación visual, el backend sigue
-   siendo la autoridad sobre la expiración real. */
 const OTP_TTL_SECONDS = 600;
 let otpCountdownId = null;
 
 function startOtpCountdown() {
   stopOtpCountdown();
-  const bar   = document.getElementById('otpTimerBar');
   const label = document.getElementById('otpTimerLabel');
-  if (!bar || !label) return;
+  const dot   = document.getElementById('otpTimerDot');
+  if (!label) return;
   const deadline = Date.now() + OTP_TTL_SECONDS * 1000;
 
   function tick() {
     const remaining = Math.max(0, Math.round((deadline - Date.now()) / 1000));
-    bar.style.width = (remaining / OTP_TTL_SECONDS * 100) + '%';
-    bar.classList.toggle('is-low', remaining <= 120 && remaining > 30);
-    bar.classList.toggle('is-critical', remaining <= 30);
     const m = String(Math.floor(remaining / 60)).padStart(2, '0');
     const s = String(remaining % 60).padStart(2, '0');
+    
+    if (dot) {
+      dot.className = 'status-dot ' + (remaining <= 30 ? 'status-dot--red' : (remaining <= 120 ? 'status-dot--yellow' : 'status-dot--green'));
+    }
+
     label.textContent = remaining > 0
-      ? `El código vence en ${m}:${s}`
-      : 'El código venció. Reenvialo para recibir uno nuevo.';
+      ? `Código válido por ${m}:${s}`
+      : 'Código vencido. Solicitá uno nuevo.';
     if (remaining <= 0) stopOtpCountdown();
   }
   tick();
@@ -224,89 +228,161 @@ function stopOtpCountdown() {
 }
 
 function initOtpFlow() {
-  /* Solo en la página de login (donde existe la tarjeta del código). */
   if (!document.getElementById('otpForm')) return;
 
+  const orbitEl = document.getElementById('otpOrbit');
+  const hubEl   = document.getElementById('orbitHub');
+  const slots   = Array.from(document.querySelectorAll('.orbit__slot'));
+  const inputs  = Array.from(document.querySelectorAll('.orbit__slot-input'));
+  const hidden  = document.getElementById('codigo');
   const errEl   = document.getElementById('otpError');
+
+  // Posicionamiento geométrico de los slots en órbita circular
+  const ORBIT_RADIUS = 92;
+  const count = slots.length;
+
+  function setupOrbitLayout(animate = false) {
+    slots.forEach((slot, i) => {
+      const angle = (360 / count) * i - 90;
+      const rad = angle * (Math.PI / 180);
+      const dx = Math.round(ORBIT_RADIUS * Math.cos(rad));
+      const dy = Math.round(ORBIT_RADIUS * Math.sin(rad));
+
+      slot.style.transform = `translate(${dx}px, ${dy}px)`;
+
+      if (animate && slot.animate) {
+        slot.animate([
+          { transform: `rotate(-200deg) translate(${Math.round(dx * 0.3)}px, ${Math.round(dy * 0.3)}px) scale(0.2)`, opacity: 0 },
+          { transform: `rotate(0deg) translate(${dx}px, ${dy}px) scale(1)`, opacity: 1 }
+        ], {
+          duration: 700 + i * 50,
+          easing: 'cubic-bezier(.34, 1.56, .64, 1)',
+          fill: 'forwards'
+        });
+      }
+    });
+  }
+
+  window.animateOtpOrbit = () => setupOrbitLayout(true);
+  setupOrbitLayout(false);
+
   const showErr = (m) => {
     if (errEl) { errEl.textContent = m; errEl.classList.remove('hidden'); }
     else authError(m);
+    orbitEl?.classList.add('is-error');
+    if (hubEl) hubEl.textContent = '✖';
   };
-  const hideErr = () => errEl?.classList.add('hidden');
 
-  /* ── Casilleros del código: cada dígito en su propia caja, con
-     autoavance/retroceso/pegado. El valor combinado vive en el input
-     oculto #codigo, que es lo único que lee el resto del flujo. */
-  const boxes  = Array.from(document.querySelectorAll('.otp-box'));
-  const hidden = document.getElementById('codigo');
-  const track  = Array.from(document.getElementById('otpTrack')?.children || []);
+  const hideErr = () => {
+    errEl?.classList.add('hidden');
+    orbitEl?.classList.remove('is-error', 'is-ok');
+    if (hubEl) hubEl.textContent = '🔒';
+  };
 
-  function syncOtpBoxes() {
+  function syncOtp() {
     if (!hidden) return;
-    const value = boxes.map(b => b.value).join('');
+    const value = inputs.map(inp => inp.value).join('');
     hidden.value = value;
-    boxes.forEach(b => b.classList.toggle('is-filled', !!b.value));
-    track.forEach((seg, i) => seg.classList.toggle('is-lit', i < value.length));
+
+    slots.forEach((slot, idx) => {
+      const isFilled = !!inputs[idx].value;
+      slot.classList.toggle('is-filled', isFilled);
+    });
+
+    orbitEl?.classList.toggle('is-active', value.length > 0);
   }
 
-  function clearOtpBoxes() {
-    boxes.forEach(b => b.value = '');
-    syncOtpBoxes();
+  function clearOtp() {
+    inputs.forEach(inp => inp.value = '');
+    syncOtp();
+    orbitEl?.classList.remove('is-error', 'is-ok');
   }
 
-  boxes.forEach((box, i) => {
-    box.addEventListener('input', () => {
-      box.value = box.value.replace(/[^0-9]/g, '').slice(-1);
-      if (box.value && boxes[i + 1]) boxes[i + 1].focus();
-      syncOtpBoxes();
+  inputs.forEach((input, i) => {
+    input.addEventListener('focus', () => {
+      orbitEl?.classList.add('is-active');
     });
-    box.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !box.value && boxes[i - 1]) boxes[i - 1].focus();
+
+    input.addEventListener('blur', () => {
+      if (!inputs.some(inp => inp.value)) {
+        orbitEl?.classList.remove('is-active');
+      }
     });
-    box.addEventListener('paste', (e) => {
+
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(-1);
+      syncOtp();
+      if (input.value && inputs[i + 1]) {
+        inputs[i + 1].focus();
+      } else if (input.value && i === count - 1) {
+        // Al completar todos los dígitos, auto-enviar el formulario
+        document.getElementById('otpBtn')?.click();
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && inputs[i - 1]) {
+        inputs[i - 1].focus();
+      } else if (e.key === 'ArrowRight' && inputs[i + 1]) {
+        inputs[i + 1].focus();
+      } else if (e.key === 'ArrowLeft' && inputs[i - 1]) {
+        inputs[i - 1].focus();
+      }
+    });
+
+    input.addEventListener('paste', (e) => {
       const text = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
       if (!text) return;
       e.preventDefault();
-      text.slice(0, boxes.length).split('').forEach((d, j) => { if (boxes[j]) boxes[j].value = d; });
-      syncOtpBoxes();
-      (boxes[Math.min(text.length, boxes.length - 1)])?.focus();
+      text.slice(0, count).split('').forEach((d, j) => {
+        if (inputs[j]) inputs[j].value = d;
+      });
+      syncOtp();
+      const nextIdx = Math.min(text.length, count - 1);
+      inputs[nextIdx]?.focus();
+      if (text.length >= count) {
+        document.getElementById('otpBtn')?.click();
+      }
     });
   });
 
-  /* Al cargar, consultar si hay un desafío MFA pendiente (p. ej. tras
-     registrarse y ser redirigido). Reemplaza al script inline que la CSP
-     bloqueaba. */
+  // Consultar al cargar si hay un desafío pendiente
   (async function checkPending() {
     try {
-      const res  = await fetch('/api/2fa/estado', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      const res = await fetch('/api/2fa/estado', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
       const json = await res.json();
       if (!json || !json.pending) return;
       showOtpStep(json.target_masked);
-    } catch { /* sin pendiente o error: queda el login normal */ }
+    } catch { /* login normal */ }
   })();
 
-  /* Verificar el código. */
+  // Envío del formulario OTP
   document.getElementById('otpForm')?.addEventListener('submit', async function (e) {
     e.preventDefault();
     hideErr();
-    const codigo = (document.getElementById('codigo')?.value || '').trim();
+    const codigo = (hidden?.value || '').trim();
     if (!/^[0-9]{6}$/.test(codigo)) {
       showErr('Ingresá el código de 6 dígitos.');
       return;
     }
+
     const data = new FormData();
     data.append('codigo', codigo);
     const submitBtn = document.getElementById('otpBtn');
     setBtnLoading(submitBtn, true);
+
     try {
       const json = await postForm('/login/verificar', data);
       if (json.success) {
-        redirectByRole(json.rol);
+        orbitEl?.classList.remove('is-error');
+        orbitEl?.classList.add('is-ok');
+        if (hubEl) hubEl.textContent = '✓';
+        setTimeout(() => redirectByRole(json.rol), 400);
       } else {
         showErr(json.error || 'Código incorrecto.');
-        shakeEl(document.getElementById('otpCard'));
-        clearOtpBoxes();
-        boxes[0]?.focus();
+        shakeEl(orbitEl);
+        clearOtp();
+        inputs[0]?.focus();
       }
     } catch {
       showErr('Error de conexión. Intentá de nuevo.');
@@ -315,16 +391,16 @@ function initOtpFlow() {
     }
   });
 
-  /* Reenviar el código por email. */
+  // Reenviar código
   document.getElementById('resendBtn')?.addEventListener('click', async function (e) {
     e.preventDefault();
-    if (this.style.pointerEvents === 'none') return;   // en enfriamiento
+    if (this.style.pointerEvents === 'none') return;
     hideErr();
     try {
       const json = await postForm('/login/reenviar', new FormData());
       if (json.success) {
         if (window.Tornalyx?.Toast) window.Tornalyx.Toast.success('Código reenviado.');
-        clearOtpBoxes();
+        clearOtp();
         if (json.target_masked) showOtpStep(json.target_masked);
         startResendCooldown(60);
       } else {
@@ -335,17 +411,17 @@ function initOtpFlow() {
     }
   });
 
-  /* Volver al login desde el paso del código. */
+  // Volver al login normal
   document.getElementById('backToLogin')?.addEventListener('click', function (e) {
     e.preventDefault();
     document.getElementById('otpCard')?.classList.add('hidden');
     document.getElementById('credCard')?.classList.remove('hidden');
-    clearOtpBoxes();
+    clearOtp();
     hideErr();
     stopOtpCountdown();
   });
 
-  syncOtpBoxes();
+  syncOtp();
 }
 
 /* Deshabilita el enlace "Reenviar" durante unos segundos. */
