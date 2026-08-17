@@ -53,19 +53,24 @@ class DocsController extends Controller {
      * Google Doc publicado. El orden es el que se muestra en la grilla.
      */
     private const MATERIAS = [
-        'ingenieria-software' => [
-            'nombre' => 'Ingeniería de Software',
-            'desc'   => 'Documentación de inicio, organización del equipo, ciclo de vida y relevamiento de requisitos.',
-            'url'    => 'https://docs.google.com/document/d/e/2PACX-1vRNPU_Vc_0dfoxOP5JWTOqqwBDzRezTEvIDMLOXt1QYw0drRfw_Zq-1gB4KhQHb4K7xcn5syj28VJ5f/pub',
-        ],
         'ciberseguridad' => [
             'nombre' => 'Ciberseguridad',
-            'desc'   => 'Amenazas, vulnerabilidades de infraestructura, controles de acceso, política de contraseñas y medidas de seguridad.',
+            'desc'   => 'Identificación de amenazas, vulnerabilidades de infraestructura, matriz de control de acceso, política de contraseñas y medidas de seguridad.',
             'url'    => 'https://docs.google.com/document/d/e/2PACX-1vQdP4ZXer6vjoQ26e8R1-eEcmss2anrn3YXf4IhZPvg4F__gTTa6kgyLIcC7geuGfg75S923FNhQIGU/pub',
         ],
+        'ingenieria-software' => [
+            'nombre' => 'Ingeniería de Software',
+            'desc'   => 'Documentación de inicio, organización del equipo, ciclo de vida Scrum, relevamiento de requisitos y especificación ESRE (IEEE 29148).',
+            'url'    => 'https://docs.google.com/document/d/e/2PACX-1vRNPU_Vc_0dfoxOP5JWTOqqwBDzRezTEvIDMLOXt1QYw0drRfw_Zq-1gB4KhQHb4K7xcn5syj28VJ5f/pub',
+        ],
+        'sistemas-operativos' => [
+            'nombre' => 'Sistemas Operativos',
+            'desc'   => 'Estudio comparativo cliente/servidor, pila LAMP en AlmaLinux 8.10, usuarios del sistema y scripts de gestión en Bash.',
+            'url'    => '',
+        ],
         'tutoria' => [
-            'nombre' => 'Tutoría',
-            'desc'   => 'Nombre y logo del grupo, logotipo de la aplicación, pensamiento S.C.A.M.P.E.R y actas de reunión.',
+            'nombre' => 'Tutoría de Proyecto UTULAB',
+            'desc'   => 'Identidad visual y significado de Telyux y Tornalyx, técnica S.C.A.M.P.E.R, 7 actas de reunión y decisiones de diseño.',
             'url'    => 'https://docs.google.com/document/d/e/2PACX-1vS98n_oJKtySAZNbLRjHq3VANtgaDZU0mIyjxhuomDXjs_k-n59_8cyMiZIaEzQ6OO6xvjPNX74wasi/pub',
         ],
     ];
@@ -523,30 +528,49 @@ class DocsController extends Controller {
      * @return array{0:string,1:?string}
      */
     private function obtenerContenido(string $slug, string $url): array {
-        $dir   = __DIR__ . '/../storage/docs-cache';
-        $cache = $dir . '/' . $slug . '.html';
+        $dirLocal = __DIR__ . '/../docs';
+        $fileLocal = $dirLocal . '/' . $slug . '.html';
 
-        // 1 · Caché fresca.
-        if (is_file($cache) && (time() - filemtime($cache)) < self::CACHE_TTL) {
-            return [(string) file_get_contents($cache), null];
+        $dirCache = __DIR__ . '/../storage/docs-cache';
+        $fileCache = $dirCache . '/' . $slug . '.html';
+
+        // Si es un documento nativo local (sin URL de Google Docs)
+        if ($url === '') {
+            if (is_file($fileLocal)) {
+                return [(string) file_get_contents($fileLocal), null];
+            }
+            if (is_file($fileCache)) {
+                return [(string) file_get_contents($fileCache), null];
+            }
+            return ['', 'El documento solicitado se encuentra en preparación.'];
         }
 
-        // 2 · Descargar y procesar.
+        // 1 · Caché fresca de Google Docs.
+        if (is_file($fileCache) && (time() - filemtime($fileCache)) < self::CACHE_TTL) {
+            return [(string) file_get_contents($fileCache), null];
+        }
+
+        // 2 · Descargar y procesar desde Google Docs.
         $html = $this->descargar($url);
         if ($html !== null) {
             $contenido = $this->extraer($html);
             if ($contenido !== '') {
-                if (!is_dir($dir)) {
-                    @mkdir($dir, 0775, true);
+                if (!is_dir($dirCache)) {
+                    @mkdir($dirCache, 0775, true);
                 }
-                @file_put_contents($cache, $contenido, LOCK_EX);
+                @file_put_contents($fileCache, $contenido, LOCK_EX);
                 return [$contenido, null];
             }
         }
 
-        // 3 · Fallback: caché vencida, mejor mostrar algo que nada.
-        if (is_file($cache)) {
-            return [(string) file_get_contents($cache), null];
+        // 3 · Fallback 1: documento local versionado en backend/docs/
+        if (is_file($fileLocal)) {
+            return [(string) file_get_contents($fileLocal), null];
+        }
+
+        // 4 · Fallback 2: caché vencida existente
+        if (is_file($fileCache)) {
+            return [(string) file_get_contents($fileCache), null];
         }
 
         return ['', 'No pudimos cargar la documentación en este momento. Probá de nuevo en unos minutos.'];

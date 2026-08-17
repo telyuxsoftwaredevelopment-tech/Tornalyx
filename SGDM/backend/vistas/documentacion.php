@@ -88,8 +88,8 @@
     .doc-resend { margin-top:var(--space-3); }
     .doc-flash { max-width:520px; margin:0 auto var(--space-4); }
 
-    @media (min-width:900px) {
-      .doc-materias { grid-template-columns:1fr 1fr 1fr; }
+    @media (min-width:768px) {
+      .doc-materias { grid-template-columns:repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -105,8 +105,9 @@
       <?php
         // Icono por materia (SVG inline: la CSP permite estilos, no scripts).
         $iconos = [
-          'ingenieria-software' => '<svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V7l7-4Z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>',
           'ciberseguridad'      => '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15" r="1.3"/></svg>',
+          'ingenieria-software' => '<svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V7l7-4Z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>',
+          'sistemas-operativos' => '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>',
           'tutoria'             => '<svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4-9 4-9-4Z"/><path d="M7 9v5c0 1.5 2.2 3 5 3s5-1.5 5-3V9"/><path d="M21 7v6"/></svg>',
         ];
       ?>
