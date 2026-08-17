@@ -510,6 +510,9 @@ function initTabShortcuts() {
    sesión", y en los navs que no tienen accesos de cuenta (p. ej.
    /torneos) se insertan. Así siempre se puede volver al perfil. */
 async function initAuthNav() {
+  // Las pantallas de autenticación (login/registro) no llevan accesos de navegación
+  if (document.querySelector('.auth-container') || document.querySelector('.auth-page')) return;
+
   // Las páginas privadas ya traen su propio nav con "Cerrar sesión".
   if (document.querySelector('.nav a[href="/logout"]')) return;
 

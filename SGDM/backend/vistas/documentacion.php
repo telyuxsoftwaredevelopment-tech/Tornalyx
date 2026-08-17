@@ -185,39 +185,12 @@
 
             <?php elseif ($gate['estado'] === 'rechazado'): ?>
               <h2>Acceso rechazado</h2>
-              <p>Tu solicitud de acceso fue rechazada. Si creés que es un error, podés volver a solicitarlo.</p>
+              <p>Tu solicitud de acceso fue rechazada por el administrador. Si considerás que es un error, podés solicitarlo nuevamente.</p>
               <form method="post" action="/documentacion/solicitar">
                 <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
                 <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
                 <button class="btn btn-primary" type="submit">Solicitar de nuevo</button>
               </form>
-
-            <?php else: /* codigo */ ?>
-              <h2>Verificación por código</h2>
-              <p>Tu acceso está aprobado. Para ver el documento, verificá tu identidad con un código enviado a <strong><?= e($gate['emailMasked']) ?></strong>.</p>
-              <?php if (empty($gate['codigoActivo'])): ?>
-                <form method="post" action="/documentacion/codigo">
-                  <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
-                  <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
-                  <button class="btn btn-primary" type="submit">Enviarme el código</button>
-                </form>
-              <?php else: ?>
-                <form method="post" action="/documentacion/verificar">
-                  <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
-                  <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
-                  <input class="form-control doc-code-input" type="text" name="codigo"
-                         inputmode="numeric" maxlength="6" pattern="\d{6}" placeholder="000000"
-                         autocomplete="one-time-code" required aria-label="Código de 6 dígitos">
-                  <button class="btn btn-primary" type="submit">Verificar y ver documento</button>
-                </form>
-                <form class="doc-resend" method="post" action="/documentacion/codigo">
-                  <input type="hidden" name="csrf_token" value="<?= e($csrf ?? '') ?>">
-                  <input type="hidden" name="materia" value="<?= e($materiaSlug) ?>">
-                  <button class="btn btn-ghost btn-sm" type="submit" <?= ((int) ($gate['cooldown'] ?? 0)) > 0 ? 'disabled' : '' ?>>
-                    <?= ((int) ($gate['cooldown'] ?? 0)) > 0 ? 'Reenviar en ' . (int) $gate['cooldown'] . ' s' : 'Reenviar código' ?>
-                  </button>
-                </form>
-              <?php endif; ?>
             <?php endif; ?>
           </div>
         </div>

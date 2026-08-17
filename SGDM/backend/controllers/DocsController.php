@@ -208,8 +208,7 @@ class DocsController extends Controller {
             return ['estado' => 'login'];
         }
 
-        // Los administradores tienen acceso total a la documentación: no
-        // necesitan solicitar acceso, ser aprobados ni verificar por código.
+        // Los administradores tienen acceso total directo a la documentación
         if (Session::getUserRole() === 'administrador') {
             return null; // acceso concedido
         }
@@ -220,22 +219,9 @@ class DocsController extends Controller {
         if ($estado === null)        return ['estado' => 'solicitar'];
         if ($estado === 'pendiente') return ['estado' => 'pendiente'];
         if ($estado === 'rechazado') return ['estado' => 'rechazado'];
+        if ($estado === 'aprobado')  return null; // acceso concedido directamente por aprobación del admin
 
-        // Aprobado: ¿ya verificó el código en esta sesión (dentro del TTL)?
-        $okHasta = (int) ($_SESSION['doc_ok'][$slug] ?? 0);
-        if (time() < $okHasta) {
-            return null; // acceso concedido
-        }
-
-        // Falta el código: preparamos los datos para la pantalla de verificación.
-        $otp     = new DocOtp();
-        $usuario = (new Usuario())->findById($usuarioId);
-        return [
-            'estado'       => 'codigo',
-            'codigoActivo' => $otp->activo($usuarioId, $slug),
-            'cooldown'     => $otp->cooldownRestante($usuarioId, $slug),
-            'emailMasked'  => $this->maskEmail((string) ($usuario['email'] ?? '')),
-        ];
+        return ['estado' => 'solicitar'];
     }
 
     /**
