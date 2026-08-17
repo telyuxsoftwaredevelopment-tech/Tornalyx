@@ -381,42 +381,45 @@ textarea.form-control { resize: none; }
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  animation: auth-fade-in .6s cubic-bezier(.22,1,.36,1) both;
+  animation: auth-fade-in .5s cubic-bezier(.22,1,.36,1) both;
 }
 
 @keyframes auth-fade-in {
-  from { opacity: 0; transform: translateY(16px) scale(.98); }
+  from { opacity: 0; transform: translateY(14px) scale(.98); }
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .auth-container {
-  background: rgba(15, 15, 22, 0.78);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(14, 14, 20, 0.82);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.85),
-              0 0 45px -10px rgba(236, 28, 36, 0.25);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.9),
+              0 0 50px -10px rgba(236, 28, 36, 0.3);
   position: relative;
   overflow: hidden;
   width: 100%;
-  max-width: 1040px;
-  min-height: 660px;
+  max-width: 1020px;
   height: 680px;
-  max-height: 90vh;
+  min-height: 640px;
+  max-height: 92vh;
 }
 
+/* ─── Paneles de Formulario (50% cada uno) ─── */
 .form-container {
   position: absolute;
   top: 0;
-  height: 100%;
+  bottom: 0;
   width: 50%;
-  transition: all 0.65s cubic-bezier(0.65, 0, 0.35, 1);
+  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: clamp(var(--space-6), 4vw, var(--space-10));
+  padding: clamp(var(--space-6), 3.5vw, var(--space-10));
   display: flex;
   flex-direction: column;
+  transition: opacity 0.5s ease;
+  z-index: 1;
 }
 
 .form-container::-webkit-scrollbar {
@@ -427,49 +430,26 @@ textarea.form-control { resize: none; }
   border-radius: 999px;
 }
 
-/* Panel Iniciar Sesión (lado izquierdo por defecto) */
+/* Formulario Iniciar Sesión (Mitad Izquierda) */
 .sign-in-container {
   left: 0;
-  width: 50%;
   z-index: 2;
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Panel Registro (oculto detrás a la izquierda por defecto) */
+/* Formulario Crear Cuenta (Mitad Derecha) */
 .sign-up-container {
-  left: 0;
-  width: 50%;
-  opacity: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Estado activo: cuando se conmuta a Registro (.right-panel-active) */
-.auth-container.right-panel-active .sign-in-container {
-  transform: translateX(100%);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.auth-container.right-panel-active .sign-up-container {
-  transform: translateX(100%);
+  left: 50%;
+  z-index: 2;
   opacity: 1;
-  z-index: 5;
   pointer-events: auto;
-  animation: auth-slide-show 0.65s;
 }
 
-@keyframes auth-slide-show {
-  0%, 49.99% {
-    opacity: 0;
-    z-index: 1;
-  }
-  50%, 100% {
-    opacity: 1;
-    z-index: 5;
-  }
+.auth-form-body {
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
 }
 
 /* ─── Contenedor del Overlay Deslizante ─── */
@@ -481,79 +461,76 @@ textarea.form-control { resize: none; }
   height: 100%;
   overflow: hidden;
   transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
-  z-index: 100;
+  z-index: 10;
+  background: linear-gradient(135deg, #150204 0%, #38070b 45%, #b31018 100%);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.6), inset 0 0 80px rgba(0, 0, 0, 0.5);
 }
 
+.overlay-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 75% 30%, rgba(236, 28, 36, 0.45) 0%, transparent 65%),
+              radial-gradient(circle at 25% 70%, rgba(180, 15, 22, 0.4) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* Cuando se activa Registro: el overlay se desliza a la izquierda */
 .auth-container.right-panel-active .overlay-container {
   transform: translateX(-100%);
 }
 
-.overlay {
-  background: linear-gradient(135deg, #180305 0%, #400a0e 45%, #b31018 100%);
-  position: relative;
-  left: -100%;
-  height: 100%;
-  width: 200%;
-  transform: translateX(0);
-  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
-  box-shadow: inset 0 0 100px rgba(0,0,0,0.6);
-}
-
-.overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 75% 30%, rgba(236, 28, 36, 0.4) 0%, transparent 60%),
-              radial-gradient(circle at 25% 70%, rgba(180, 15, 22, 0.35) 0%, transparent 55%);
-  pointer-events: none;
-}
-
-.auth-container.right-panel-active .overlay {
-  transform: translateX(50%);
-}
-
 .overlay-panel {
   position: absolute;
-  top: 0;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   padding: 0 var(--space-8);
   text-align: center;
-  height: 100%;
-  width: 50%;
-  transition: transform 0.65s cubic-bezier(0.65, 0, 0.35, 1);
   color: #ffffff;
-  z-index: 10;
+  transition: opacity 0.4s ease, transform 0.5s ease;
 }
 
-.overlay-left {
-  left: 0;
-  transform: translateX(-20%);
-}
-
-.auth-container.right-panel-active .overlay-left {
+/* Panel cuando está en modo Login (muestra invitación a Crear Cuenta) */
+.overlay-panel.overlay-right {
+  opacity: 1;
   transform: translateX(0);
+  pointer-events: auto;
+  z-index: 2;
 }
 
-.overlay-right {
-  right: 0;
+.auth-container.right-panel-active .overlay-panel.overlay-right {
+  opacity: 0;
+  transform: translateX(20px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Panel cuando está en modo Registro (muestra invitación a Iniciar Sesión) */
+.overlay-panel.overlay-left {
+  opacity: 0;
+  transform: translateX(-20px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.auth-container.right-panel-active .overlay-panel.overlay-left {
+  opacity: 1;
   transform: translateX(0);
-}
-
-.auth-container.right-panel-active .overlay-right {
-  transform: translateX(20%);
+  pointer-events: auto;
+  z-index: 2;
 }
 
 .overlay-panel h2 {
   font-family: var(--head);
-  font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+  font-size: clamp(1.8rem, 2.6vw, 2.3rem);
   font-weight: 800;
   letter-spacing: -0.5px;
   margin-bottom: var(--space-3);
   color: #ffffff;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
 }
 
 .overlay-panel p {
@@ -562,14 +539,14 @@ textarea.form-control { resize: none; }
   opacity: 0.95;
   max-width: 32ch;
   margin-bottom: var(--space-6);
-  color: rgba(255, 255, 255, 0.92);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 /* ─── Botón Ghost (Exacto del video de referencia) ─── */
 .ghost-btn {
   padding: 14px 40px;
   border-radius: 12px;
-  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
   background: transparent;
   color: #ffffff;
   font-size: 0.95rem;
@@ -581,7 +558,7 @@ textarea.form-control { resize: none; }
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
 }
 
 .ghost-btn:hover {
@@ -589,19 +566,13 @@ textarea.form-control { resize: none; }
   color: #0f1015;
   border-color: #ffffff;
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
 }
 
 .ghost-btn:active {
   transform: translateY(0);
 }
 
-/* Adaptación interna del formulario */
-.auth-form-body {
-  width: 100%;
-  max-width: 420px;
-  margin: auto;
-}
 
 
 /* =====================================================
