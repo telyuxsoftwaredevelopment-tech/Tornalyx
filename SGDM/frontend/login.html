@@ -8,9 +8,9 @@
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../css/variables.css?v=12" />
-  <link rel="stylesheet" href="../css/main.css?v=12" />
-  <link rel="stylesheet" href="../css/components.css?v=12" />
+  <link rel="stylesheet" href="../css/variables.css?v=13" />
+  <link rel="stylesheet" href="../css/main.css?v=13" />
+  <link rel="stylesheet" href="../css/components.css?v=13" />
   <style>
     body { display:flex; flex-direction:column; min-height:100vh; }
     /* Foto de fondo detrás del glassmorphism del panel de formulario
@@ -270,7 +270,17 @@
         <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
         Tornalyx
       </a>
-      <div class="nav-right nav-right-static">
+      <nav class="nav-links" aria-label="Navegación principal">
+        <a href="/">Inicio</a>
+        <a href="/torneos">Torneos</a>
+        <a href="/jugadores">Jugadores</a>
+        <a href="/documentacion">Documentación</a>
+      </nav>
+      <div class="nav-right">
+        <a href="/login" class="nav-link-login" data-auth-toggle="login">Iniciar Sesión</a>
+        <a href="/login?tab=registro" class="btn btn-nav-register" data-auth-toggle="signup">Registrarse</a>
+      </div>
+      <div class="nav-utility" id="navUtility">
       </div>
     </div>
   </header>
@@ -512,8 +522,8 @@
     </div>
   </main>
 
-  <script src="../js/main.js?v=8"></script>
-  <script src="../js/validations.js?v=8"></script>
-  <script src="../js/auth-flip.js?v=8"></script>
+  <script src="../js/main.js?v=13"></script>
+  <script src="../js/validations.js?v=13"></script>
+  <script src="../js/auth-flip.js?v=13"></script>
 </body>
 </html>
