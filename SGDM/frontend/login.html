@@ -8,9 +8,9 @@
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../css/variables.css?v=8" />
-  <link rel="stylesheet" href="../css/main.css?v=8" />
-  <link rel="stylesheet" href="../css/components.css?v=8" />
+  <link rel="stylesheet" href="../css/variables.css?v=9" />
+  <link rel="stylesheet" href="../css/main.css?v=9" />
+  <link rel="stylesheet" href="../css/components.css?v=9" />
   <style>
     body { display:flex; flex-direction:column; min-height:100vh; }
     /* Foto de fondo detrás del glassmorphism del panel de formulario
@@ -217,8 +217,8 @@
 
         <!-- Switch para pantallas móviles -->
         <div class="mobile-auth-switch">
-          <button type="button" class="mobile-switch-btn active" id="mobileSignInTab">Iniciar sesión</button>
-          <button type="button" class="mobile-switch-btn" id="mobileSignUpTab">Crear cuenta</button>
+          <button type="button" class="mobile-switch-btn active" id="mobileSignInTab">Inicia sesión</button>
+          <button type="button" class="mobile-switch-btn" id="mobileSignUpTab">Crea tu cuenta</button>
         </div>
 
         <!-- ─── Panel 1: Iniciar Sesión / OTP (Sign In) ─── -->
@@ -431,16 +431,16 @@
         <div class="overlay-container">
           <!-- Overlay Izquierdo (visible en modo Registro) -->
           <div class="overlay-panel overlay-left">
-            <h2>¡Bienvenido de nuevo!</h2>
-            <p>Para mantenerte conectado con tus torneos, estadísticas y rivales, iniciá sesión con tu cuenta.</p>
-            <button type="button" class="ghost-btn" id="signInBtn" data-auth-toggle="login">Iniciar sesión</button>
+            <h2>¿Ya tienes cuenta en Tornalyx?</h2>
+            <p>Inicia sesión con tus credenciales para acceder a tus torneos y estadísticas.</p>
+            <button type="button" class="ghost-btn" id="signInBtn" data-auth-toggle="login">Inicia sesión</button>
           </div>
 
           <!-- Overlay Derecho (visible en modo Login) -->
           <div class="overlay-panel overlay-right">
-            <h2>¡Hola, competidor!</h2>
-            <p>Ingresá tus datos personales y empezá tu camino hacia la gloria en los torneos de Tornalyx.</p>
-            <button type="button" class="ghost-btn" id="signUpBtn" data-auth-toggle="signup">Crear cuenta</button>
+            <h2>¿No tienes cuenta en Tornalyx?</h2>
+            <p>Crea tu cuenta gratis y empieza a competir en los torneos.</p>
+            <button type="button" class="ghost-btn" id="signUpBtn" data-auth-toggle="signup">Crea tu cuenta</button>
           </div>
         </div>
 
