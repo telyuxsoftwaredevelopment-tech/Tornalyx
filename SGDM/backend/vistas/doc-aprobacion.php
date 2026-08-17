@@ -9,9 +9,9 @@
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../css/variables.css?v=14" />
-  <link rel="stylesheet" href="../css/main.css?v=14" />
-  <link rel="stylesheet" href="../css/components.css?v=14" />
+  <link rel="stylesheet" href="../css/variables.css?v=15" />
+  <link rel="stylesheet" href="../css/main.css?v=15" />
+  <link rel="stylesheet" href="../css/components.css?v=15" />
   <style>
     .aprob-page { padding:var(--space-12) var(--space-4) var(--space-16); }
     .aprob-card {
@@ -93,6 +93,6 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=14"></script>
+  <script src="../js/main.js?v=15"></script>
 </body>
 </html>
