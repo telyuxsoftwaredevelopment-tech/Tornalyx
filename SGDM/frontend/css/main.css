@@ -303,9 +303,10 @@ p  { line-height:1.6; }
 }
 
 .navbar__actions,.nav-right {
-  display:none;
+  display:flex;
   align-items:center;
-  gap:14px;
+  gap:12px;
+  margin-left:auto;
 }
 .nav-link-login {
   color:#e2e8f0;
@@ -314,6 +315,7 @@ p  { line-height:1.6; }
   text-decoration:none;
   padding:6px 12px;
   transition:color var(--transition-fast);
+  white-space:nowrap;
 }
 .nav-link-login:hover { color:#ffffff; }
 
@@ -331,6 +333,7 @@ p  { line-height:1.6; }
   align-items:center;
   justify-content:center;
   transition:all 0.25s ease;
+  white-space:nowrap;
   box-shadow:5px 5px 12px rgba(0, 0, 0, 0.5), -3px -3px 9px rgba(255, 70, 85, 0.2);
 }
 .btn-nav-register:hover {
@@ -356,14 +359,13 @@ p  { line-height:1.6; }
 }
 @media(max-width:420px) {
   .nav-right.nav-right-static { gap:6px; }
-  .nav-right.nav-right-static .ghost-link { display:none; }
 }
 .ghost-link { font-size:14px; color:var(--muted); transition:color .15s; }
 .ghost-link:hover { color:#fff; }
 
 /* Hamburger */
 .navbar__hamburger,.burger {
-  display:flex;
+  display:none;
   flex-direction:column;
   gap:5px;
   cursor:pointer;
@@ -430,11 +432,54 @@ p  { line-height:1.6; }
   .navbar__hamburger,.burger { display:none; }
 }
 
-/* ─── Nav utility (mobile) ────────────────────────────────
-   Reemplaza al burger en las páginas públicas que navegan por la bottom
-   nav: sólo lleva tema + accesibilidad (la navegación bajó a la barra
-   inferior, ver .bottom-nav). */
-.nav-utility { display:flex; align-items:center; gap:10px; margin-left:auto; }
+@media(max-width:680px) {
+  .navbar__inner, .nav-in {
+    padding: 0 14px;
+    gap: 8px;
+  }
+  .navbar__logo, .brand {
+    font-size: 16px;
+    gap: 7px;
+  }
+  .navbar__logo .badge-logo, .brand .badge {
+    width: 30px;
+    height: 30px;
+  }
+  .navbar__actions, .nav-right {
+    gap: 6px;
+  }
+  .nav-link-login {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+  .btn-nav-register {
+    font-size: 12px;
+    padding: 0.5em 0.9em;
+    border-radius: 0.5em;
+  }
+}
+
+@media(max-width:380px) {
+  .navbar__inner, .nav-in {
+    padding: 0 10px;
+    gap: 5px;
+  }
+  .navbar__logo, .brand {
+    font-size: 14px;
+    gap: 5px;
+  }
+  .nav-link-login {
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+  .btn-nav-register {
+    font-size: 11px;
+    padding: 0.4em 0.75em;
+  }
+}
+
+/* ─── Nav utility (mobile) ──────────────────────────────── */
+.nav-utility { display:flex; align-items:center; gap:6px; margin-left:4px; }
 @media(min-width:860px) { .nav-utility { display:none; } }
 
 /* ─── Bottom nav (mobile, páginas públicas) ───────────────
