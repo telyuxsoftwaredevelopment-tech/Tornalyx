@@ -1,6 +1,6 @@
 /* =====================================================
    TORNALYX – SGDM | Design Tokens
-   Tema Oscuro Puro – Deep Charcoal & Vibrant Crimson/Coral
+   Tema Oscuro Puro · Tipografía Unificada: Space Grotesk
    ===================================================== */
 
 :root {
@@ -57,13 +57,13 @@
   --color-gray-800: #f1f5f9;
   --color-gray-900: #ffffff;
 
-  /* ── Tipografía ───────────────────────────────────── */
-  --head:       "Space Grotesk", system-ui, -apple-system, sans-serif;
-  --body:       "IBM Plex Sans", system-ui, -apple-system, sans-serif;
-  --mono:       "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
-  --font-base:    "IBM Plex Sans", system-ui, sans-serif;
-  --font-heading: "Space Grotesk", system-ui, sans-serif;
-  --font-mono:    "IBM Plex Mono", ui-monospace, monospace;
+  /* ── Tipografía (Space Grotesk en todo el sitio) ──── */
+  --head:         "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --body:         "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --mono:         "Space Grotesk", ui-monospace, monospace;
+  --font-base:    "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-heading: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-mono:    "Space Grotesk", ui-monospace, monospace;
 
   --font-size-xs:   0.75rem;    /* 12px */
   --font-size-sm:   0.875rem;   /* 14px */
@@ -100,7 +100,7 @@
   --border-radius-xl:   1rem;      /* 16px */
   --border-radius-full: 9999px;
 
-  /* ── Sombras ──────────────────────────────────────── */
+  /* ── Sombras / Neumorfismo ────────────────────────── */
   --shadow-sm: 0 1px 2px 0 rgba(0,0,0,.4);
   --shadow:    0 1px 3px 0 rgba(0,0,0,.5), 0 1px 2px -1px rgba(0,0,0,.4);
   --shadow-md: 0 4px 6px -1px rgba(0,0,0,.6), 0 2px 4px -2px rgba(0,0,0,.5);

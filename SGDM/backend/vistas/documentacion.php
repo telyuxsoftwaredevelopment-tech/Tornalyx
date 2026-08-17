@@ -9,9 +9,9 @@
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../css/variables.css?v=10" />
-  <link rel="stylesheet" href="../css/main.css?v=10" />
-  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/variables.css?v=11" />
+  <link rel="stylesheet" href="../css/main.css?v=11" />
+  <link rel="stylesheet" href="../css/components.css?v=11" />
   <style>
     .doc-page { padding:var(--space-10) var(--space-4) var(--space-16); }
     .doc-head { text-align:center; margin-bottom:var(--space-10); }
@@ -219,6 +219,6 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=10"></script>
+  <script src="../js/main.js?v=11"></script>
 </body>
 </html>

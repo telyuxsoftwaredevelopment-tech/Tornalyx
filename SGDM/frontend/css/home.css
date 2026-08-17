@@ -6,7 +6,7 @@
 /* ─── Hero: texto a la izquierda, tarjeta eSports a la derecha ── */
 .hero {
   position: relative;
-  padding: clamp(40px, 6vw, 76px) 0 clamp(48px, 6vw, 84px);
+  padding: clamp(36px, 5vw, 72px) 0 clamp(44px, 5vw, 80px);
   overflow: hidden;
 }
 
@@ -14,7 +14,7 @@
   display: grid;
   grid-template-columns: 1fr;
   align-items: center;
-  gap: 48px;
+  gap: 40px;
   width: 100%;
 }
 
@@ -32,7 +32,7 @@
 
 .hero-title {
   font-family: var(--font-heading);
-  font-size: clamp(2.8rem, 5.5vw, 4.4rem);
+  font-size: clamp(2.4rem, 5.5vw, 4.4rem);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.035em;
@@ -46,11 +46,11 @@
 }
 
 .hero-text .lead {
-  font-size: clamp(1rem, 1.2vw, 1.125rem);
+  font-size: clamp(0.95rem, 1.2vw, 1.125rem);
   line-height: 1.65;
   color: #94a3b8;
   max-width: 48ch;
-  margin: 0 0 36px;
+  margin: 0 0 32px;
 }
 
 .hero-cta {
@@ -60,26 +60,42 @@
   animation: fade-up .6s .25s cubic-bezier(.22,1,.36,1) both;
 }
 
+/* ─── Botón Neumórfico Hero ─── */
 .btn-hero-explore {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  background: var(--red);
+  background: linear-gradient(145deg, #ff4655, #cc2b37);
   color: #ffffff !important;
   font-family: var(--font-heading);
   font-size: 15px;
   font-weight: 700;
-  padding: 14px 28px;
-  border-radius: 8px;
+  padding: 0.8em 2em;
+  border-radius: 0.65em;
+  border: 1px solid rgba(255, 70, 85, 0.4);
   text-decoration: none;
-  transition: background .2s cubic-bezier(.22,1,.36,1), transform .15s, box-shadow .2s;
-  box-shadow: 0 4px 20px rgba(255, 70, 85, 0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.55), -4px -4px 12px rgba(255, 70, 85, 0.2);
 }
 
 .btn-hero-explore:hover {
-  background: var(--red-bright);
+  background: linear-gradient(145deg, #ff5e6d, #ff4655);
+  border-color: #ff5e6d;
   transform: translateY(-2px);
-  box-shadow: 0 6px 26px rgba(255, 70, 85, 0.5);
+  box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.65), -5px -5px 14px rgba(255, 94, 109, 0.35), 0 0 24px var(--red-glow);
+}
+
+.btn-hero-explore:active {
+  background: linear-gradient(145deg, #cc2b37, #ff4655);
+  box-shadow: inset 4px 4px 12px rgba(0, 0, 0, 0.8), inset -4px -4px 12px rgba(255, 70, 85, 0.25);
+  transform: scale(0.98);
+}
+
+@media (max-width: 580px) {
+  .hero-cta { width: 100%; }
+  .btn-hero-explore { width: 100%; }
 }
 
 /* ─── Vista previa a la derecha del hero (tarjeta eSports con barra LIVE) ─ */
@@ -184,7 +200,10 @@
   text-align: left;
 }
 
-.audiencias-text .eyebrow { justify-content: flex-start; }
+.audiencias-text h2 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.15;
+}
 
 /* ─── Galería de la sección de audiencias ─────────────── */
 .galeria { position: relative; }
@@ -196,6 +215,12 @@
   background: var(--bg-2);
   overflow: hidden;
   box-shadow: 0 0 32px -6px var(--red-glow);
+}
+
+@media(max-width: 640px) {
+  .galeria__slides {
+    aspect-ratio: 16/10;
+  }
 }
 
 .galeria__slides::before,

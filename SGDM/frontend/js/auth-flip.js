@@ -38,6 +38,9 @@
     if (mobileSignInTab && mobileSignUpTab) {
       mobileSignInTab.classList.toggle('active', !isSignUp);
       mobileSignUpTab.classList.toggle('active', isSignUp);
+      if (window.innerWidth <= 820) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
 
     if (push) {
