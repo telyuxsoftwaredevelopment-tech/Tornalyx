@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <script>document.documentElement.setAttribute('data-theme','dark');</script>
   <title>Tornalyx | Buscar jugadores</title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../css/variables.css" />
-  <link rel="stylesheet" href="../css/main.css?v=5" />
+  <link rel="stylesheet" href="../css/variables.css?v=10" />
+  <link rel="stylesheet" href="../css/main.css?v=10" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/torneos.css" />
   <style>
@@ -65,26 +65,10 @@
         <a href="/documentacion">Documentación</a>
       </nav>
       <div class="nav-right">
-        <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
-          <input type="checkbox" class="theme-toggle__input" />
-          <span class="theme-toggle__track">
-            <span class="theme-toggle__thumb">
-              <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
-              <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
-            </span>
-          </span>
-        </label>
+        <a href="/login" class="nav-link-login">Iniciar Sesión</a>
+        <a href="/login?tab=registro" class="btn btn-nav-register">Registrarse</a>
       </div>
       <div class="nav-utility" id="navUtility">
-        <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
-          <input type="checkbox" class="theme-toggle__input" />
-          <span class="theme-toggle__track">
-            <span class="theme-toggle__thumb">
-              <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
-              <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
-            </span>
-          </span>
-        </label>
       </div>
     </div>
   </header>
@@ -185,7 +169,7 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=5"></script>
+  <script src="../js/main.js?v=10"></script>
   <script src="../js/torneo-ui.js"></script>
   <script src="../js/jugadores.js"></script>
 </body>

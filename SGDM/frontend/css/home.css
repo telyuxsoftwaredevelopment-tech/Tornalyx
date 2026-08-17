@@ -1,119 +1,249 @@
 /* =====================================================
    TORNALYX – pages/home.css
-   Estilos exclusivos de la home (index.php).
+   Estilos exclusivos de la home (index.html).
    ===================================================== */
 
-/* ─── Hero: texto y botones a la izquierda, vista previa a la derecha ── */
+/* ─── Hero: texto a la izquierda, tarjeta eSports a la derecha ── */
+.hero {
+  position: relative;
+  padding: clamp(40px, 6vw, 76px) 0 clamp(48px, 6vw, 84px);
+  overflow: hidden;
+}
+
 .hero-top {
-  display:grid;
-  grid-template-columns:1fr;
-  align-items:center;
-  gap:44px;
-  width:100%;
-  animation:fade-up .6s .12s cubic-bezier(.22,1,.36,1) both;
-}
-.hero-text { text-align:left; }
-.hero-text .eyebrow { justify-content:flex-start; }
-.hero-text h1 { margin:0 0 20px; }
-.hero-text .lead { margin:0; max-width:52ch; }
-.hero-cta { margin-top:32px; animation:fade-up .6s .28s cubic-bezier(.22,1,.36,1) both; }
-
-/* ─── Vista previa a la derecha del hero (columna 2 de .hero-top) ─────
-   Mobile-first: apilada debajo del texto por defecto (.hero-top sigue en
-   una sola columna); pasa a dos columnas recién en escritorio. El fondo
-   de la sección sigue siendo el sólido de siempre: la imagen es un
-   elemento contenido, no un background que lo tape. ─────────────────── */
-.hero-media {
-  animation:fade-up .6s .2s cubic-bezier(.22,1,.36,1) both;
-  border-radius:20px;
-  border:1px solid var(--line);
-  background:var(--bg-2);
-  overflow:hidden;
-  box-shadow:0 30px 60px -20px rgba(0,0,0,.6), 0 0 32px -6px var(--red-glow);
-}
-.hero-media img {
-  display:block;
-  width:100%;
-  aspect-ratio:16/9;
-  object-fit:cover;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 48px;
+  width: 100%;
 }
 
-@media(min-width:860px) {
-  .hero-top { grid-template-columns:1.1fr 1fr; }
+@media(min-width: 880px) {
+  .hero-top {
+    grid-template-columns: 1.15fr 1fr;
+    gap: 56px;
+  }
 }
 
-/* Menos aire entre el hero y la sección siguiente. */
-.hero { padding-bottom:clamp(32px,5vw,64px); }
+.hero-text {
+  text-align: left;
+  animation: fade-up .6s .1s cubic-bezier(.22,1,.36,1) both;
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2.8rem, 5.5vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  color: #ffffff;
+  margin: 0 0 20px;
+}
+
+.hero-title-accent {
+  color: var(--red);
+  display: inline;
+}
+
+.hero-text .lead {
+  font-size: clamp(1rem, 1.2vw, 1.125rem);
+  line-height: 1.65;
+  color: #94a3b8;
+  max-width: 48ch;
+  margin: 0 0 36px;
+}
+
+.hero-cta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  animation: fade-up .6s .25s cubic-bezier(.22,1,.36,1) both;
+}
+
+.btn-hero-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--red);
+  color: #ffffff !important;
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background .2s cubic-bezier(.22,1,.36,1), transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 20px rgba(255, 70, 85, 0.35);
+}
+
+.btn-hero-explore:hover {
+  background: var(--red-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 26px rgba(255, 70, 85, 0.5);
+}
+
+/* ─── Vista previa a la derecha del hero (tarjeta eSports con barra LIVE) ─ */
+.hero-media-card {
+  position: relative;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 70, 85, 0.28);
+  background: #12141a;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -12px rgba(0,0,0,.7), 0 0 45px -8px rgba(255, 70, 85, 0.22);
+  animation: fade-up .6s .2s cubic-bezier(.22,1,.36,1) both;
+}
+
+.hero-media-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+}
+
+.hero-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-live-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: rgba(13, 15, 19, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-live-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hero-live-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--red-bright);
+  flex: none;
+}
+
+.hero-live-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-live-subtitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--muted-2);
+  text-transform: uppercase;
+}
+
+.hero-live-title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.hero-live-badge {
+  background: var(--red);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 12px rgba(255, 70, 85, 0.4);
+}
 
 /* ─── Audiencias: foto a la izquierda, texto a la derecha ─ */
 .audiencias-grid {
-  display:grid;
-  grid-template-columns:1fr;
-  gap:32px;
-  align-items:center;
-  text-align:left;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  align-items: center;
+  text-align: left;
 }
-.audiencias-text .eyebrow { justify-content:flex-start; }
+
+.audiencias-text .eyebrow { justify-content: flex-start; }
 
 /* ─── Galería de la sección de audiencias ─────────────── */
-.galeria { position:relative; }
+.galeria { position: relative; }
 .galeria__slides {
-  position:relative;
-  aspect-ratio:4/3;
-  border-radius:20px;
-  border:1px solid var(--line);
-  background:var(--bg-2);
-  overflow:hidden;
-  box-shadow:0 0 32px -6px var(--red-glow);
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  overflow: hidden;
+  box-shadow: 0 0 32px -6px var(--red-glow);
 }
-/* Corner brackets, mismo motivo que .hero-value — sentados 10px adentro
-   del borde para no quedar recortados por el overflow:hidden del frame. */
+
 .galeria__slides::before,
 .galeria__slides::after {
-  content:""; position:absolute; z-index:2;
-  width:16px; height:16px; pointer-events:none;
+  content: ""; position: absolute; z-index: 2;
+  width: 16px; height: 16px; pointer-events: none;
 }
-.galeria__slides::before { top:10px; left:10px; border-top:2px solid var(--red); border-left:2px solid var(--red); }
-.galeria__slides::after { bottom:10px; right:10px; border-bottom:2px solid var(--red); border-right:2px solid var(--red); }
+.galeria__slides::before { top: 10px; left: 10px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
+.galeria__slides::after { bottom: 10px; right: 10px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
+
 .galeria__slide {
-  position:absolute; inset:0;
-  margin:0;
-  opacity:0;
-  transition:opacity .8s ease;
-  pointer-events:none;
+  position: absolute; inset: 0;
+  margin: 0;
+  opacity: 0;
+  transition: opacity .8s ease;
+  pointer-events: none;
 }
-.galeria__slide.is-active { opacity:1; pointer-events:auto; }
+.galeria__slide.is-active { opacity: 1; pointer-events: auto; }
 .galeria__slide img {
-  width:100%; height:100%;
-  object-fit:cover;
-  display:block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
 }
-/* Degradado inferior para que el epígrafe se lea sobre cualquier foto. */
+
 .galeria__slide figcaption {
-  position:absolute; left:0; right:0; bottom:0;
-  padding:38px var(--space-5) var(--space-4);
-  font-family:var(--font-heading); font-weight:600; font-size:15px;
-  color:#fff;
-  background:linear-gradient(to top,rgba(0,0,0,.8),transparent);
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 38px var(--space-5) var(--space-4);
+  font-family: var(--font-heading); font-weight: 600; font-size: 15px;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0,0,0,.8), transparent);
 }
 
 .galeria__puntos {
-  display:flex; justify-content:center; gap:8px;
-  margin-top:var(--space-4);
+  display: flex; justify-content: center; gap: 8px;
+  margin-top: var(--space-4);
 }
 .galeria__punto {
-  width:8px; height:8px; padding:0;
-  border-radius:50%; border:none;
-  background:var(--line);
-  cursor:pointer;
-  transition:background .25s,transform .25s,width .25s;
+  width: 8px; height: 8px; padding: 0;
+  border-radius: 50%; border: none;
+  background: var(--line);
+  cursor: pointer;
+  transition: background .25s, transform .25s, width .25s;
 }
-.galeria__punto:hover { background:var(--muted-2); }
-.galeria__punto.is-active { background:var(--red); width:22px; border-radius:999px; }
+.galeria__punto:hover { background: var(--muted-2); }
+.galeria__punto.is-active { background: var(--red); width: 22px; border-radius: 999px; }
 
-/* Con "reducir animaciones" el cambio es instantáneo (sin fundido). */
-html.a11y-motion .galeria__slide { transition:none; }
+html.a11y-motion .galeria__slide { transition: none; }
 
-@media(min-width:860px) {
-  .audiencias-grid { grid-template-columns:1fr 1.1fr; gap:56px; }
+@media(min-width: 860px) {
+  .audiencias-grid { grid-template-columns: 1fr 1.1fr; gap: 56px; }
 }

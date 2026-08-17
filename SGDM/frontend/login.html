@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <script>document.documentElement.setAttribute('data-theme','dark');</script>
   <title>Tornalyx | Iniciar sesión</title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../css/variables.css?v=9" />
-  <link rel="stylesheet" href="../css/main.css?v=9" />
+  <link rel="stylesheet" href="../css/variables.css?v=10" />
+  <link rel="stylesheet" href="../css/main.css?v=10" />
   <link rel="stylesheet" href="../css/components.css?v=9" />
   <style>
     body { display:flex; flex-direction:column; min-height:100vh; }
@@ -198,15 +198,6 @@
         Tornalyx
       </a>
       <div class="nav-right nav-right-static">
-        <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
-          <input type="checkbox" class="theme-toggle__input" />
-          <span class="theme-toggle__track">
-            <span class="theme-toggle__thumb">
-              <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
-              <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
-            </span>
-          </span>
-        </label>
       </div>
     </div>
   </header>

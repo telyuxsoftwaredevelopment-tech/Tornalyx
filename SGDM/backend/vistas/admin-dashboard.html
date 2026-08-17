@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <script>document.documentElement.setAttribute('data-theme','dark');</script>
   <title>Tornalyx | Panel de Administración</title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../../css/main.css?v=5" />
+  <link rel="stylesheet" href="../../css/main.css?v=10" />
   <link rel="stylesheet" href="../../css/components.css" />
   <link rel="stylesheet" href="../../css/dashboard.css" />
   <style>
@@ -223,15 +223,6 @@
         <span id="topbarTitle" style="font-family:var(--head);font-weight:700;color:var(--ink)">Dashboard</span>
       </div>
       <div id="topbarActions" style="display:flex;align-items:center;gap:var(--space-4)">
-        <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
-          <input type="checkbox" class="theme-toggle__input" />
-          <span class="theme-toggle__track">
-            <span class="theme-toggle__thumb">
-              <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
-              <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
-            </span>
-          </span>
-        </label>
         <a href="/torneos" class="btn btn-ghost btn-sm">Ver sitio</a>
       </div>
     </header>
@@ -605,7 +596,7 @@
     </div>
   </div>
 
-  <script src="../../js/main.js?v=5"></script>
+  <script src="../../js/main.js?v=10"></script>
   <script src="../../js/dashboard.js"></script>
   <script src="../../js/torneo-ui.js"></script>
   <script src="../../js/organizador.js"></script>

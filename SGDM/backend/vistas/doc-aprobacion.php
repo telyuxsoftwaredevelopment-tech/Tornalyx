@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Aprobación de solicitud de acceso a la documentación de Tornalyx." />
-  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <script>document.documentElement.setAttribute('data-theme','dark');</script>
   <title><?= e($title ?? 'Tornalyx | Solicitud de acceso') ?></title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../css/variables.css" />
-  <link rel="stylesheet" href="../css/main.css?v=5" />
+  <link rel="stylesheet" href="../css/variables.css?v=10" />
+  <link rel="stylesheet" href="../css/main.css?v=10" />
   <link rel="stylesheet" href="../css/components.css" />
   <style>
     .aprob-page { padding:var(--space-12) var(--space-4) var(--space-16); }
@@ -93,6 +93,6 @@
     </div>
   </footer>
 
-  <script src="../js/main.js?v=5"></script>
+  <script src="../js/main.js?v=10"></script>
 </body>
 </html>

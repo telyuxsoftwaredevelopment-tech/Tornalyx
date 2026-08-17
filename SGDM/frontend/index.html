@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Tornalyx · Organizá torneos de deporte, mente y esports: inscripciones, fixture, resultados y posiciones en un solo lugar." />
-  <script>(function(){try{var t=localStorage.getItem('tornalyx-theme')||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+  <script>document.documentElement.setAttribute('data-theme','dark');</script>
   <title>Tornalyx · Torneos de deporte, mente y esports</title>
 
   <link rel="icon" href="../assets/favicon.ico" type="image/x-icon" />
   <link rel="shortcut icon" href="../assets/favicon.ico" />
-  <link rel="stylesheet" href="../css/variables.css" />
-  <link rel="stylesheet" href="../css/main.css?v=5" />
+  <link rel="stylesheet" href="../css/variables.css?v=10" />
+  <link rel="stylesheet" href="../css/main.css?v=10" />
   <link rel="stylesheet" href="../css/components.css" />
-  <link rel="stylesheet" href="../css/home.css?v=5" />
+  <link rel="stylesheet" href="../css/home.css?v=10" />
 </head>
 <body>
 
@@ -30,26 +30,10 @@
       <a href="/documentacion">Documentación</a>
     </nav>
     <div class="nav-right">
-      <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
-        <input type="checkbox" class="theme-toggle__input" />
-        <span class="theme-toggle__track">
-          <span class="theme-toggle__thumb">
-            <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
-            <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
-          </span>
-        </span>
-      </label>
+      <a href="/login" class="nav-link-login">Iniciar Sesión</a>
+      <a href="/login?tab=registro" class="btn btn-nav-register">Registrarse</a>
     </div>
     <div class="nav-utility" id="navUtility">
-      <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
-        <input type="checkbox" class="theme-toggle__input" />
-        <span class="theme-toggle__track">
-          <span class="theme-toggle__thumb">
-            <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
-            <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
-          </span>
-        </span>
-      </label>
     </div>
   </div>
 </header>
@@ -115,20 +99,39 @@
 
   <!-- ── HERO ─────────────────────────────────────────── -->
   <section class="hero">
-    <div class="grid-lines"></div>
     <div class="wrap hero-in">
       <div class="hero-top">
         <div class="hero-text">
-          <h1>Un solo sistema.<br><span class="accent">Toda tu competencia.</span></h1>
+          <h1 class="hero-title">Un solo sistema.<br><span class="hero-title-accent">Toda tu competencia.</span></h1>
           <p class="lead">Creá, gestioná y automatizá ligas, playoffs o torneos suizos en minutos. Desde competiciones locales hasta ligas profesionales, todo en un solo lugar.</p>
-          <div class="btn-row hero-cta">
-            <a class="btn btn-primary btn-lg" href="/registro">Comenzar gratis</a>
-            <a class="btn btn-ghost btn-lg" href="/torneos">Explorar torneos</a>
+          <div class="hero-cta">
+            <a class="btn-hero-explore" href="/torneos">
+              Explorar torneos
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
           </div>
         </div>
-        <div class="hero-media">
-          <img src="../assets/hero-arena.jpg"
-               alt="Escenario de gran final de esports, con el trofeo de Tornalyx en el centro y el cuadro de llaves de ambos lados" />
+        <div class="hero-media-card">
+          <div class="hero-media-image-wrap">
+            <img src="../assets/hero-arena.jpg"
+                 alt="Escenario de gran final de esports, con el trofeo de Tornalyx en el centro y el cuadro de llaves de ambos lados"
+                 class="hero-media-img" />
+          </div>
+          <div class="hero-live-bar">
+            <div class="hero-live-info">
+              <span class="hero-live-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="5"/>
+                  <path d="M14.5 12.5 16 20l-4-2-4 2 1.5-7.5"/>
+                </svg>
+              </span>
+              <div class="hero-live-text">
+                <span class="hero-live-subtitle">LIVE NOW</span>
+                <strong class="hero-live-title">Global Championship 2024</strong>
+              </div>
+            </div>
+            <span class="hero-live-badge">LIVE</span>
+          </div>
         </div>
       </div>
     </div>
@@ -218,7 +221,7 @@
   </div>
 </footer>
 
-<script src="../js/main.js?v=5"></script>
+<script src="../js/main.js?v=10"></script>
 <script src="../js/galeria.js"></script>
 </body>
 </html>

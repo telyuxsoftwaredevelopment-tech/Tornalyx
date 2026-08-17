@@ -30,26 +30,10 @@ $marcaBN = static fn(string $seccion): string =>
       <a href="/documentacion"<?= $marca('documentacion') ?>>Documentación</a>
     </nav>
     <div class="nav-right">
-      <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
-        <input type="checkbox" class="theme-toggle__input" />
-        <span class="theme-toggle__track">
-          <span class="theme-toggle__thumb">
-            <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
-            <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
-          </span>
-        </span>
-      </label>
+      <a href="/login" class="nav-link-login">Iniciar Sesión</a>
+      <a href="/login?tab=registro" class="btn btn-nav-register">Registrarse</a>
     </div>
     <div class="nav-utility" id="navUtility">
-      <label class="theme-toggle" aria-label="Cambiar tema claro/oscuro">
-        <input type="checkbox" class="theme-toggle__input" />
-        <span class="theme-toggle__track">
-          <span class="theme-toggle__thumb">
-            <span class="theme-toggle__icon theme-toggle__icon--sun">☀</span>
-            <span class="theme-toggle__icon theme-toggle__icon--moon">☾</span>
-          </span>
-        </span>
-      </label>
     </div>
   </div>
 </header>

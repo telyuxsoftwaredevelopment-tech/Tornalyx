@@ -567,41 +567,46 @@ async function initAuthNav() {
     icono.replaceWith(av);
   });
 
-  /* En desktop el acceso a la cuenta del nav pasa a ser la foto; cualquier
-     otro botón/enlace "Entrar" de la página (hero, footer, CTAs sueltos)
-     pasa a llevar al panel en vez de mandar de nuevo al login. */
-  document.querySelectorAll('.nav-right a[href="/login"]').forEach(a => a.replaceWith(avatar()));
-  document.querySelectorAll('a[href="/login"]').forEach(a => {
+  /* En desktop el acceso a la cuenta del nav pasa a ser la foto; y el registro pasa a ser Cerrar sesión */
+  document.querySelectorAll('.nav-right a.nav-link-login, .nav-right a[href="/login"]').forEach(a => a.replaceWith(avatar()));
+  document.querySelectorAll('.nav-right .btn-nav-register, .nav-right a[href="/registro"], .nav-right a[href^="/login?tab="]').forEach(a => {
+    const salir = document.createElement('a');
+    salir.href = '/logout';
+    salir.className = 'nav-link-login';
+    salir.textContent = 'Cerrar sesión';
+    a.replaceWith(salir);
+  });
+
+  document.querySelectorAll('a[href="/login"]:not(.bottom-nav__item):not(.nav-link-login)').forEach(a => {
     a.href = panelUrl;
     a.textContent = panelTxt;
   });
-  document.querySelectorAll('a[href="/registro"]').forEach(a => {
+  document.querySelectorAll('a[href="/registro"]:not(.btn-nav-register)').forEach(a => {
     a.href = '/logout';
     a.textContent = 'Cerrar sesión';
     a.classList.remove('btn-primary');
     if (a.classList.contains('btn')) a.classList.add('btn-ghost');
   });
 
-  // Navs sin accesos de cuenta (p. ej. /torneos): insertarlos.
+  // Navs sin accesos de cuenta: insertarlos.
   document.querySelectorAll('.nav .nav-right').forEach(cont => {
     if (cont.querySelector('.nav-avatar, a[href="/logout"]')) return;
     const salir = document.createElement('a');
     salir.href = '/logout';
-    salir.className = 'ghost-link';
+    salir.className = 'nav-link-login';
     salir.textContent = 'Cerrar sesión';
-    cont.insertBefore(salir, cont.querySelector('.theme-toggle'));
-    cont.insertBefore(avatar(), cont.querySelector('.theme-toggle'));
+    cont.appendChild(avatar());
+    cont.appendChild(salir);
   });
   document.querySelectorAll('.mobile-nav').forEach(cont => {
     if (cont.querySelector(`a[href="${panelUrl}"], a[href="/logout"]`)) return;
-    const toggle = cont.querySelector('.theme-toggle');
     const mk = (href, text) => {
       const a = document.createElement('a');
       a.href = href; a.textContent = text;
       return a;
     };
-    cont.insertBefore(mk(panelUrl, panelTxt), toggle);
-    cont.insertBefore(mk('/logout', 'Cerrar sesión'), toggle);
+    cont.appendChild(mk(panelUrl, panelTxt));
+    cont.appendChild(mk('/logout', 'Cerrar sesión'));
   });
 }
 
@@ -788,33 +793,14 @@ function initAccessibility() {
   aplicar();
 }
 
-/* ─── Toggle claro/oscuro ─────────────────────────────── */
-/* El tema ya se aplica antes del primer paint (script inline en el
-   <head> de cada página); acá solo sincronizamos los switches visibles
-   y persistimos el cambio cuando el usuario lo toca. */
-const THEME_KEY = 'tornalyx-theme';
-
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  document.querySelectorAll('.theme-toggle__input').forEach(input => {
-    input.checked = theme === 'light';
-  });
+/* ─── Tema Oscuro Permanente ─────────────────────────── */
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', 'dark');
+  try { localStorage.removeItem('tornalyx-theme'); } catch { /* noop */ }
 }
 
 function initThemeToggle() {
-  const inputs = document.querySelectorAll('.theme-toggle__input');
-  if (!inputs.length) return;
-
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
-  applyTheme(current);
-
-  inputs.forEach(input => {
-    input.addEventListener('change', () => {
-      const theme = input.checked ? 'light' : 'dark';
-      try { localStorage.setItem(THEME_KEY, theme); } catch { /* privado / bloqueado */ }
-      applyTheme(theme);
-    });
-  });
+  applyTheme();
 }
 
 /* ─── Usuario actual en paneles privados ─────────────── */
