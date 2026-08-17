@@ -123,25 +123,6 @@ function renderGrid() {
   if (!grid) return;
   grid.innerHTML = catalogo.map(cardHtml).join('');
   aplicarFiltros();
-  initTilt(grid);
-}
-
-/** Tilt 3D sutil que sigue al cursor sobre cada card (se salta si el
-    usuario pidió menos movimiento). */
-function initTilt(grid) {
-  const reducir = document.documentElement.classList.contains('a11y-motion')
-    || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  if (reducir) return;
-
-  grid.querySelectorAll('.torneo-card').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      card.style.transform = `translateY(-4px) rotateX(${(-y * 6).toFixed(2)}deg) rotateY(${(x * 8).toFixed(2)}deg)`;
-    });
-    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
-  });
 }
 
 /** Rellena el select de disciplinas con las que existen realmente. */

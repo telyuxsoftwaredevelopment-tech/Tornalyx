@@ -109,12 +109,18 @@ function getDB(): PDO {
 
         try {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            // Sincronizar automáticamente cualquier columna o tabla faltante
+            require_once __DIR__ . '/../models/Migracion.php';
+            (new Migracion())->ejecutarFaltantes();
         } catch (PDOException $e) {
             // Reason: Never exponer detalles de BD al cliente en producción
             error_log('DB connection error: ' . $e->getMessage());
             throw new RuntimeException('No se pudo conectar a la base de datos.');
+        } catch (Throwable $e) {
+            error_log('Auto-migration error: ' . $e->getMessage());
         }
     }
 
     return $pdo;
 }
+

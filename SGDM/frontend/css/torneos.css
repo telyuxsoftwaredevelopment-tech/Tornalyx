@@ -45,22 +45,19 @@
 select.form-control { cursor: pointer; }
 
 /* ─── Tarjeta de torneo ──────────────────────────────── */
-/* perspective en el grid (no en la card): así el tilt 3D que le aplica
-   torneos.js por mousemove tiene un punto de fuga desde el que rotar. */
-.cards-grid { perspective: 1000px; }
+.cards-grid { display: grid; }
 .torneo-card {
   background: var(--bg-card);
   border: 1px solid var(--line);
   border-radius: 16px;
   overflow: hidden;
-  transition: border-color .2s, transform .2s, box-shadow .2s;
+  transition: border-color .2s ease, box-shadow .2s ease;
   display: flex;
   flex-direction: column;
 }
 .torneo-card:hover {
   border-color: var(--red-deep);
-  transform: translateY(-4px);
-  box-shadow: 0 24px 50px -30px rgba(0,0,0,.9);
+  box-shadow: 0 12px 30px -15px rgba(0,0,0,.7);
 }
 .torneo-card__sport {
   height: 80px;
