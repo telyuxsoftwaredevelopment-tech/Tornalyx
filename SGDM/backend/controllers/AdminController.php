@@ -189,7 +189,10 @@ class AdminController extends Controller {
 
     /** Nombres legibles de materias restringidas (para el correo de aviso). */
     private const MATERIA_NOMBRES = [
-        'ciberseguridad' => 'Ciberseguridad',
+        'ciberseguridad'      => 'Ciberseguridad',
+        'ingenieria-software' => 'Ingeniería de Software',
+        'sistemas-operativos' => 'Sistemas Operativos',
+        'tutoria'             => 'Tutoría de Proyecto UTULAB',
     ];
 
     /**

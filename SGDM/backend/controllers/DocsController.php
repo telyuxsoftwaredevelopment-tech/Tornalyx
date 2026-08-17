@@ -336,7 +336,7 @@ class DocsController extends Controller {
 
     /** Correo del aprobador de solicitudes (configurable por entorno). */
     private function approverEmail(): string {
-        return (string) (getenv('DOC_APPROVER_EMAIL') ?: 'rcurbelo551@gmail.com');
+        return (string) (getenv('DOC_APPROVER_EMAIL') ?: 'telyuxsoftwaredevelopment67@gmail.com');
     }
 
     /** Base absoluta (esquema + host) para armar enlaces en los correos. */
