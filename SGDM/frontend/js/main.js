@@ -585,13 +585,13 @@ async function initAuthNav() {
   const panelTxt = me.rol === 'administrador' ? 'Mi panel' : 'Mis torneos';
 
   /* Avatar del usuario: su foto de perfil o, si no subió ninguna, sus
-     iniciales sobre el rojo de marca. Reemplaza al botón "Entrar". */
+     iniciales sobre el rojo de marca. Al tocarlo redirige a /perfil. */
   const avatar = () => {
     const a = document.createElement('a');
-    a.href = panelUrl;
+    a.href = '/perfil';
     a.className = 'nav-avatar';
-    a.title = panelTxt;
-    a.setAttribute('aria-label', panelTxt);
+    a.title = 'Mi perfil';
+    a.setAttribute('aria-label', 'Mi perfil');
     if (me.avatar_url) {
       a.style.backgroundImage = `url(${encodeURI(me.avatar_url)})`;
     } else {
@@ -600,15 +600,11 @@ async function initAuthNav() {
     return a;
   };
 
-  /* Tab "Cuenta" de la bottom nav: mismo criterio que el avatar de arriba,
-     pero sin reemplazar el <a> entero (rompería el pill de initBottomNav,
-     que mide sus posiciones por índice) — sólo se le cambia el ícono
-     interno. Va antes del reemplazo genérico de a[href="/login"] de abajo
-     para que ese selector ya no lo encuentre (le cambiamos el href acá). */
+  /* Tab "Cuenta" de la bottom nav: redirige a /perfil */
   document.querySelectorAll('.bottom-nav__account[href="/login"]').forEach(a => {
-    a.href = panelUrl;
-    a.title = panelTxt;
-    a.setAttribute('aria-label', panelTxt);
+    a.href = '/perfil';
+    a.title = 'Mi perfil';
+    a.setAttribute('aria-label', 'Mi perfil');
     const icono = a.querySelector('.bottom-nav__icon');
     if (!icono) return;
     const av = document.createElement('span');
@@ -906,6 +902,14 @@ async function initCurrentUser() {
   document.querySelectorAll('[data-user-welcome]').forEach(el => {
     el.textContent = 'Bienvenido/a, ' + (nombre || full);
   });
+
+  /* Si el usuario tiene rol administrador, mostrar acceso a Administración en el sidebar */
+  if (me.rol === 'administrador') {
+    document.querySelectorAll('#sidebarAdminLink, [data-admin-only]').forEach(el => {
+      el.style.display = 'flex';
+      el.classList.remove('hidden');
+    });
+  }
 }
 
 /* ─── Menú de acciones (3 puntos) ─────────────────────── */

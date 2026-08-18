@@ -274,10 +274,18 @@
 
   /* ─── Carga inicial ────────────────────────────────── */
 
+  function verificarRolAdmin(u) {
+    const adminLink = $('sidebarAdminLink');
+    if (adminLink) {
+      adminLink.style.display = (u && u.rol === 'administrador') ? 'flex' : 'none';
+    }
+  }
+
   async function cargar() {
     try {
       const res = await Api.get('/api/perfil');
       usuarioActual = res.usuario;
+      verificarRolAdmin(res.usuario);
       pintarHero(res.usuario);
       pintarStats(res.stats);
       pintarTorneos(res.torneos);

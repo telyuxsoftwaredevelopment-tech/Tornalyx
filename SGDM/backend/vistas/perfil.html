@@ -199,6 +199,16 @@
           </svg>
         </span> Seguridad
       </a>
+      <a class="sidebar__item" id="sidebarAdminLink" href="/admin/dashboard" title="Administración" style="display:none">
+        <span class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="9" rx="1"/>
+            <rect x="14" y="3" width="7" height="5" rx="1"/>
+            <rect x="14" y="12" width="7" height="9" rx="1"/>
+            <rect x="3" y="16" width="7" height="5" rx="1"/>
+          </svg>
+        </span> Administración
+      </a>
     </nav>
     <div class="sidebar__footer">
       <div class="user-row">
@@ -329,7 +339,10 @@
       <!-- MIS TORNEOS -->
       <div class="section-panel" id="panel-torneos">
         <div class="card">
-          <div class="card__header"><h3>Historial de torneos</h3></div>
+          <div class="card__header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--space-3)">
+            <h3>Historial de torneos</h3>
+            <a class="btn btn-ghost btn-sm" href="/organizador/dashboard">Panel de organizador →</a>
+          </div>
           <div style="overflow-x:auto">
             <table class="data-table">
               <thead>
