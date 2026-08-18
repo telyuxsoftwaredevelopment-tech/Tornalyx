@@ -988,10 +988,11 @@ textarea.form-control { resize: none; }
 
 /* =====================================================
    APPLE / iOS / macOS LIQUID GLASS DESIGN SYSTEM
-   Activado automáticamente en iPhone, iPad, Mac o [data-glass="liquid"]
+   Activado automáticamente en iPhone, iPad, Mac o [data-glass="liquid"] / .ios-liquid-glass
    ===================================================== */
 :root.is-apple,
 :root.is-ios,
+:root.ios-liquid-glass,
 [data-glass="liquid"] {
   --glass-blur: blur(34px) saturate(210%);
   --glass-bg: rgba(18, 20, 30, 0.68);
@@ -1001,14 +1002,24 @@ textarea.form-control { resize: none; }
                     0 20px 50px rgba(0, 0, 0, 0.55);
 }
 
-:root.is-apple .nav,
-:root.is-apple .navbar,
-:root.is-apple .bottom-nav,
-:root.is-apple .doc-materia,
-:root.is-apple .auth-container,
-:root.is-apple .card,
-:root.is-apple .modal__box,
-:root.is-apple .doc-tabs-control {
+/* Clases utilitarias directas */
+.glass,
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+:root.is-apple .glass,
+:root.is-ios .glass,
+:root.ios-liquid-glass .glass,
+[data-glass="liquid"] .glass,
+:root.is-apple .liquid-glass,
+:root.is-ios .liquid-glass,
+:root.ios-liquid-glass .liquid-glass,
+[data-glass="liquid"] .liquid-glass {
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
   background: var(--glass-bg) !important;
@@ -1016,24 +1027,79 @@ textarea.form-control { resize: none; }
   box-shadow: var(--glass-specular) !important;
 }
 
-:root.is-apple .doc-materia {
+/* Contenedores y componentes principales bajo Liquid Glass */
+:root.is-apple .nav,
+:root.is-apple .navbar,
+:root.is-apple .bottom-nav,
+:root.is-apple .doc-materia,
+:root.is-apple .auth-container,
+:root.is-apple .card,
+:root.is-apple .modal__box,
+:root.is-apple .doc-tabs-control,
+:root.is-apple .action-menu__list,
+:root.is-ios .nav,
+:root.is-ios .navbar,
+:root.is-ios .bottom-nav,
+:root.is-ios .doc-materia,
+:root.is-ios .auth-container,
+:root.is-ios .card,
+:root.is-ios .modal__box,
+:root.is-ios .doc-tabs-control,
+:root.is-ios .action-menu__list,
+:root.ios-liquid-glass .nav,
+:root.ios-liquid-glass .navbar,
+:root.ios-liquid-glass .bottom-nav,
+:root.ios-liquid-glass .doc-materia,
+:root.ios-liquid-glass .auth-container,
+:root.ios-liquid-glass .card,
+:root.ios-liquid-glass .modal__box,
+:root.ios-liquid-glass .doc-tabs-control,
+:root.ios-liquid-glass .action-menu__list,
+[data-glass="liquid"] .nav,
+[data-glass="liquid"] .navbar,
+[data-glass="liquid"] .bottom-nav,
+[data-glass="liquid"] .doc-materia,
+[data-glass="liquid"] .auth-container,
+[data-glass="liquid"] .card,
+[data-glass="liquid"] .modal__box,
+[data-glass="liquid"] .doc-tabs-control,
+[data-glass="liquid"] .action-menu__list {
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  background: var(--glass-bg) !important;
+  border-color: var(--glass-border) !important;
+  box-shadow: var(--glass-specular) !important;
+}
+
+:root.is-apple .doc-materia,
+:root.is-ios .doc-materia,
+:root.ios-liquid-glass .doc-materia,
+[data-glass="liquid"] .doc-materia {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%), rgba(18, 22, 34, 0.65) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 12px 32px rgba(0, 0, 0, 0.4) !important;
 }
 
-:root.is-apple .doc-tab-btn.active {
+:root.is-apple .doc-tab-btn.active,
+:root.is-ios .doc-tab-btn.active,
+:root.ios-liquid-glass .doc-tab-btn.active,
+[data-glass="liquid"] .doc-tab-btn.active {
   background: linear-gradient(145deg, #ff4655, #cc2b37) !important;
   box-shadow: 0 4px 18px rgba(255, 70, 85, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
 }
 
-:root.is-apple .btn-primary {
+:root.is-apple .btn-primary,
+:root.is-ios .btn-primary,
+:root.ios-liquid-glass .btn-primary,
+[data-glass="liquid"] .btn-primary {
   box-shadow: 0 6px 20px rgba(255, 70, 85, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
 }
 
 /* ─── Apple / iOS Liquid Glass Mobile Navigation Bar ─── */
 :root.is-apple .bottom-nav,
-:root.is-ios .bottom-nav {
+:root.is-ios .bottom-nav,
+:root.ios-liquid-glass .bottom-nav,
+[data-glass="liquid"] .bottom-nav {
   border-radius: 999px !important;
   -webkit-backdrop-filter: blur(38px) saturate(220%) brightness(114%) !important;
   backdrop-filter: blur(38px) saturate(220%) brightness(114%) !important;
@@ -1046,7 +1112,9 @@ textarea.form-control { resize: none; }
 }
 
 :root.is-apple .bottom-nav__pill,
-:root.is-ios .bottom-nav__pill {
+:root.is-ios .bottom-nav__pill,
+:root.ios-liquid-glass .bottom-nav__pill,
+[data-glass="liquid"] .bottom-nav__pill {
   border-radius: 999px !important;
   background: linear-gradient(135deg, rgba(255, 70, 85, 0.4) 0%, rgba(200, 16, 46, 0.24) 100%), rgba(255, 70, 85, 0.16) !important;
   -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
@@ -1056,5 +1124,6 @@ textarea.form-control { resize: none; }
               inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4),
               0 8px 26px rgba(255, 70, 85, 0.48) !important;
 }
+
 
 

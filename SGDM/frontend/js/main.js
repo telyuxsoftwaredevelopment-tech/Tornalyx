@@ -163,18 +163,23 @@ function initScrollReveal() {
 /* ─── Tabs genéricos [role="tab"] ───────────────────── */
 /* ─── Detección Apple / iOS / macOS para Liquid Glass ─── */
 function detectAppleLiquidGlass() {
-  const ua = navigator.userAgent || navigator.vendor || window.opera || '';
-  const platform = navigator.platform || '';
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(platform) || /Mac OS X/.test(ua);
-  const isApple = isIOS || isMac || (/AppleWebKit/.test(ua) && /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua));
+  try {
+    const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+    const platform = navigator.platform || '';
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(platform) || /Mac OS X/.test(ua);
+    const isApple = isIOS || isMac || (/AppleWebKit/.test(ua) && /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua));
 
-  if (isApple) {
-    document.documentElement.classList.add('is-apple');
-    document.documentElement.setAttribute('data-apple-device', isIOS ? 'ios' : 'mac');
-  }
-  if (isIOS) {
-    document.documentElement.classList.add('is-ios');
+    if (isApple) {
+      document.documentElement.classList.add('is-apple');
+      document.documentElement.setAttribute('data-apple-device', isIOS ? 'ios' : 'mac');
+    }
+    if (isIOS) {
+      document.documentElement.classList.add('is-ios');
+      document.documentElement.classList.add('ios-liquid-glass');
+    }
+  } catch (err) {
+    console.warn('[LiquidGlass] Error detectando iOS:', err);
   }
 }
 
