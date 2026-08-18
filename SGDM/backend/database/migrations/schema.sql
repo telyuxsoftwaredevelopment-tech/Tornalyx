@@ -319,3 +319,32 @@ CREATE TABLE IF NOT EXISTS doc_otps (
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     INDEX idx_expires (expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ──────────────────────────────────────────────────────────────
+-- TABLA: schema_migrations  (registro de migraciones aplicadas)
+-- La crea también add_schema_migrations.sql, pero tiene que estar acá:
+-- sin ella, una base recién creada desde este archivo arranca con el
+-- registro vacío y la auto-migración de Migracion::ejecutarFaltantes()
+-- vuelve a correr las diez add_*.sql contra un esquema que ya las trae,
+-- llenando el log de errores de columna duplicada.
+-- ──────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    filename    VARCHAR(180) NOT NULL PRIMARY KEY,
+    applied_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Backfill: este archivo ya trae plegado el efecto de todas las migraciones
+-- de abajo, así que se dan por aplicadas. IMPORTANTE: al plegar una migración
+-- nueva en este esquema, agregar su nombre también a esta lista; si no, se va
+-- a re-ejecutar de más en cada base nueva.
+INSERT IGNORE INTO schema_migrations (filename) VALUES
+    ('add_2fa.sql'),
+    ('add_avatar_blob.sql'),
+    ('add_doc_acceso.sql'),
+    ('add_nickname_tag.sql'),
+    ('add_perfil.sql'),
+    ('add_redes_sociales.sql'),
+    ('add_rol_torneo_simplificado.sql'),
+    ('add_schema_migrations.sql'),
+    ('add_torneo_banner.sql'),
+    ('add_torneo_gestion.sql');
