@@ -330,7 +330,11 @@ CREATE TABLE IF NOT EXISTS doc_otps (
 -- ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS schema_migrations (
     filename    VARCHAR(180) NOT NULL PRIMARY KEY,
-    applied_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    applied_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- NULL = aplicada sin errores. Si trae texto, la migracion corrio pero
+    -- alguna sentencia fallo: Migracion::faltantes() la sigue reportando
+    -- como pendiente y el panel de admin la muestra (ver Migracion.php).
+    error       VARCHAR(500) NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Backfill: este archivo ya trae plegado el efecto de todas las migraciones

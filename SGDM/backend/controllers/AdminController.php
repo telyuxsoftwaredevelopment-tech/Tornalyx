@@ -46,7 +46,8 @@ class AdminController extends Controller {
     /**
      * Chequeo de salud del esquema (GET /api/admin/salud): compara las
      * migraciones add_*.sql del repo contra schema_migrations y avisa si
-     * falta correr alguna en esta base (ver add_schema_migrations.sql).
+     * falta correr alguna en esta base, o si alguna corrio pero quedo a medio
+     * aplicar (ver add_schema_migrations.sql y Migracion::faltantes()).
      * Solo para administradores.
      */
     public function salud(): void {
