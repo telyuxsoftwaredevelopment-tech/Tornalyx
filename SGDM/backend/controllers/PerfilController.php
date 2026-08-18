@@ -86,6 +86,9 @@ class PerfilController extends Controller {
 
         $nombre    = trim((string) (filter_input(INPUT_POST, 'nombre',    FILTER_DEFAULT) ?? ''));
         $apellido  = trim((string) (filter_input(INPUT_POST, 'apellido',  FILTER_DEFAULT) ?? ''));
+        $nickname  = trim((string) (filter_input(INPUT_POST, 'nickname',  FILTER_DEFAULT) ?? ''));
+        $tag       = trim((string) (filter_input(INPUT_POST, 'tag',       FILTER_DEFAULT) ?? ''));
+        $tag       = ltrim($tag, '#');
         $email     = (string) (filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL) ?? '');
         $fechaNac  = trim((string) (filter_input(INPUT_POST, 'fecha_nac', FILTER_DEFAULT) ?? ''));
         $ubicacion = trim((string) (filter_input(INPUT_POST, 'ubicacion', FILTER_DEFAULT) ?? ''));
@@ -101,6 +104,21 @@ class PerfilController extends Controller {
         if (mb_strlen($nombre) > 60 || mb_strlen($apellido) > 60) {
             $this->jsonError('Nombre y apellido no pueden superar los 60 caracteres.');
             return;
+        }
+        if ($nickname !== '' && mb_strlen($nickname) > 30) {
+            $this->jsonError('El nickname no puede superar los 30 caracteres.');
+            return;
+        }
+        if ($tag !== '') {
+            if (mb_strlen($tag) > 5) {
+                $this->jsonError('El hashtag no puede superar los 5 caracteres.');
+                return;
+            }
+            if (!preg_match('/^[A-Za-z0-9]{1,5}$/', $tag)) {
+                $this->jsonError('El hashtag solo puede contener números y letras (máximo 5 caracteres).');
+                return;
+            }
+            $tag = strtoupper($tag);
         }
         if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 120) {
             $this->jsonError('Correo electrónico inválido.');
@@ -150,6 +168,8 @@ class PerfilController extends Controller {
         $this->usuarioModel->actualizar($userId, [
             'nombre'        => $nombre,
             'apellido'      => $apellido,
+            'nickname'      => $nickname !== '' ? $nickname : null,
+            'tag'           => $tag !== '' ? $tag : null,
             'email'         => $email,
             'fecha_nac'     => $fechaNac,
             'ubicacion'     => $ubicacion !== '' ? $ubicacion : null,
@@ -292,6 +312,8 @@ class PerfilController extends Controller {
                 'id'            => (int) $u['id'],
                 'nombre'        => $u['nombre'],
                 'apellido'      => $u['apellido'],
+                'nickname'      => $u['nickname']      ?? null,
+                'tag'           => $u['tag']           ?? null,
                 'rol'           => $u['rol'],
                 'bio'           => $u['bio']           ?? null,
                 'ubicacion'     => $u['ubicacion']     ?? null,
@@ -316,6 +338,8 @@ class PerfilController extends Controller {
             'id'            => (int) ($u['id'] ?? 0),
             'nombre'        => $u['nombre']        ?? '',
             'apellido'      => $u['apellido']      ?? '',
+            'nickname'      => $u['nickname']      ?? null,
+            'tag'           => $u['tag']           ?? null,
             'email'         => $u['email']         ?? '',
             'rol'           => $u['rol']           ?? '',
             'fecha_nac'     => $u['fecha_nac']     ?? null,

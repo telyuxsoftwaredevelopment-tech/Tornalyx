@@ -133,6 +133,12 @@ class Usuario extends Model {
         try {
             $cols = $this->db->query("SHOW COLUMNS FROM usuarios")->fetchAll(PDO::FETCH_COLUMN);
             $faltantes = [];
+            if (!in_array('nickname', $cols, true)) {
+                $faltantes[] = "ADD COLUMN nickname VARCHAR(30) NULL DEFAULT NULL";
+            }
+            if (!in_array('tag', $cols, true)) {
+                $faltantes[] = "ADD COLUMN tag VARCHAR(5) NULL DEFAULT NULL";
+            }
             if (!in_array('ubicacion', $cols, true)) {
                 $faltantes[] = "ADD COLUMN ubicacion VARCHAR(120) NULL DEFAULT NULL";
             }
@@ -189,7 +195,7 @@ class Usuario extends Model {
     }
 
     /**
-     * Busca jugadores por nombre o apellido para el buscador público.
+     * Busca jugadores por nombre, apellido, nickname o tag para el buscador público.
      * Devuelve solo datos que es seguro mostrar de un tercero.
      *
      * @param string $q     Texto a buscar (mínimo 2 caracteres, valida el controlador).
@@ -197,16 +203,17 @@ class Usuario extends Model {
      * @return array
      */
     public function buscar(string $q, int $limite = 20): array {
+        $this->asegurarColumnasPerfil();
         $stmt = $this->db->prepare(
-            "SELECT id, nombre, apellido, rol, avatar_url, ubicacion
+            "SELECT id, nombre, apellido, nickname, tag, rol, avatar_url, ubicacion
                FROM usuarios
               WHERE estado = 'activo'
-                AND (nombre LIKE ? OR apellido LIKE ? OR CONCAT(nombre, ' ', apellido) LIKE ?)
+                AND (nombre LIKE ? OR apellido LIKE ? OR CONCAT(nombre, ' ', apellido) LIKE ? OR nickname LIKE ? OR CONCAT(nickname, '#', tag) LIKE ?)
               ORDER BY nombre ASC
               LIMIT " . (int) $limite
         );
         $patron = '%' . $q . '%';
-        $stmt->execute([$patron, $patron, $patron]);
+        $stmt->execute([$patron, $patron, $patron, $patron, $patron]);
         return $stmt->fetchAll();
     }
 
@@ -217,15 +224,16 @@ class Usuario extends Model {
      * @return array
      */
     public function listar(?string $rol = null): array {
+        $this->asegurarColumnasPerfil();
         if ($rol) {
             $stmt = $this->db->prepare(
-                'SELECT id, nombre, apellido, email, rol, estado, fecha_nac, created_at
+                'SELECT id, nombre, apellido, nickname, tag, email, rol, estado, fecha_nac, created_at
                    FROM usuarios WHERE rol = ?'
             );
             $stmt->execute([$rol]);
         } else {
             $stmt = $this->db->query(
-                'SELECT id, nombre, apellido, email, rol, estado, fecha_nac, created_at
+                'SELECT id, nombre, apellido, nickname, tag, email, rol, estado, fecha_nac, created_at
                    FROM usuarios'
             );
         }

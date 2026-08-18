@@ -94,16 +94,20 @@ function renderResultados(jugadores) {
       </div>`;
     return;
   }
-  cont.innerHTML = jugadores.map(j => `
+  cont.innerHTML = jugadores.map(j => {
+    const displayNombre = j.nickname ? `${j.nickname}${j.tag ? ' #' + j.tag : ''}` : `${j.nombre} ${j.apellido || ''}`.trim();
+    const sub = j.nickname ? `${j.nombre} ${j.apellido || ''}`.trim() + ' · ' : '';
+    return `
     <button class="jugador-card" data-id="${j.id}">
       ${avatarHtml(j)}
       <span>
-        <span class="jugador-card__nombre">${esc(`${j.nombre} ${j.apellido || ''}`.trim())}</span>
+        <span class="jugador-card__nombre">${esc(displayNombre)}</span>
         <span class="jugador-card__meta" style="display:block">
-          ${esc(j.rol)}${j.ubicacion ? ' · ' + esc(j.ubicacion) : ''}
+          ${esc(sub)}${esc(j.rol)}${j.ubicacion ? ' · ' + esc(j.ubicacion) : ''}
         </span>
       </span>
-    </button>`).join('');
+    </button>`;
+  }).join('');
 
   cont.querySelectorAll('.jugador-card').forEach(card => {
     card.addEventListener('click', () => {
@@ -118,7 +122,8 @@ function renderResultados(jugadores) {
 function renderFicha(data) {
   const j = data.jugador;
   const r = data.resumen || {};
-  const nombre = `${j.nombre} ${j.apellido || ''}`.trim();
+  const nombrePrincipal = j.nickname ? `${j.nickname}${j.tag ? ' #' + j.tag : ''}` : `${j.nombre} ${j.apellido || ''}`.trim();
+  const subNombre = j.nickname ? `${j.nombre} ${j.apellido || ''}`.trim() : null;
   const redes = redesHtml(j);
 
   const stats = [
@@ -161,9 +166,9 @@ function renderFicha(data) {
         <div style="display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap">
           ${avatarHtml(j, 'jugador-avatar')}
           <div>
-            <h2 style="font-size:var(--font-size-2xl);color:var(--ink)">${esc(nombre)}</h2>
+            <h2 style="font-size:var(--font-size-2xl);color:var(--ink)">${esc(nombrePrincipal)}</h2>
             <div style="font-size:var(--font-size-sm);color:var(--muted)">
-              ${esc(j.rol)}${j.ubicacion ? ' · 📍 ' + esc(j.ubicacion) : ''}
+              ${subNombre ? '👤 ' + esc(subNombre) + ' · ' : ''}${esc(j.rol)}${j.ubicacion ? ' · 📍 ' + esc(j.ubicacion) : ''}
             </div>
           </div>
         </div>

@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     id           INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nombre       VARCHAR(60)  NOT NULL,
     apellido     VARCHAR(60)  NOT NULL,
+    nickname     VARCHAR(30)  DEFAULT NULL,
+    tag          VARCHAR(5)   DEFAULT NULL,
     email        VARCHAR(120) NOT NULL UNIQUE,
     password     VARCHAR(255) NOT NULL,          -- bcrypt hash
     fecha_nac    DATE         NOT NULL,

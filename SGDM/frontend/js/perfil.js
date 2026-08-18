@@ -65,18 +65,22 @@
   }
 
   function pintarHero(u) {
-    if ($('heroNombre')) $('heroNombre').textContent = `${u.nombre} ${u.apellido}`.trim();
+    if ($('heroNombre')) {
+      if (u.nickname) {
+        const tagHtml = u.tag ? `<span class="profile-hero-tag">#${Utils.escapeHtml(u.tag)}</span>` : '';
+        $('heroNombre').innerHTML = `${Utils.escapeHtml(u.nickname)} ${tagHtml}`;
+      } else {
+        $('heroNombre').textContent = `${u.nombre} ${u.apellido}`.trim();
+      }
+    }
 
     const meta = [];
     if (u.rol) {
       const esAdmin = u.rol === 'administrador';
       meta.push(`<span class="${esAdmin ? 'badge-role-admin' : 'badge-role-user'}">${esAdmin ? 'ADMINISTRADOR' : 'PARTICIPANTE'}</span>`);
     }
-    if (u.created_at) {
-      const alta = new Date(String(u.created_at).replace(' ', 'T'));
-      if (!isNaN(alta)) {
-        meta.push('<span>📅 Miembro desde ' + alta.toLocaleDateString('es-UY', { month: 'short', year: 'numeric' }) + '</span>');
-      }
+    if (u.nickname) {
+      meta.push('<span>👤 ' + Utils.escapeHtml(`${u.nombre} ${u.apellido}`.trim()) + '</span>');
     }
     if (u.email) {
       meta.push('<span>✉️ ' + Utils.escapeHtml(u.email) + '</span>');
@@ -149,6 +153,8 @@
   /* ─── Formulario de datos ──────────────────────────── */
 
   function llenarFormulario(u) {
+    if ($('pNickname'))  $('pNickname').value  = u.nickname  || '';
+    if ($('pTag'))       $('pTag').value       = u.tag       || '';
     $('pNombre').value    = u.nombre    || '';
     $('pApellido').value  = u.apellido  || '';
     $('pEmail').value     = u.email     || '';
@@ -176,6 +182,14 @@
   function initFormularios() {
     $('pBio').addEventListener('input', actualizarContadorBio);
 
+    if ($('pTag')) {
+      $('pTag').addEventListener('input', (e) => {
+        let val = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+        if (val.length > 5) val = val.slice(0, 5);
+        e.target.value = val;
+      });
+    }
+
     /* "Restablecer" vuelve a los valores guardados, no a campos vacíos. */
     $('perfilForm').addEventListener('reset', (e) => {
       e.preventDefault();
@@ -189,8 +203,20 @@
         Toast.error(`La descripción supera las ${BIO_MAX_PALABRAS} palabras (tiene ${palabras}).`);
         return;
       }
+      const nickVal = $('pNickname') ? $('pNickname').value.trim() : '';
+      if (nickVal.length > 30) {
+        Toast.error('El nickname no puede superar los 30 caracteres.');
+        return;
+      }
+      const tagVal = $('pTag') ? $('pTag').value.trim().replace(/^#/, '').toUpperCase() : '';
+      if (tagVal !== '' && !/^[A-Z0-9]{1,5}$/.test(tagVal)) {
+        Toast.error('El hashtag solo puede tener hasta 5 letras y números (ej: UY1, 1234).');
+        return;
+      }
       try {
         const res = await Api.post('/api/perfil/actualizar', {
+          nickname:       nickVal,
+          tag:            tagVal,
           nombre:         $('pNombre').value.trim(),
           apellido:       $('pApellido').value.trim(),
           email:          $('pEmail').value.trim(),

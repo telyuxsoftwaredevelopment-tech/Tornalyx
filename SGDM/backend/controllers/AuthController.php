@@ -244,6 +244,8 @@ class AuthController extends Controller {
             'id'         => (int) $u['id'],
             'nombre'     => $u['nombre'],
             'apellido'   => $u['apellido'],
+            'nickname'   => $u['nickname'] ?? null,
+            'tag'        => $u['tag'] ?? null,
             'email'      => $u['email'],
             'rol'        => $u['rol'],
             'avatar_url' => $u['avatar_url'] ?? null,
