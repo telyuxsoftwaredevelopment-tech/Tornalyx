@@ -686,12 +686,14 @@ function initAccessibility() {
 
   /* El disparador es siempre un ícono (nunca la palabra "Accesibilidad"),
      ubicado dentro de la barra superior de la página, sea cual sea su
-     forma: el menú público (.nav-links), la franja de cuenta del login
-     (.nav-right) o la topbar de los paneles privados (#topbarActions).
-     Solo si una página no tiene ninguna barra cae al botón flotante. */
-  const navBar = document.querySelector('.nav .nav-links')
-    || document.querySelector('.nav .nav-right, .nav .nav-right-static')
-    || document.getElementById('topbarActions');
+     forma: la topbar de los paneles privados (#topbarActions), el menú
+     público (.nav-links) o la franja de cuenta del login (.nav-right).
+     La topbar va primero porque los paneles ahora tienen las dos barras y
+     .nav-links se oculta por CSS abajo de 860px, donde el ícono quedaría
+     invisible. Solo si una página no tiene ninguna barra cae al flotante. */
+  const navBar = document.getElementById('topbarActions')
+    || document.querySelector('.nav .nav-links')
+    || document.querySelector('.nav .nav-right, .nav .nav-right-static');
   const widget = document.createElement('div');
   widget.className = navBar ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
   // El nombre accesible viaja por aria-label/title para lectores de pantalla.

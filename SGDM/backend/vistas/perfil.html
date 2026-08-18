@@ -16,9 +16,14 @@
     /* ─── Layout General ──────────────────────────────────── */
     body { display:flex; min-height:100vh; overflow-x:hidden; background:var(--bg); color:var(--ink); }
     
+    /* El navbar se saca del flujo flex del body (que reparte sidebar y
+       contenido en columnas): fijo arriba, ancho completo, y el resto del
+       layout arranca --navbar-height mas abajo. */
+    header.nav { position:fixed; top:0; left:0; right:0; width:100%; z-index:210; }
+    .app-main { margin-top:var(--navbar-height); }
     /* ─── Sidebar Estilo Tornalyx ─────────────────────────── */
     .sidebar {
-      position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-width, 250px);
+      position:fixed; top:var(--navbar-height); left:0; bottom:0; width:var(--sidebar-width, 250px);
       background:var(--bg-2, #14171D); border-right:1px solid var(--line, #222733);
       display:flex; flex-direction:column; z-index:200;
       transition:transform .25s cubic-bezier(.4,0,.2,1);
@@ -82,7 +87,7 @@
     /* ─── Main Area & Topbar ──────────────────────────────── */
     .app-main { margin-left:var(--sidebar-width, 250px); flex:1; display:flex; flex-direction:column; min-width:0; }
     .topbar {
-      position:sticky; top:0; z-index:100;
+      position:sticky; top:var(--navbar-height); z-index:100;
       background:rgba(13, 15, 18, 0.85); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
       border-bottom:1px solid var(--line, #222733); padding:0 var(--space-6); height:64px;
       display:flex; align-items:center; justify-content:space-between; gap:var(--space-4);
@@ -301,6 +306,31 @@
 </head>
 <body>
 
+  <!-- Navbar publica: la misma barra del resto del sitio, para poder salir del
+       panel sin volver atras. main.js (initAuthNav) reemplaza "Iniciar Sesion /
+       Registrarse" por el avatar y "Cerrar sesion" cuando hay sesion, que en
+       estas pantallas privadas es siempre. -->
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="/">
+        <span class="badge badge-crop" style="background-image:url(../../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
+        Tornalyx
+      </a>
+      <nav class="nav-links" aria-label="Navegacion principal">
+        <a href="/">Inicio</a>
+        <a href="/torneos">Torneos</a>
+        <a href="/jugadores">Jugadores</a>
+        <a href="/documentacion">Documentacion</a>
+      </nav>
+      <div class="nav-right">
+        <a href="/login" class="nav-link-login">Iniciar Sesion</a>
+        <a href="/login?tab=registro" class="btn btn-nav-register">Registrarse</a>
+      </div>
+      <div class="nav-utility" id="navUtility">
+      </div>
+    </div>
+  </header>
+
   <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <a class="sidebar-brand" href="/">
@@ -437,7 +467,7 @@
           <form id="perfilForm" novalidate>
             <!-- Nickname y Tagline (Estilo Riot) -->
             <div class="form-group">
-              <label class="form-label" for="pNickname">Nickname y Tag <span class="form-label-opt">(Estilo Riot Games, máx. 5 caracteres en tag)</span></label>
+              <label class="form-label" for="pNickname">Nickname y Tag</label>
               <div class="riot-id-group">
                 <div class="riot-id-nick-wrap">
                   <input class="form-control" type="text" id="pNickname" name="nickname" maxlength="30" placeholder="Tu nickname (ej: Kratos)" autocomplete="nickname" />

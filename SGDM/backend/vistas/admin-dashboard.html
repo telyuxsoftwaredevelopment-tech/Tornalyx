@@ -13,8 +13,13 @@
   <link rel="stylesheet" href="../../css/dashboard.css" />
   <style>
     body { display:flex; min-height:100vh; overflow-x:hidden; }
+    /* El navbar se saca del flujo flex del body (que reparte sidebar y
+       contenido en columnas): fijo arriba, ancho completo, y el resto del
+       layout arranca --navbar-height mas abajo. */
+    header.nav { position:fixed; top:0; left:0; right:0; width:100%; z-index:210; }
+    .app-main { margin-top:var(--navbar-height); }
     .sidebar {
-      position:fixed; top:0; left:0; bottom:0; width:var(--sidebar-width);
+      position:fixed; top:var(--navbar-height); left:0; bottom:0; width:var(--sidebar-width);
       background:var(--bg-2); border-right:1px solid var(--line);
       display:flex; flex-direction:column; z-index:200;
       transition:transform .25s cubic-bezier(.4,0,.2,1);
@@ -75,7 +80,7 @@
     .app-main { margin-left:var(--sidebar-width); flex:1; display:flex; flex-direction:column; min-width:0; }
 
     .topbar {
-      position:sticky; top:0; z-index:100;
+      position:sticky; top:var(--navbar-height); z-index:100;
       background:rgba(11,7,8,.9); backdrop-filter:blur(12px);
       border-bottom:1px solid var(--line-soft);
       padding:0 var(--space-6); height:64px;
@@ -162,6 +167,31 @@
   </style>
 </head>
 <body>
+
+  <!-- Navbar publica: la misma barra del resto del sitio, para poder salir del
+       panel sin volver atras. main.js (initAuthNav) reemplaza "Iniciar Sesion /
+       Registrarse" por el avatar y "Cerrar sesion" cuando hay sesion, que en
+       estas pantallas privadas es siempre. -->
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="brand" href="/">
+        <span class="badge badge-crop" style="background-image:url(../../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
+        Tornalyx
+      </a>
+      <nav class="nav-links" aria-label="Navegacion principal">
+        <a href="/">Inicio</a>
+        <a href="/torneos">Torneos</a>
+        <a href="/jugadores">Jugadores</a>
+        <a href="/documentacion">Documentacion</a>
+      </nav>
+      <div class="nav-right">
+        <a href="/login" class="nav-link-login">Iniciar Sesion</a>
+        <a href="/login?tab=registro" class="btn btn-nav-register">Registrarse</a>
+      </div>
+      <div class="nav-utility" id="navUtility">
+      </div>
+    </div>
+  </header>
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
