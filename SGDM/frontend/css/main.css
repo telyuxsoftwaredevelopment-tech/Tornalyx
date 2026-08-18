@@ -72,9 +72,9 @@ p  { line-height:1.6; }
 /* ─── Sección genérica ────────────────────────────────── */
 .section { padding:clamp(64px,8vw,112px) 0; position:relative; }
 .section--alt {
-  background:var(--bg-2);
-  border-top:1px solid var(--line-soft);
-  border-bottom:1px solid var(--line-soft);
+  background: transparent;
+  border-top: none;
+  border-bottom: none;
 }
 .section__header { text-align:center; margin-bottom:clamp(32px,5vw,52px); }
 .section__header p { color:var(--muted); font-size:var(--font-size-lg); margin-top:var(--space-2); }
@@ -702,7 +702,11 @@ select.form-control option { background:var(--bg-2); color:var(--ink); }
 .cta-band .lead { max-width:50ch; margin:0 auto 28px; }
 
 /* ─── Footer ──────────────────────────────────────────── */
-.footer,.footer-wrap { border-top:1px solid var(--line-soft); padding:56px 0 32px; }
+.footer,.footer-wrap {
+  background: var(--bg-2);
+  border-top: none;
+  padding: 56px 0 32px;
+}
 .foot-grid {
   display:grid;
   grid-template-columns:1fr;
