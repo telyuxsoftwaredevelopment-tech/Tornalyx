@@ -154,25 +154,6 @@ class Torneo extends Model {
     }
 
     /**
-     * Retorna el ID del organizador dueño del torneo al que pertenece un
-     * partido, o null si el partido no existe.
-     *
-     * @param int $partidoId
-     * @return int|null
-     */
-    public function getOrganizadorDePartido(int $partidoId): ?int {
-        $stmt = $this->db->prepare(
-            'SELECT t.organizador_id
-               FROM partidos p
-               INNER JOIN torneos t ON t.id = p.torneo_id
-               WHERE p.id = ?'
-        );
-        $stmt->execute([$partidoId]);
-        $row = $stmt->fetch();
-        return $row ? (int) $row['organizador_id'] : null;
-    }
-
-    /**
      * Retorna la tabla de posiciones de un torneo.
      *
      * @param int $torneoId

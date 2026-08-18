@@ -121,12 +121,10 @@ $router->get('#^/api/perfil/avatar/(\d+)$#', static fn($id) => (new PerfilContro
 $router->get('/api/torneos',           static fn() => (new TorneoController())->index());
 $router->get('/api/torneos/mios',      static fn() => (new TorneoController())->mios());
 $router->post('/api/torneo/crear',     static fn() => (new TorneoController())->store());
-$router->post('/api/torneo/resultado', static fn() => (new TorneoController())->cargarResultado());
 
 // Torneo por ID: /api/torneo/42 (la restricción \d+ evita que "abc" matchee).
 $router->get('#^/api/torneo/(\d+)$#',               static fn($id) => (new TorneoController())->show((int) $id));
 $router->get('#^/api/torneo/(\d+)/partidos$#',      static fn($id) => (new PartidoController())->listar((int) $id));
-$router->get('#^/api/torneo/(\d+)/equipos$#',       static fn($id) => (new InscripcionController())->equipos((int) $id));
 $router->get('#^/api/torneo/(\d+)/inscripciones$#', static fn($id) => (new InscripcionController())->listar((int) $id));
 $router->get('#^/api/torneo/(\d+)/avisos$#',        static fn($id) => (new AvisoController())->deTorneo((int) $id));
 $router->post('#^/api/torneo/(\d+)/editar$#',       static fn($id) => (new TorneoController())->actualizar((int) $id));
@@ -147,9 +145,7 @@ $router->post('/api/partido/estado',      static fn() => (new PartidoController(
 $router->post('/api/partido/resultado',   static fn() => (new PartidoController())->resultado());
 $router->post('/api/partido/asistencia',  static fn() => (new PartidoController())->asistencia());
 
-// ─── AVISOS / NOTIFICACIONES (API JSON) ────────────────────────
-$router->get('/api/avisos',          static fn() => (new AvisoController())->mios());
-$router->post('/api/avisos/leer',    static fn() => (new AvisoController())->marcarLeidos());
+// ─── AVISOS (API JSON) ─────────────────────────────────────────
 $router->post('/api/aviso/publicar', static fn() => (new AvisoController())->publicar());
 
 // ─── JUGADORES (API JSON pública) ──────────────────────────────

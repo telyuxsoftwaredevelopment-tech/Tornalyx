@@ -172,19 +172,6 @@ class InscripcionController extends Controller {
         ]);
     }
 
-    /**
-     * Equipos de un torneo (GET /api/torneo/{id}/equipos). Público: sirve para
-     * que un jugador elija a cuál sumarse al inscribirse.
-     */
-    public function equipos(int $torneoId): void {
-        $torneo = $this->torneoModel->findById($torneoId);
-        if (!$torneo || !$torneo['publico']) {
-            $this->jsonError('Torneo no encontrado.', [], 404);
-            return;
-        }
-        $this->jsonSuccess(['equipos' => $this->equipoModel->listarPorTorneo($torneoId)]);
-    }
-
     // ──────────────────────────────────────────────────────
     // Helpers privados
     // ──────────────────────────────────────────────────────

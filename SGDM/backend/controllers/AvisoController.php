@@ -21,32 +21,6 @@ class AvisoController extends Controller {
     }
 
     /**
-     * Avisos del usuario autenticado (GET /api/avisos), con el contador de
-     * los que todavía no leyó.
-     */
-    public function mios(): void {
-        if (!$this->requireApiLogin()) {
-            return;
-        }
-        $usuarioId = (int) Session::getUserId();
-        $this->jsonSuccess([
-            'avisos'   => $this->avisoModel->paraUsuario($usuarioId),
-            'sin_leer' => $this->avisoModel->sinLeer($usuarioId),
-        ]);
-    }
-
-    /**
-     * Marca todos los avisos como leídos (POST /api/avisos/leer).
-     */
-    public function marcarLeidos(): void {
-        if (!$this->requireApiLogin()) {
-            return;
-        }
-        $this->avisoModel->marcarLeidos((int) Session::getUserId());
-        $this->jsonSuccess(['sin_leer' => 0]);
-    }
-
-    /**
      * Avisos públicos de un torneo (GET /api/torneo/{id}/avisos).
      */
     public function deTorneo(int $torneoId): void {
