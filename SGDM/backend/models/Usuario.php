@@ -132,36 +132,38 @@ class Usuario extends Model {
 
         try {
             $cols = $this->db->query("SHOW COLUMNS FROM usuarios")->fetchAll(PDO::FETCH_COLUMN);
-            $faltantes = [];
-            if (!in_array('nickname', $cols, true)) {
-                $faltantes[] = "ADD COLUMN nickname VARCHAR(30) NULL DEFAULT NULL";
-            }
-            if (!in_array('tag', $cols, true)) {
-                $faltantes[] = "ADD COLUMN tag VARCHAR(5) NULL DEFAULT NULL";
-            }
-            if (!in_array('ubicacion', $cols, true)) {
-                $faltantes[] = "ADD COLUMN ubicacion VARCHAR(120) NULL DEFAULT NULL";
-            }
-            if (!in_array('bio', $cols, true)) {
-                $faltantes[] = "ADD COLUMN bio TEXT NULL DEFAULT NULL";
-            }
-            if (!in_array('twitter_url', $cols, true)) {
-                $faltantes[] = "ADD COLUMN twitter_url VARCHAR(255) NULL DEFAULT NULL";
-            }
-            if (!in_array('facebook_url', $cols, true)) {
-                $faltantes[] = "ADD COLUMN facebook_url VARCHAR(255) NULL DEFAULT NULL";
-            }
-            if (!in_array('instagram_url', $cols, true)) {
-                $faltantes[] = "ADD COLUMN instagram_url VARCHAR(255) NULL DEFAULT NULL";
-            }
-            if (!in_array('avatar_blob', $cols, true)) {
-                $faltantes[] = "ADD COLUMN avatar_blob MEDIUMBLOB NULL DEFAULT NULL, ADD COLUMN avatar_mime VARCHAR(50) NULL DEFAULT NULL";
-            }
-            if (!empty($faltantes)) {
-                $this->db->exec("ALTER TABLE usuarios " . implode(', ', $faltantes));
-            }
         } catch (Throwable $e) {
             error_log("asegurarColumnasPerfil aviso: " . $e->getMessage());
+            return;
+        }
+
+        // Un ALTER por columna, no uno solo con todas las cláusulas unidas por
+        // coma: el ALTER es atómico, así que si una sola cláusula falla se
+        // pierden también las demás. Fue lo que dejó a instagram_url sin crear
+        // en la base de TiDB durante días, sin más rastro que una línea de log.
+        $definiciones = [
+            'nickname'      => 'VARCHAR(30)  NULL DEFAULT NULL',
+            'tag'           => 'VARCHAR(5)   NULL DEFAULT NULL',
+            'ubicacion'     => 'VARCHAR(120) NULL DEFAULT NULL',
+            'bio'           => 'TEXT         NULL DEFAULT NULL',
+            'twitter_url'   => 'VARCHAR(255) NULL DEFAULT NULL',
+            'facebook_url'  => 'VARCHAR(255) NULL DEFAULT NULL',
+            'instagram_url' => 'VARCHAR(255) NULL DEFAULT NULL',
+            // avatar_data, no avatar_blob: ese es el nombre que crea
+            // add_avatar_blob.sql y el que lee PerfilController::servirAvatar.
+            'avatar_data'   => 'MEDIUMBLOB   NULL DEFAULT NULL',
+            'avatar_mime'   => 'VARCHAR(30)  NULL DEFAULT NULL',
+        ];
+
+        foreach ($definiciones as $columna => $definicion) {
+            if (in_array($columna, $cols, true)) {
+                continue;
+            }
+            try {
+                $this->db->exec("ALTER TABLE usuarios ADD COLUMN $columna $definicion");
+            } catch (Throwable $e) {
+                error_log("asegurarColumnasPerfil ($columna) aviso: " . $e->getMessage());
+            }
         }
     }
 
