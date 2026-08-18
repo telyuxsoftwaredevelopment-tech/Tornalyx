@@ -65,31 +65,30 @@
   }
 
   function pintarHero(u) {
-    $('heroNombre').textContent = `${u.nombre} ${u.apellido}`.trim();
-    $('heroRol').textContent = { participante: 'Participante', administrador: 'Administrador' }[u.rol] || u.rol;
-
-    const bio = $('heroBio');
-    if (u.bio) {
-      bio.textContent = u.bio;
-      bio.classList.remove('hidden');
-    } else {
-      bio.classList.add('hidden');
-    }
+    if ($('heroNombre')) $('heroNombre').textContent = `${u.nombre} ${u.apellido}`.trim();
 
     const meta = [];
+    if (u.rol) {
+      const esAdmin = u.rol === 'administrador';
+      meta.push(`<span class="${esAdmin ? 'badge-role-admin' : 'badge-role-user'}">${esAdmin ? 'ADMINISTRADOR' : 'PARTICIPANTE'}</span>`);
+    }
     if (u.created_at) {
       const alta = new Date(String(u.created_at).replace(' ', 'T'));
       if (!isNaN(alta)) {
-        meta.push('📅 Miembro desde ' + alta.toLocaleDateString('es-UY', { month: 'short', year: 'numeric' }));
+        meta.push('<span>📅 Miembro desde ' + alta.toLocaleDateString('es-UY', { month: 'short', year: 'numeric' }) + '</span>');
       }
     }
-    if (u.ubicacion) meta.push('📍 ' + u.ubicacion);
-    meta.push('✉️ ' + u.email);
-    $('heroMeta').innerHTML = meta.map(m => `<span>${Utils.escapeHtml(m)}</span>`).join('');
-    $('heroRedes').innerHTML = redesHtml(u);
+    if (u.email) {
+      meta.push('<span>✉️ ' + Utils.escapeHtml(u.email) + '</span>');
+    }
+    if (u.ubicacion) {
+      meta.push('<span>📍 ' + Utils.escapeHtml(u.ubicacion) + '</span>');
+    }
+    if ($('heroMeta')) $('heroMeta').innerHTML = meta.join('');
+    if ($('heroRedes')) $('heroRedes').innerHTML = redesHtml(u);
 
     pintarAvatar($('heroAvatar'), u);
-    pintarAvatar($('editAvatar'), u);
+    if ($('editAvatar')) pintarAvatar($('editAvatar'), u);
   }
 
   /* ─── Render de stats, torneos y equipos ───────────── */
@@ -235,7 +234,9 @@
 
   function initAvatar() {
     const input = $('avatarInput');
-    $('avatarBtn').addEventListener('click', () => input.click());
+    if (!input) return;
+    const triggers = [$('avatarBtn'), $('heroAvatar')].filter(Boolean);
+    triggers.forEach(el => el.addEventListener('click', () => input.click()));
 
     input.addEventListener('change', async () => {
       const file = input.files && input.files[0];
@@ -264,7 +265,7 @@
         if (!json.success) throw new Error(json.error || 'No se pudo subir la imagen.');
         usuarioActual.avatar_url = json.avatar_url;
         pintarAvatar($('heroAvatar'), usuarioActual);
-        pintarAvatar($('editAvatar'), usuarioActual);
+        if ($('editAvatar')) pintarAvatar($('editAvatar'), usuarioActual);
         Toast.success('Foto de perfil actualizada.');
       } catch (err) {
         Toast.error(err.message);
@@ -276,9 +277,10 @@
 
   function verificarRolAdmin(u) {
     const adminLink = $('sidebarAdminLink');
-    if (adminLink) {
-      adminLink.style.display = (u && u.rol === 'administrador') ? 'flex' : 'none';
-    }
+    const adminSec  = $('sidebarAdminSection');
+    const esAdmin   = (u && u.rol === 'administrador');
+    if (adminLink) adminLink.style.display = esAdmin ? 'flex' : 'none';
+    if (adminSec)  adminSec.style.display  = esAdmin ? 'block' : 'none';
   }
 
   async function cargar() {

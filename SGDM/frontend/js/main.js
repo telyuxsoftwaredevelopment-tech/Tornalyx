@@ -905,8 +905,8 @@ async function initCurrentUser() {
 
   /* Si el usuario tiene rol administrador, mostrar acceso a Administración en el sidebar */
   if (me.rol === 'administrador') {
-    document.querySelectorAll('#sidebarAdminLink, [data-admin-only]').forEach(el => {
-      el.style.display = 'flex';
+    document.querySelectorAll('#sidebarAdminLink, #sidebarAdminSection, [data-admin-only]').forEach(el => {
+      el.style.display = (el.tagName === 'SPAN' || el.classList.contains('sidebar__section')) ? 'block' : 'flex';
       el.classList.remove('hidden');
     });
   }
