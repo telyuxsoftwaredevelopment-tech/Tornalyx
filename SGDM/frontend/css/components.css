@@ -1034,20 +1034,27 @@ textarea.form-control { resize: none; }
 /* ─── Apple / iOS Liquid Glass Mobile Navigation Bar ─── */
 :root.is-apple .bottom-nav,
 :root.is-ios .bottom-nav {
-  -webkit-backdrop-filter: blur(36px) saturate(220%) brightness(112%) !important;
-  backdrop-filter: blur(36px) saturate(220%) brightness(112%) !important;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.04) 25%, rgba(14, 16, 26, 0.58) 100%), rgba(10, 12, 18, 0.6) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.28) !important;
-  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.6), inset 0 2px 1.5px 0 rgba(255, 255, 255, 0.5), inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4) !important;
+  border-radius: 999px !important;
+  -webkit-backdrop-filter: blur(38px) saturate(220%) brightness(114%) !important;
+  backdrop-filter: blur(38px) saturate(220%) brightness(114%) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.04) 30%, rgba(14, 16, 26, 0.6) 100%), rgba(10, 12, 18, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.7),
+              0 0 24px rgba(0, 0, 0, 0.4),
+              inset 0 2px 1.5px 0 rgba(255, 255, 255, 0.55),
+              inset 0 -1px 1.5px 0 rgba(0, 0, 0, 0.4) !important;
 }
 
 :root.is-apple .bottom-nav__pill,
 :root.is-ios .bottom-nav__pill {
-  background: linear-gradient(135deg, rgba(255, 70, 85, 0.38) 0%, rgba(200, 16, 46, 0.22) 100%), rgba(255, 70, 85, 0.15) !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, rgba(255, 70, 85, 0.4) 0%, rgba(200, 16, 46, 0.24) 100%), rgba(255, 70, 85, 0.16) !important;
   -webkit-backdrop-filter: blur(20px) saturate(200%) !important;
   backdrop-filter: blur(20px) saturate(200%) !important;
-  border: 1px solid rgba(255, 140, 155, 0.55) !important;
-  box-shadow: inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.7), inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4), 0 8px 24px rgba(255, 70, 85, 0.45) !important;
+  border: 1px solid rgba(255, 140, 155, 0.6) !important;
+  box-shadow: inset 0 2px 2px 0 rgba(255, 255, 255, 0.75),
+              inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4),
+              0 8px 26px rgba(255, 70, 85, 0.48) !important;
 }
 
 
