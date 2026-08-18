@@ -126,10 +126,24 @@ class PerfilController extends Controller {
             $this->jsonError('Ese correo ya está en uso por otra cuenta.', [], 409);
             return;
         }
+
+        $redesProcesadas = [];
         foreach (['twitter_url' => $twitter, 'facebook_url' => $facebook, 'instagram_url' => $instagram] as $campo => $valor) {
-            if ($valor !== '' && !$this->esUrlValida($valor)) {
-                $this->jsonError('El enlace de ' . $campo . ' debe ser una URL http(s) válida.');
-                return;
+            if ($valor !== '') {
+                $norm = $this->normalizarRedSocial($campo, $valor);
+                if ($norm === null) {
+                    $nombreAmigable = match($campo) {
+                        'twitter_url'   => 'X (Twitter)',
+                        'facebook_url'  => 'Facebook',
+                        'instagram_url' => 'Instagram',
+                        default         => $campo,
+                    };
+                    $this->jsonError("El enlace o usuario de $nombreAmigable no es válido.");
+                    return;
+                }
+                $redesProcesadas[$campo] = $norm;
+            } else {
+                $redesProcesadas[$campo] = null;
             }
         }
 
@@ -140,9 +154,9 @@ class PerfilController extends Controller {
             'fecha_nac'     => $fechaNac,
             'ubicacion'     => $ubicacion !== '' ? $ubicacion : null,
             'bio'           => $bio !== '' ? $bio : null,
-            'twitter_url'   => $twitter   !== '' ? $twitter   : null,
-            'facebook_url'  => $facebook  !== '' ? $facebook  : null,
-            'instagram_url' => $instagram !== '' ? $instagram : null,
+            'twitter_url'   => $redesProcesadas['twitter_url'],
+            'facebook_url'  => $redesProcesadas['facebook_url'],
+            'instagram_url' => $redesProcesadas['instagram_url'],
         ]);
 
         // El nav y los saludos usan el nombre guardado en sesión.
@@ -313,6 +327,48 @@ class PerfilController extends Controller {
             'instagram_url' => $u['instagram_url'] ?? null,
             'created_at'    => $u['created_at']    ?? null,
         ];
+    }
+
+    /**
+     * Normaliza un input de red social para aceptar tanto URLs completas
+     * (https://instagram.com/usuario), URLs sin protocolo (instagram.com/usuario),
+     * usuarios con arroba (@usuario) o simples nombres de usuario (usuario).
+     */
+    private function normalizarRedSocial(string $tipo, string $valor): ?string {
+        $v = trim($valor);
+        if ($v === '') {
+            return null;
+        }
+        // Quitar arroba inicial si el usuario puso @usuario
+        $v = ltrim($v, '@');
+
+        // Si ya empieza con http:// o https://
+        if (preg_match('#^https?://#i', $v)) {
+            return $this->esUrlValida($v) ? $v : null;
+        }
+
+        // Si empieza con www. o el dominio de la red social
+        if (preg_match('#^(?:www\.)?(?:twitter\.com|x\.com|facebook\.com|fb\.com|instagram\.com|instagr\.am)/#i', $v)) {
+            $url = 'https://' . ltrim($v, '/');
+            return $this->esUrlValida($url) ? $url : null;
+        }
+
+        // Si es un nombre de usuario alfanumérico (letras, números, puntos, guiones)
+        if (preg_match('/^[A-Za-z0-9_.-]{1,60}$/', $v)) {
+            $base = match ($tipo) {
+                'twitter_url'   => 'https://x.com/',
+                'facebook_url'  => 'https://facebook.com/',
+                'instagram_url' => 'https://instagram.com/',
+                default         => ''
+            };
+            if ($base !== '') {
+                return $base . $v;
+            }
+        }
+
+        // Intento genérico agregando https://
+        $url = 'https://' . $v;
+        return $this->esUrlValida($url) ? $url : null;
     }
 
     /**

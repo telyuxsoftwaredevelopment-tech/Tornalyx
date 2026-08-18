@@ -122,6 +122,44 @@ class Usuario extends Model {
     }
 
     /**
+     * Asegura que las columnas de perfil y redes sociales existan en la tabla.
+     * Idempotente y seguro para bases ya migradas o pendientes de migración.
+     */
+    public function asegurarColumnasPerfil(): void {
+        static $verificado = false;
+        if ($verificado) return;
+        $verificado = true;
+
+        try {
+            $cols = $this->db->query("SHOW COLUMNS FROM usuarios")->fetchAll(PDO::FETCH_COLUMN);
+            $faltantes = [];
+            if (!in_array('ubicacion', $cols, true)) {
+                $faltantes[] = "ADD COLUMN ubicacion VARCHAR(120) NULL DEFAULT NULL";
+            }
+            if (!in_array('bio', $cols, true)) {
+                $faltantes[] = "ADD COLUMN bio TEXT NULL DEFAULT NULL";
+            }
+            if (!in_array('twitter_url', $cols, true)) {
+                $faltantes[] = "ADD COLUMN twitter_url VARCHAR(255) NULL DEFAULT NULL";
+            }
+            if (!in_array('facebook_url', $cols, true)) {
+                $faltantes[] = "ADD COLUMN facebook_url VARCHAR(255) NULL DEFAULT NULL";
+            }
+            if (!in_array('instagram_url', $cols, true)) {
+                $faltantes[] = "ADD COLUMN instagram_url VARCHAR(255) NULL DEFAULT NULL";
+            }
+            if (!in_array('avatar_blob', $cols, true)) {
+                $faltantes[] = "ADD COLUMN avatar_blob MEDIUMBLOB NULL DEFAULT NULL, ADD COLUMN avatar_mime VARCHAR(50) NULL DEFAULT NULL";
+            }
+            if (!empty($faltantes)) {
+                $this->db->exec("ALTER TABLE usuarios " . implode(', ', $faltantes));
+            }
+        } catch (Throwable $e) {
+            error_log("asegurarColumnasPerfil aviso: " . $e->getMessage());
+        }
+    }
+
+    /**
      * Actualiza los campos indicados de un usuario. Si viene 'password', se
      * hashea antes de guardar; si no viene, la contraseña queda intacta.
      *
@@ -130,6 +168,7 @@ class Usuario extends Model {
      * @return bool
      */
     public function actualizar(int $id, array $campos): bool {
+        $this->asegurarColumnasPerfil();
         if (isset($campos['password'])) {
             $campos['password'] = password_hash($campos['password'], PASSWORD_BCRYPT, ['cost' => 12]);
         }
