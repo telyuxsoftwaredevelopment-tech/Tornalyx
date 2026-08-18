@@ -289,10 +289,27 @@
     <div class="auth-sliding-wrapper">
       <div class="auth-container" id="authContainer">
 
-        <!-- Switch para pantallas móviles -->
-        <div class="mobile-auth-switch">
-          <button type="button" class="mobile-switch-btn active" id="mobileSignInTab">Inicia sesión</button>
-          <button type="button" class="mobile-switch-btn" id="mobileSignUpTab">Crea tu cuenta</button>
+        <!-- ─── Banner Curvo Expansivo Móvil (TikTok Prosper Samuel) ─── -->
+        <div class="mobile-banner mobile-only" id="mobileBanner">
+          <!-- Vista Banner en modo Login (invita a Registro) -->
+          <div class="mobile-banner__content mobile-banner__login">
+            <div class="mobile-banner__badge">
+              <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
+            </div>
+            <h2>¿Nuevo aquí?</h2>
+            <p>Crea tu cuenta y empieza a competir en torneos de deportes y esports.</p>
+            <button type="button" class="mobile-banner__btn" id="mobileToSignupBtn" data-auth-toggle="signup">CREAR CUENTA</button>
+          </div>
+
+          <!-- Vista Banner en modo Registro (invita a Login) -->
+          <div class="mobile-banner__content mobile-banner__signup">
+            <div class="mobile-banner__badge">
+              <span class="badge badge-crop" style="background-image:url(../assets/ICONO.png)" role="img" aria-label="Tornalyx"></span>
+            </div>
+            <h2>¡Bienvenido de vuelta!</h2>
+            <p>¿Ya tienes una cuenta registrada? Inicia sesión para continuar.</p>
+            <button type="button" class="mobile-banner__btn" id="mobileToLoginBtn" data-auth-toggle="login">INICIAR SESIÓN</button>
+          </div>
         </div>
 
         <!-- ─── Panel 1: Iniciar Sesión / OTP (Sign In) ─── -->
