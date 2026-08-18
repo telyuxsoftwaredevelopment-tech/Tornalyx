@@ -70,13 +70,13 @@ p  { line-height:1.6; }
 }
 
 /* ─── Sección genérica ────────────────────────────────── */
-.section { padding:clamp(64px,8vw,112px) 0; position:relative; }
+.section { padding:clamp(28px, 4vw, 56px) 0; position:relative; }
 .section--alt {
   background: transparent;
   border-top: none;
   border-bottom: none;
 }
-.section__header { text-align:center; margin-bottom:clamp(32px,5vw,52px); }
+.section__header { text-align:center; margin-bottom:clamp(24px, 3.5vw, 38px); }
 .section__header p { color:var(--muted); font-size:var(--font-size-lg); margin-top:var(--space-2); }
 
 /* ─── Botones Neumórficos (Neumorphism Design) ────────── */
@@ -133,24 +133,24 @@ p  { line-height:1.6; }
 .btn:active { transform: scale(0.98); }
 .btn:focus { outline: none; }
 
-/* Primary — Neumorfismo Rojo Coral */
+/* Primary — Neumorfismo Rojo Oficial Tornalyx */
 .btn-primary {
-  background: linear-gradient(145deg, #ff4655, #cc2b37);
+  background: linear-gradient(145deg, #e50914, #990710);
   color: #ffffff !important;
-  border: 2px solid rgba(255, 110, 125, 0.4);
-  box-shadow: inset 4px 4px 10px rgba(160, 20, 35, 0.8), inset -4px -4px 10px rgba(255, 140, 155, 0.45);
+  border: 2px solid rgba(240, 20, 30, 0.4);
+  box-shadow: inset 4px 4px 10px rgba(130, 5, 12, 0.85), inset -4px -4px 10px rgba(255, 60, 75, 0.45);
 }
 .btn-primary:hover,
 .btn-primary:focus {
   outline: none;
-  border-color: #ff5e6d;
-  box-shadow: inset 2px 2px 5px rgba(160, 20, 35, 0.8), inset -2px -2px 5px rgba(255, 140, 155, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(255, 70, 85, 0.35);
+  border-color: #ff1e2b;
+  box-shadow: inset 2px 2px 5px rgba(130, 5, 12, 0.85), inset -2px -2px 5px rgba(255, 60, 75, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(229, 9, 20, 0.35);
   transform: translateY(-1px);
 }
 .btn-primary:active {
-  background: linear-gradient(145deg, #cc2b37, #ff4655);
+  background: linear-gradient(145deg, #990710, #e50914);
   color: #ffffff !important;
-  box-shadow: inset 5px 5px 12px rgba(120, 10, 25, 0.9), inset -4px -4px 10px rgba(255, 120, 135, 0.3);
+  box-shadow: inset 5px 5px 12px rgba(90, 2, 8, 0.95), inset -4px -4px 10px rgba(240, 30, 45, 0.3);
   transform: scale(0.98);
 }
 
@@ -206,19 +206,20 @@ p  { line-height:1.6; }
 }
 
 .btn-danger {
-  background: linear-gradient(145deg, #ff4655, #cc2b37);
+  background: linear-gradient(145deg, #e50914, #990710);
   color: #fff !important;
-  border: 2px solid rgba(255, 110, 125, 0.4);
-  box-shadow: inset 4px 4px 10px rgba(160, 20, 35, 0.8), inset -4px -4px 10px rgba(255, 140, 155, 0.45);
+  border: 2px solid rgba(240, 20, 30, 0.4);
+  box-shadow: inset 4px 4px 10px rgba(130, 5, 12, 0.85), inset -4px -4px 10px rgba(255, 60, 75, 0.45);
 }
 .btn-danger:hover,
 .btn-danger:focus {
   outline: none;
-  box-shadow: inset 2px 2px 5px rgba(160, 20, 35, 0.8), inset -2px -2px 5px rgba(255, 140, 155, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(255, 70, 85, 0.3);
+  border-color: #ff1e2b;
+  box-shadow: inset 2px 2px 5px rgba(130, 5, 12, 0.85), inset -2px -2px 5px rgba(255, 60, 75, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(229, 9, 20, 0.3);
   transform: translateY(-1px);
 }
 .btn-danger:active {
-  box-shadow: inset 5px 5px 12px rgba(120, 10, 25, 0.9), inset -4px -4px 10px rgba(255, 120, 135, 0.3);
+  box-shadow: inset 5px 5px 12px rgba(90, 2, 8, 0.95), inset -4px -4px 10px rgba(240, 30, 45, 0.3);
   transform: scale(0.98);
 }
 
@@ -371,32 +372,32 @@ p  { line-height:1.6; }
 .nav-link-login:hover { color:#ffffff; }
 
 .btn-nav-register {
-  background: linear-gradient(145deg, #ff4655, #cc2b37);
+  background: linear-gradient(145deg, #e50914, #990710);
   color: #ffffff !important;
   font-family: var(--font-heading);
   font-size: 14px;
   font-weight: 600;
   padding: 8px 24px;
   border-radius: 50px;
-  border: 2px solid rgba(255, 110, 125, 0.4);
+  border: 2px solid rgba(240, 20, 30, 0.4);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease-in-out;
   white-space: nowrap;
-  box-shadow: inset 3px 3px 8px rgba(160, 20, 35, 0.8), inset -3px -3px 8px rgba(255, 140, 155, 0.45);
+  box-shadow: inset 3px 3px 8px rgba(130, 5, 12, 0.85), inset -3px -3px 8px rgba(255, 60, 75, 0.45);
 }
 .btn-nav-register:hover,
 .btn-nav-register:focus {
   outline: none;
-  border-color: #ff5e6d;
-  box-shadow: inset 2px 2px 4px rgba(160, 20, 35, 0.8), inset -2px -2px 4px rgba(255, 140, 155, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(255, 70, 85, 0.3);
+  border-color: #ff1e2b;
+  box-shadow: inset 2px 2px 4px rgba(130, 5, 12, 0.85), inset -2px -2px 4px rgba(255, 60, 75, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(229, 9, 20, 0.3);
   transform: translateY(-1px);
 }
 .btn-nav-register:active {
-  background: linear-gradient(145deg, #cc2b37, #ff4655);
-  box-shadow: inset 4px 4px 10px rgba(120, 10, 25, 0.9), inset -3px -3px 8px rgba(255, 120, 135, 0.3);
+  background: linear-gradient(145deg, #990710, #e50914);
+  box-shadow: inset 4px 4px 10px rgba(90, 2, 8, 0.95), inset -3px -3px 8px rgba(240, 30, 45, 0.3);
   transform: scale(0.98);
 }
 
@@ -758,7 +759,7 @@ select.form-control option { background:var(--bg-2); color:var(--ink); }
 .footer,.footer-wrap {
   background: var(--bg-2);
   border-top: none;
-  padding: 56px 0 32px;
+  padding: 44px 0 28px;
 }
 .foot-grid {
   display:grid;

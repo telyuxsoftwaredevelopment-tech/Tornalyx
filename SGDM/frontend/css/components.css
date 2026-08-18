@@ -1084,15 +1084,15 @@ textarea.form-control { resize: none; }
 :root.is-ios .doc-tab-btn.active,
 :root.ios-liquid-glass .doc-tab-btn.active,
 [data-glass="liquid"] .doc-tab-btn.active {
-  background: linear-gradient(145deg, #ff4655, #cc2b37) !important;
-  box-shadow: 0 4px 18px rgba(255, 70, 85, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+  background: linear-gradient(145deg, #e50914, #990710) !important;
+  box-shadow: 0 4px 18px rgba(229, 9, 20, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
 }
 
 :root.is-apple .btn-primary,
 :root.is-ios .btn-primary,
 :root.ios-liquid-glass .btn-primary,
 [data-glass="liquid"] .btn-primary {
-  box-shadow: 0 6px 20px rgba(255, 70, 85, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
 }
 
 /* ─── Apple / iOS Liquid Glass Mobile Navigation Bar ─── */

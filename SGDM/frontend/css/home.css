@@ -6,7 +6,7 @@
 /* ─── Hero: texto a la izquierda, tarjeta eSports a la derecha ── */
 .hero {
   position: relative;
-  padding: clamp(36px, 5vw, 72px) 0 clamp(44px, 5vw, 80px);
+  padding: clamp(28px, 4vw, 56px) 0 clamp(20px, 3vw, 40px);
   overflow: hidden;
 }
 
@@ -14,14 +14,14 @@
   display: grid;
   grid-template-columns: 1fr;
   align-items: center;
-  gap: 40px;
+  gap: 36px;
   width: 100%;
 }
 
 @media(min-width: 880px) {
   .hero-top {
     grid-template-columns: 1.15fr 1fr;
-    gap: 56px;
+    gap: 48px;
   }
 }
 
@@ -32,12 +32,12 @@
 
 .hero-title {
   font-family: var(--font-heading);
-  font-size: clamp(2.4rem, 5.5vw, 4.4rem);
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
   font-weight: 800;
   line-height: 1.05;
   letter-spacing: -0.035em;
   color: #ffffff;
-  margin: 0 0 20px;
+  margin: 0 0 16px;
 }
 
 .hero-title-accent {
@@ -47,10 +47,10 @@
 
 .hero-text .lead {
   font-size: clamp(0.95rem, 1.2vw, 1.125rem);
-  line-height: 1.65;
+  line-height: 1.6;
   color: #94a3b8;
   max-width: 48ch;
-  margin: 0 0 32px;
+  margin: 0 0 24px;
 }
 
 .hero-cta {
@@ -66,31 +66,31 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: linear-gradient(145deg, #ff4655, #cc2b37);
+  background: linear-gradient(145deg, #e50914, #990710);
   color: #ffffff !important;
   font-family: var(--font-heading);
   font-size: 15px;
   font-weight: 700;
-  padding: 14px 38px;
+  padding: 13px 36px;
   border-radius: 50px;
-  border: 2px solid rgba(255, 110, 125, 0.4);
+  border: 2px solid rgba(240, 20, 30, 0.4);
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  box-shadow: inset 4px 4px 10px rgba(160, 20, 35, 0.8), inset -4px -4px 10px rgba(255, 140, 155, 0.45);
+  box-shadow: inset 4px 4px 10px rgba(130, 5, 12, 0.85), inset -4px -4px 10px rgba(255, 60, 75, 0.45);
 }
 
 .btn-hero-explore:hover,
 .btn-hero-explore:focus {
   outline: none;
-  border-color: #ff5e6d;
-  box-shadow: inset 2px 2px 5px rgba(160, 20, 35, 0.8), inset -2px -2px 5px rgba(255, 140, 155, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(255, 70, 85, 0.35);
+  border-color: #ff1e2b;
+  box-shadow: inset 2px 2px 5px rgba(130, 5, 12, 0.85), inset -2px -2px 5px rgba(255, 60, 75, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(229, 9, 20, 0.35);
   transform: translateY(-1px);
 }
 
 .btn-hero-explore:active {
-  background: linear-gradient(145deg, #cc2b37, #ff4655);
-  box-shadow: inset 5px 5px 12px rgba(120, 10, 25, 0.9), inset -4px -4px 10px rgba(255, 120, 135, 0.3);
+  background: linear-gradient(145deg, #990710, #e50914);
+  box-shadow: inset 5px 5px 12px rgba(90, 2, 8, 0.95), inset -4px -4px 10px rgba(240, 30, 45, 0.3);
   transform: scale(0.98);
 }
 
@@ -103,10 +103,10 @@
 .hero-media-card {
   position: relative;
   border-radius: 20px;
-  border: 1px solid rgba(255, 70, 85, 0.28);
+  border: 1px solid rgba(229, 9, 20, 0.28);
   background: #12141a;
   overflow: hidden;
-  box-shadow: 0 24px 60px -12px rgba(0,0,0,.7), 0 0 45px -8px rgba(255, 70, 85, 0.22);
+  box-shadow: 0 24px 60px -12px rgba(0,0,0,.7), 0 0 45px -8px rgba(229, 9, 20, 0.22);
   animation: fade-up .6s .2s cubic-bezier(.22,1,.36,1) both;
 }
 

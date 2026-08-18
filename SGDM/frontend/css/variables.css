@@ -4,18 +4,18 @@
    ===================================================== */
 
 :root {
-  /* ── Colores de marca ─────────────────────────────── */
-  --red:        #ff4655;
-  --red-bright: #ff5e6d;
-  --red-deep:   #cc2b37;
-  --red-glow:   rgba(255, 70, 85, 0.35);
+  /* ── Colores de marca (Rojo Oficial Logo Tornalyx) ── */
+  --red:        #e50914;
+  --red-bright: #ff1e2b;
+  --red-deep:   #990710;
+  --red-glow:   rgba(229, 9, 20, 0.35);
 
   /* ── Alias de marca → nombres semánticos ─────────── */
-  --color-primary:       #ff4655;
-  --color-primary-dark:  #cc2b37;
-  --color-primary-light: rgba(255, 70, 85, 0.12);
+  --color-primary:       #e50914;
+  --color-primary-dark:  #990710;
+  --color-primary-light: rgba(229, 9, 20, 0.12);
   --color-secondary:     #10b981;   /* verde para éxito */
-  --color-danger:        #ff4655;
+  --color-danger:        #e50914;
   --color-warning:       #f59e0b;
   --color-info:          #0ea5e9;
 
@@ -34,7 +34,7 @@
   --line:       #222733;
   --line-soft:  #181b22;
   --border-color:       #222733;
-  --border-color-focus: #ff4655;
+  --border-color-focus: #e50914;
 
   /* ── Texto ────────────────────────────────────────── */
   --ink:     #ffffff;
