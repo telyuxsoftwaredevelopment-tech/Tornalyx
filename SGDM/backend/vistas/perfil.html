@@ -89,11 +89,6 @@
     }
     .topbar-left { display:flex; align-items:center; gap:var(--space-3); }
     .topbar-title { font-family:var(--head); font-weight:700; font-size:18px; color:var(--ink); }
-    .ghost-link {
-      display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:500;
-      color:#8d96a7; text-decoration:none; transition:color .15s;
-    }
-    .ghost-link:hover { color:#ffffff; }
     .menu-toggle {
       display:none; flex-direction:column; gap:4px;
       background:none; border:none; cursor:pointer; padding:8px; border-radius:8px;
@@ -372,7 +367,7 @@
           <div class="user-role" data-user-role>…</div>
         </div>
       </div>
-      <a class="btn btn-ghost btn-sm btn-full" href="/logout" style="margin-top:10px">Cerrar sesión</a>
+      <a class="btn btn-primary btn-sm btn-full" href="/logout" style="margin-top:10px">Cerrar sesión</a>
     </div>
   </aside>
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -387,10 +382,6 @@
         <span class="topbar-title" id="topbarTitle">Mi perfil</span>
       </div>
       <div id="topbarActions" style="display:flex;align-items:center;gap:var(--space-3)">
-        <a class="ghost-link" href="/">
-          Ver sitio
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </a>
       </div>
     </header>
 
@@ -511,6 +502,30 @@
                     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
                   </span>
                   <input class="form-control" type="text" id="pInstagram" name="instagram_url" placeholder="Usuario Instagram" />
+                </div>
+                <div class="input-with-icon">
+                  <span class="input-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/></svg>
+                  </span>
+                  <input class="form-control" type="text" id="pYoutube" name="youtube_url" placeholder="Canal de YouTube" />
+                </div>
+                <div class="input-with-icon">
+                  <span class="input-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 12.5a4 4 0 1 0 4 4V4c.6 2.6 2.7 4.4 5.5 4.6"/></svg>
+                  </span>
+                  <input class="form-control" type="text" id="pTiktok" name="tiktok_url" placeholder="Usuario TikTok" />
+                </div>
+                <div class="input-with-icon">
+                  <span class="input-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M17 4l-6 8 6 8"/></svg>
+                  </span>
+                  <input class="form-control" type="text" id="pKick" name="kick_url" placeholder="Usuario Kick" />
+                </div>
+                <div class="input-with-icon">
+                  <span class="input-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16v11l-4 4h-3l-3 3H8v-3H4z"/><line x1="11" y1="8" x2="11" y2="12"/><line x1="15" y1="8" x2="15" y2="12"/></svg>
+                  </span>
+                  <input class="form-control" type="text" id="pTwitch" name="twitch_url" placeholder="Usuario Twitch" />
                 </div>
               </div>
             </div>
