@@ -71,25 +71,26 @@
   font-family: var(--font-heading);
   font-size: 15px;
   font-weight: 700;
-  padding: 0.8em 2em;
-  border-radius: 0.65em;
-  border: 1px solid rgba(255, 70, 85, 0.4);
+  padding: 14px 38px;
+  border-radius: 50px;
+  border: 2px solid rgba(255, 110, 125, 0.4);
   text-decoration: none;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.55), -4px -4px 12px rgba(255, 70, 85, 0.2);
+  transition: all 0.2s ease-in-out;
+  box-shadow: inset 4px 4px 10px rgba(160, 20, 35, 0.8), inset -4px -4px 10px rgba(255, 140, 155, 0.45);
 }
 
-.btn-hero-explore:hover {
-  background: linear-gradient(145deg, #ff5e6d, #ff4655);
+.btn-hero-explore:hover,
+.btn-hero-explore:focus {
+  outline: none;
   border-color: #ff5e6d;
-  transform: translateY(-2px);
-  box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.65), -5px -5px 14px rgba(255, 94, 109, 0.35), 0 0 24px var(--red-glow);
+  box-shadow: inset 2px 2px 5px rgba(160, 20, 35, 0.8), inset -2px -2px 5px rgba(255, 140, 155, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(255, 70, 85, 0.35);
+  transform: translateY(-1px);
 }
 
 .btn-hero-explore:active {
   background: linear-gradient(145deg, #cc2b37, #ff4655);
-  box-shadow: inset 4px 4px 12px rgba(0, 0, 0, 0.8), inset -4px -4px 12px rgba(255, 70, 85, 0.25);
+  box-shadow: inset 5px 5px 12px rgba(120, 10, 25, 0.9), inset -4px -4px 10px rgba(255, 120, 135, 0.3);
   transform: scale(0.98);
 }
 

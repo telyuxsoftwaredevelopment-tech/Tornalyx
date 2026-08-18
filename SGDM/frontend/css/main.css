@@ -79,46 +79,79 @@ p  { line-height:1.6; }
 .section__header { text-align:center; margin-bottom:clamp(32px,5vw,52px); }
 .section__header p { color:var(--muted); font-size:var(--font-size-lg); margin-top:var(--space-2); }
 
-/* ─── Botones (Neumorfismo Táctil Tornalyx) ──────────── */
-.btn {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  font-family:var(--font-heading);
-  font-weight:600;
-  font-size:15px;
-  padding:0.75em 1.7em;
-  border-radius:0.65em;
-  cursor:pointer;
-  border:1px solid transparent;
-  transition:all 0.25s ease;
-  white-space:nowrap;
-  text-decoration:none;
-}
-.btn:hover { text-decoration:none; }
-.btn:active {
-  transform:scale(0.97);
+/* ─── Botones Neumórficos (Neumorphism Design) ────────── */
+/* From Uiverse.io by adamgiebl */
+.neu-button {
+  background-color: #e0e0e0;
+  border-radius: 50px;
+  box-shadow: inset 4px 4px 10px #bcbcbc, inset -4px -4px 10px #ffffff;
+  color: #4d4d4d;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  padding: 12px 36px;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid rgb(206, 206, 206);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
 }
 
-/* Primary — Neumorfismo Rojo Coral Vibrante */
-.btn-primary {
-  background:linear-gradient(145deg, #ff4655, #cc2b37);
-  color:#ffffff !important;
-  border:1px solid rgba(255, 70, 85, 0.4);
-  box-shadow:6px 6px 14px rgba(0,0,0,.55), -4px -4px 10px rgba(255,70,85,.2);
+.neu-button:hover,
+.neu-button:focus {
+  outline: none;
+  box-shadow: inset 2px 2px 5px #bcbcbc, inset -2px -2px 5px #ffffff, 2px 2px 5px #bcbcbc, -2px -2px 5px #ffffff;
+  transform: translateY(-1px);
 }
-.btn-primary:hover {
-  background:linear-gradient(145deg, #ff5e6d, #ff4655);
-  border-color:#ff5e6d;
-  box-shadow:8px 8px 18px rgba(0,0,0,.65), -5px -5px 14px rgba(255,94,109,.3), 0 0 24px var(--red-glow);
-  transform:translateY(-1px);
+
+.neu-button:active {
+  box-shadow: inset 4px 4px 10px #9a9a9a, inset -4px -4px 10px #ffffff;
+  transform: scale(0.98);
+}
+
+/* Base general de botones del sistema */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 32px;
+  border-radius: 50px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn:hover { text-decoration: none; }
+.btn:active { transform: scale(0.98); }
+.btn:focus { outline: none; }
+
+/* Primary — Neumorfismo Rojo Coral */
+.btn-primary {
+  background: linear-gradient(145deg, #ff4655, #cc2b37);
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 110, 125, 0.4);
+  box-shadow: inset 4px 4px 10px rgba(160, 20, 35, 0.8), inset -4px -4px 10px rgba(255, 140, 155, 0.45);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  outline: none;
+  border-color: #ff5e6d;
+  box-shadow: inset 2px 2px 5px rgba(160, 20, 35, 0.8), inset -2px -2px 5px rgba(255, 140, 155, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(255, 70, 85, 0.35);
+  transform: translateY(-1px);
 }
 .btn-primary:active {
-  background:linear-gradient(145deg, #cc2b37, #ff4655);
-  color:#f1f5f9 !important;
-  box-shadow:inset 4px 4px 12px rgba(0,0,0,.8), inset -4px -4px 12px rgba(255,70,85,.25);
-  transform:scale(0.98);
+  background: linear-gradient(145deg, #cc2b37, #ff4655);
+  color: #ffffff !important;
+  box-shadow: inset 5px 5px 12px rgba(120, 10, 25, 0.9), inset -4px -4px 10px rgba(255, 120, 135, 0.3);
+  transform: scale(0.98);
 }
 
 /* Ghost / Secundario — Neumorfismo Dark Charcoal */
@@ -126,54 +159,72 @@ p  { line-height:1.6; }
 .btn-secondary,
 .btn-outline,
 .ghost-btn {
-  background:linear-gradient(145deg, var(--bg-3), var(--bg-2));
-  color:var(--ink) !important;
-  border:1px solid rgba(255,255,255,.06);
-  box-shadow:6px 6px 14px rgba(0,0,0,.5), -4px -4px 10px rgba(255,255,255,.03);
+  background: linear-gradient(145deg, #1f242e, #14171d);
+  color: var(--ink) !important;
+  border: 2px solid #272e3d;
+  box-shadow: inset 4px 4px 10px #0b0d11, inset -4px -4px 10px #2a3344;
 }
 .btn-ghost:hover,
 .btn-secondary:hover,
 .btn-outline:hover,
-.ghost-btn:hover {
-  border-color:rgba(255,70,85,.35);
-  color:#ffffff !important;
-  box-shadow:8px 8px 18px rgba(0,0,0,.6), -5px -5px 12px rgba(255,255,255,.05);
-  transform:translateY(-1px);
+.ghost-btn:hover,
+.btn-ghost:focus,
+.btn-secondary:focus,
+.btn-outline:focus,
+.ghost-btn:focus {
+  outline: none;
+  border-color: rgba(255, 70, 85, 0.5);
+  color: #ffffff !important;
+  box-shadow: inset 2px 2px 5px #0b0d11, inset -2px -2px 5px #2a3344, 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
 }
 .btn-ghost:active,
 .btn-secondary:active,
 .btn-outline:active,
 .ghost-btn:active {
-  background:linear-gradient(145deg, #101217, #181c24);
-  color:var(--muted) !important;
-  box-shadow:inset 4px 4px 12px rgba(0,0,0,.85), inset -4px -4px 12px rgba(255,255,255,.03);
-  transform:scale(0.98);
+  background: linear-gradient(145deg, #101217, #181c24);
+  color: var(--muted) !important;
+  box-shadow: inset 5px 5px 12px #07090c, inset -4px -4px 10px #202734;
+  transform: scale(0.98);
 }
 
 .btn-success {
-  background:linear-gradient(145deg,#12c087,var(--color-secondary));
-  color:#fff !important;
-  box-shadow:6px 6px 14px rgba(0,0,0,.5), -4px -4px 10px rgba(20,200,140,.1);
+  background: linear-gradient(145deg, #12c087, var(--color-secondary));
+  color: #fff !important;
+  border: 2px solid rgba(40, 220, 160, 0.4);
+  box-shadow: inset 4px 4px 10px rgba(5, 70, 50, 0.8), inset -4px -4px 10px rgba(60, 240, 180, 0.45);
 }
-.btn-success:hover { background:linear-gradient(145deg,#16d494,#0b8a5e); transform:translateY(-1px); }
+.btn-success:hover,
+.btn-success:focus {
+  outline: none;
+  box-shadow: inset 2px 2px 5px rgba(5, 70, 50, 0.8), inset -2px -2px 5px rgba(60, 240, 180, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(20, 200, 140, 0.25);
+  transform: translateY(-1px);
+}
 .btn-success:active {
-  box-shadow:inset 4px 4px 10px rgba(3,60,40,.7), inset -4px -4px 10px rgba(30,220,155,.15);
-  transform:scale(0.98);
+  box-shadow: inset 5px 5px 12px rgba(3, 50, 35, 0.9), inset -4px -4px 10px rgba(40, 200, 150, 0.3);
+  transform: scale(0.98);
 }
 
 .btn-danger {
-  background:linear-gradient(145deg,#ff4655,#cc2b37);
-  color:#fff !important;
-  box-shadow:6px 6px 14px rgba(0,0,0,.55), -4px -4px 10px rgba(255,70,85,.2);
+  background: linear-gradient(145deg, #ff4655, #cc2b37);
+  color: #fff !important;
+  border: 2px solid rgba(255, 110, 125, 0.4);
+  box-shadow: inset 4px 4px 10px rgba(160, 20, 35, 0.8), inset -4px -4px 10px rgba(255, 140, 155, 0.45);
+}
+.btn-danger:hover,
+.btn-danger:focus {
+  outline: none;
+  box-shadow: inset 2px 2px 5px rgba(160, 20, 35, 0.8), inset -2px -2px 5px rgba(255, 140, 155, 0.45), 2px 2px 8px rgba(0, 0, 0, 0.6), -2px -2px 8px rgba(255, 70, 85, 0.3);
+  transform: translateY(-1px);
 }
 .btn-danger:active {
-  box-shadow:inset 4px 4px 10px rgba(0,0,0,.8), inset -4px -4px 10px rgba(255,70,85,.25);
-  transform:scale(0.98);
+  box-shadow: inset 5px 5px 12px rgba(120, 10, 25, 0.9), inset -4px -4px 10px rgba(255, 120, 135, 0.3);
+  transform: scale(0.98);
 }
 
-.btn-sm { padding:0.5em 1.2em; font-size:13px; border-radius:0.55em; }
-.btn-lg { padding:0.85em 2em; font-size:16px; border-radius:0.7em; }
-.btn-full { width:100%; }
+.btn-sm { padding: 8px 20px; font-size: 13px; border-radius: 50px; }
+.btn-lg { padding: 15px 40px; font-size: 17px; border-radius: 50px; }
+.btn-full { width: 100%; }
 
 .btn-row { display:flex; gap:14px; flex-wrap:wrap; }
 .btn-row-center { justify-content:center; }
@@ -320,31 +371,33 @@ p  { line-height:1.6; }
 .nav-link-login:hover { color:#ffffff; }
 
 .btn-nav-register {
-  background:linear-gradient(145deg, #ff4655, #cc2b37);
-  color:#ffffff !important;
-  font-family:var(--font-heading);
-  font-size:14px;
-  font-weight:600;
-  padding:0.6em 1.5em;
-  border-radius:0.6em;
-  border:1px solid rgba(255, 70, 85, 0.4);
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  transition:all 0.25s ease;
-  white-space:nowrap;
-  box-shadow:5px 5px 12px rgba(0, 0, 0, 0.5), -3px -3px 9px rgba(255, 70, 85, 0.2);
+  background: linear-gradient(145deg, #ff4655, #cc2b37);
+  color: #ffffff !important;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 24px;
+  border-radius: 50px;
+  border: 2px solid rgba(255, 110, 125, 0.4);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease-in-out;
+  white-space: nowrap;
+  box-shadow: inset 3px 3px 8px rgba(160, 20, 35, 0.8), inset -3px -3px 8px rgba(255, 140, 155, 0.45);
 }
-.btn-nav-register:hover {
-  background:linear-gradient(145deg, #ff5e6d, #ff4655);
-  border-color:#ff5e6d;
-  transform:translateY(-1px);
-  box-shadow:7px 7px 16px rgba(0, 0, 0, 0.6), -4px -4px 12px rgba(255, 94, 109, 0.3);
+.btn-nav-register:hover,
+.btn-nav-register:focus {
+  outline: none;
+  border-color: #ff5e6d;
+  box-shadow: inset 2px 2px 4px rgba(160, 20, 35, 0.8), inset -2px -2px 4px rgba(255, 140, 155, 0.45), 2px 2px 6px rgba(0, 0, 0, 0.5), -2px -2px 6px rgba(255, 70, 85, 0.3);
+  transform: translateY(-1px);
 }
 .btn-nav-register:active {
-  box-shadow:inset 4px 4px 10px rgba(0, 0, 0, 0.8), inset -4px -4px 10px rgba(255, 70, 85, 0.25);
-  transform:scale(0.98);
+  background: linear-gradient(145deg, #cc2b37, #ff4655);
+  box-shadow: inset 4px 4px 10px rgba(120, 10, 25, 0.9), inset -3px -3px 8px rgba(255, 120, 135, 0.3);
+  transform: scale(0.98);
 }
 
 .theme-toggle {
