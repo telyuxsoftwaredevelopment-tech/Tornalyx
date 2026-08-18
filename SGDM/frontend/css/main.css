@@ -767,7 +767,7 @@ select.form-control option { background:var(--bg-2); color:var(--ink); }
   gap:36px 20px;
 }
 @media(min-width:520px) { .foot-grid { grid-template-columns:repeat(3,1fr); } .foot-brand { grid-column:1 / -1; } }
-@media(min-width:768px) { .foot-grid { grid-template-columns:1.8fr 1fr 1fr 1fr; gap:28px; } .foot-brand { grid-column:auto; } }
+@media(min-width:768px) { .foot-grid { grid-template-columns:1.6fr repeat(4,1fr); gap:28px; } .foot-brand { grid-column:auto; } }
 .foot-brand .brand { margin-bottom:14px; }
 .foot-brand p { color:var(--muted); font-size:14px; line-height:1.6; max-width:32ch; }
 .foot-col h5 { font-family:var(--font-heading); font-size:13px; font-weight:600; color:var(--ink); margin-bottom:16px; letter-spacing:.4px; text-transform:uppercase; }
