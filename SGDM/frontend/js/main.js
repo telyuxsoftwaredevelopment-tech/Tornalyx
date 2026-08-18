@@ -161,17 +161,66 @@ function initScrollReveal() {
 }
 
 /* ─── Tabs genéricos [role="tab"] ───────────────────── */
+/* ─── Detección Apple / iOS / macOS para Liquid Glass ─── */
+function detectAppleLiquidGlass() {
+  const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+  const platform = navigator.platform || '';
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(platform) || /Mac OS X/.test(ua);
+  const isApple = isIOS || isMac || (/AppleWebKit/.test(ua) && /Safari/.test(ua) && !/Chrome|Chromium|Edg|OPR/.test(ua));
+
+  if (isApple) {
+    document.documentElement.classList.add('is-apple');
+    document.documentElement.setAttribute('data-apple-device', isIOS ? 'ios' : 'mac');
+  }
+  if (isIOS) {
+    document.documentElement.classList.add('is-ios');
+  }
+}
+
+/* ─── Pestañas / Tabs (Documentación y General) ───────── */
 function initTabs() {
+  // Pestañas generales con role="tab"
   document.querySelectorAll('[role="tab"]').forEach(tab => {
-    tab.addEventListener('click', function () {
+    tab.addEventListener('click', function (e) {
+      const targetId = this.dataset.tabTarget || ('tab-' + this.dataset.tab);
       const parent = this.closest('[role="tablist"]') || document;
-      parent.querySelectorAll('[role="tab"]').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      parent.querySelectorAll('[role="tab"]').forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      
+      document.querySelectorAll('.tab-content, .doc-tab-panel').forEach(c => {
+        c.classList.remove('active');
+        c.hidden = true;
+      });
+
       this.classList.add('active');
-      const panel = document.getElementById('tab-' + this.dataset.tab);
-      if (panel) panel.classList.add('active');
+      this.setAttribute('aria-selected', 'true');
+
+      const panel = document.getElementById(targetId) || document.getElementById('tab-' + this.dataset.tab);
+      if (panel) {
+        panel.classList.add('active');
+        panel.hidden = false;
+      }
+
+      // Sincronización en URL para apartado de documentación
+      if (targetId === 'tabPresentaciones' || targetId === 'tabDocumentacion') {
+        const url = new URL(window.location);
+        url.searchParams.set('tab', targetId === 'tabPresentaciones' ? 'presentaciones' : 'documentacion');
+        history.replaceState(null, '', url);
+      }
     });
   });
+
+  // Restaurar pestaña activa de documentación si viene por URL (?tab=presentaciones)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabQuery = urlParams.get('tab');
+  if (tabQuery === 'presentaciones') {
+    const presTabBtn = document.getElementById('tabBtnPres') || document.querySelector('[data-tab-target="tabPresentaciones"]');
+    if (presTabBtn) presTabBtn.click();
+  }
 }
 
 /* ─── Toast Notifications ────────────────────────────── */
@@ -883,7 +932,10 @@ function initActionMenus() {
 }
 
 /* ─── Init global ────────────────────────────────────── */
+detectAppleLiquidGlass();
+
 document.addEventListener('DOMContentLoaded', () => {
+  detectAppleLiquidGlass();
   initMobileNav();
   initBottomNav();
   initScrollReveal();
