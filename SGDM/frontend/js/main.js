@@ -685,15 +685,14 @@ function initAccessibility() {
   }
 
   /* El disparador es siempre un ícono (nunca la palabra "Accesibilidad"),
-     ubicado dentro de la barra superior de la página, sea cual sea su
-     forma: la topbar de los paneles privados (#topbarActions), el menú
-     público (.nav-links) o la franja de cuenta del login (.nav-right).
-     La topbar va primero porque los paneles ahora tienen las dos barras y
-     .nav-links se oculta por CSS abajo de 860px, donde el ícono quedaría
-     invisible. Solo si una página no tiene ninguna barra cae al flotante. */
-  const navBar = document.getElementById('topbarActions')
-    || document.querySelector('.nav .nav-links')
-    || document.querySelector('.nav .nav-right, .nav .nav-right-static');
+     dentro del navbar de la página. El navbar reparte sus utilidades en
+     dos tiras complementarias: .nav-links se ve de 860px para arriba y
+     .nav-utility de 860px para abajo. Acá va el widget principal, en la
+     de escritorio; el clon de más abajo cubre la móvil. La topbar de los
+     paneles queda de reserva, y sin ninguna barra cae al botón flotante. */
+  const navBar = document.querySelector('.nav .nav-links')
+    || document.querySelector('.nav .nav-right, .nav .nav-right-static')
+    || document.getElementById('topbarActions');
   const widget = document.createElement('div');
   widget.className = navBar ? 'a11y-widget a11y-widget--nav' : 'a11y-widget';
   // El nombre accesible viaja por aria-label/title para lectores de pantalla.
@@ -781,6 +780,9 @@ function initAccessibility() {
      abajo) lo trataría como un click externo y cerraría el panel en el
      mismo evento que lo abre. */
   document.querySelectorAll('.nav-utility').forEach(host => {
+    // El widget principal ya vive acá (es el primer destino que se elige):
+    // agregar además el clon dejaría dos íconos iguales pegados.
+    if (host.contains(widget)) { return; }
     const copia = abrirDesdeMobile.cloneNode(true);
     copia.addEventListener('click', e => {
       e.preventDefault();
