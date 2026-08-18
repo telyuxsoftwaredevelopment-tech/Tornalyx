@@ -31,8 +31,15 @@ const REDES_ICONS = {
   twitter_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4l16 16M20 4L4 20"/></svg>',
   facebook_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 21v-7h2.5l.5-3H14V9a1.5 1.5 0 0 1 1.5-1.5H17V4.6C16.5 4.5 15.6 4.4 14.7 4.4c-2.5 0-4.2 1.6-4.2 4.4V11H8v3h2.5v7"/></svg>',
   instagram_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1"/></svg>',
+    youtube_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z"/></svg>',
+    tiktok_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 12.5a4 4 0 1 0 4 4V4c.6 2.6 2.7 4.4 5.5 4.6"/></svg>',
+    kick_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M17 4l-6 8 6 8"/></svg>',
+    twitch_url: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h16v11l-4 4h-3l-3 3H8v-3H4z"/><line x1="11" y1="8" x2="11" y2="12"/><line x1="15" y1="8" x2="15" y2="12"/></svg>',
 };
-const REDES_LABELS = { twitter_url: 'X / Twitter', facebook_url: 'Facebook', instagram_url: 'Instagram' };
+const REDES_LABELS = {
+  twitter_url: 'X / Twitter', facebook_url: 'Facebook', instagram_url: 'Instagram',
+  youtube_url: 'YouTube', tiktok_url: 'TikTok', kick_url: 'Kick', twitch_url: 'Twitch',
+};
 
 function redesHtml(j) {
   return Object.keys(REDES_ICONS)

@@ -149,6 +149,10 @@ class Usuario extends Model {
             'twitter_url'   => 'VARCHAR(255) NULL DEFAULT NULL',
             'facebook_url'  => 'VARCHAR(255) NULL DEFAULT NULL',
             'instagram_url' => 'VARCHAR(255) NULL DEFAULT NULL',
+            'youtube_url'   => 'VARCHAR(255) NULL DEFAULT NULL',
+            'tiktok_url'    => 'VARCHAR(255) NULL DEFAULT NULL',
+            'kick_url'      => 'VARCHAR(255) NULL DEFAULT NULL',
+            'twitch_url'    => 'VARCHAR(255) NULL DEFAULT NULL',
             // avatar_data, no avatar_blob: ese es el nombre que crea
             // add_avatar_blob.sql y el que lee PerfilController::servirAvatar.
             'avatar_data'   => 'MEDIUMBLOB   NULL DEFAULT NULL',

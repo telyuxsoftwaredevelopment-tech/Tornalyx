@@ -96,6 +96,10 @@ class PerfilController extends Controller {
         $twitter   = trim((string) (filter_input(INPUT_POST, 'twitter_url',   FILTER_DEFAULT) ?? ''));
         $facebook  = trim((string) (filter_input(INPUT_POST, 'facebook_url',  FILTER_DEFAULT) ?? ''));
         $instagram = trim((string) (filter_input(INPUT_POST, 'instagram_url', FILTER_DEFAULT) ?? ''));
+        $youtube   = trim((string) (filter_input(INPUT_POST, 'youtube_url',   FILTER_DEFAULT) ?? ''));
+        $tiktok    = trim((string) (filter_input(INPUT_POST, 'tiktok_url',    FILTER_DEFAULT) ?? ''));
+        $kick      = trim((string) (filter_input(INPUT_POST, 'kick_url',      FILTER_DEFAULT) ?? ''));
+        $twitch    = trim((string) (filter_input(INPUT_POST, 'twitch_url',    FILTER_DEFAULT) ?? ''));
 
         if ($nombre === '' || $apellido === '' || $email === '' || $fechaNac === '') {
             $this->jsonError('Nombre, apellido, correo y fecha de nacimiento son obligatorios.');
@@ -146,7 +150,12 @@ class PerfilController extends Controller {
         }
 
         $redesProcesadas = [];
-        foreach (['twitter_url' => $twitter, 'facebook_url' => $facebook, 'instagram_url' => $instagram] as $campo => $valor) {
+        $redes = [
+            'twitter_url'   => $twitter,   'facebook_url' => $facebook, 'instagram_url' => $instagram,
+            'youtube_url'   => $youtube,   'tiktok_url'   => $tiktok,   'kick_url'      => $kick,
+            'twitch_url'    => $twitch,
+        ];
+        foreach ($redes as $campo => $valor) {
             if ($valor !== '') {
                 $norm = $this->normalizarRedSocial($campo, $valor);
                 if ($norm === null) {
@@ -154,6 +163,10 @@ class PerfilController extends Controller {
                         'twitter_url'   => 'X (Twitter)',
                         'facebook_url'  => 'Facebook',
                         'instagram_url' => 'Instagram',
+                        'youtube_url'   => 'YouTube',
+                        'tiktok_url'    => 'TikTok',
+                        'kick_url'      => 'Kick',
+                        'twitch_url'    => 'Twitch',
                         default         => $campo,
                     };
                     $this->jsonError("El enlace o usuario de $nombreAmigable no es válido.");
@@ -177,6 +190,10 @@ class PerfilController extends Controller {
             'twitter_url'   => $redesProcesadas['twitter_url'],
             'facebook_url'  => $redesProcesadas['facebook_url'],
             'instagram_url' => $redesProcesadas['instagram_url'],
+            'youtube_url'   => $redesProcesadas['youtube_url'],
+            'tiktok_url'    => $redesProcesadas['tiktok_url'],
+            'kick_url'      => $redesProcesadas['kick_url'],
+            'twitch_url'    => $redesProcesadas['twitch_url'],
         ]);
 
         // El nav y los saludos usan el nombre guardado en sesión.
@@ -321,6 +338,10 @@ class PerfilController extends Controller {
                 'twitter_url'   => $u['twitter_url']   ?? null,
                 'facebook_url'  => $u['facebook_url']  ?? null,
                 'instagram_url' => $u['instagram_url'] ?? null,
+                'youtube_url'   => $u['youtube_url']   ?? null,
+                'tiktok_url'    => $u['tiktok_url']    ?? null,
+                'kick_url'      => $u['kick_url']      ?? null,
+                'twitch_url'    => $u['twitch_url']    ?? null,
                 'created_at'    => $u['created_at']    ?? null,
             ],
             'torneos'   => $this->torneoModel->listarDeParticipante($id),
@@ -349,6 +370,10 @@ class PerfilController extends Controller {
             'twitter_url'   => $u['twitter_url']   ?? null,
             'facebook_url'  => $u['facebook_url']  ?? null,
             'instagram_url' => $u['instagram_url'] ?? null,
+            'youtube_url'   => $u['youtube_url']   ?? null,
+            'tiktok_url'    => $u['tiktok_url']    ?? null,
+            'kick_url'      => $u['kick_url']      ?? null,
+            'twitch_url'    => $u['twitch_url']    ?? null,
             'created_at'    => $u['created_at']    ?? null,
         ];
     }
@@ -372,7 +397,7 @@ class PerfilController extends Controller {
         }
 
         // Si empieza con www. o el dominio de la red social
-        if (preg_match('#^(?:www\.)?(?:twitter\.com|x\.com|facebook\.com|fb\.com|instagram\.com|instagr\.am)/#i', $v)) {
+        if (preg_match('#^(?:www\.)?(?:twitter\.com|x\.com|facebook\.com|fb\.com|instagram\.com|instagr\.am|youtube\.com|youtu\.be|tiktok\.com|kick\.com|twitch\.tv)/#i', $v)) {
             $url = 'https://' . ltrim($v, '/');
             return $this->esUrlValida($url) ? $url : null;
         }
@@ -383,6 +408,10 @@ class PerfilController extends Controller {
                 'twitter_url'   => 'https://x.com/',
                 'facebook_url'  => 'https://facebook.com/',
                 'instagram_url' => 'https://instagram.com/',
+                'youtube_url'   => 'https://youtube.com/@',
+                'tiktok_url'    => 'https://tiktok.com/@',
+                'kick_url'      => 'https://kick.com/',
+                'twitch_url'    => 'https://twitch.tv/',
                 default         => ''
             };
             if ($base !== '') {
