@@ -1,4 +1,4 @@
-# 🏆 TORNALIX - Sistema de Gestión Deportiva Modular
+# 🏆 TORNALYX - Sistema de Gestión Deportiva Modular
 
 <div align="center">
 
