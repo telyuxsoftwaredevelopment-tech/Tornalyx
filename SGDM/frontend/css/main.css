@@ -589,6 +589,11 @@ body:has(.bottom-nav) { padding-bottom:calc(86px + env(safe-area-inset-bottom));
   pointer-events:none;
 }
 
+/* Paginas que muestran la barra pero no marca ninguna seccion (los paneles
+   privados: su seccion no esta entre los cinco accesos). Sin esto la pildora
+   se queda en su posicion por defecto y resalta "Inicio" por error. */
+.bottom-nav:not(:has(.bottom-nav__item[aria-current="page"])) .bottom-nav__pill { opacity:0; }
+
 .bottom-nav__item {
   position:relative; z-index:1;
   display:flex; flex-direction:column; align-items:center; justify-content:center;

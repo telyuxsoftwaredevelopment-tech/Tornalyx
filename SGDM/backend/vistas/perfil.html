@@ -272,7 +272,10 @@
 
     /* Acciones del formulario */
     .form-actions-row {
-      display:flex; align-items:center; gap:14px; margin-top:28px;
+      /* wrap: en pantallas angostas los dos botones no entran en una fila y
+         se salian del formulario, estirando el ancho del documento (y con el,
+         la barra inferior fija, que quedaba descentrada). */
+      display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:28px;
     }
 
     /* ─── Data Tables & Card Panels ───────────────────────── */
@@ -637,6 +640,64 @@
       </div>
     </footer>
   </div>
+
+  <!-- Navegacion movil: la misma capsula flotante de las paginas publicas.
+       Se oculta sola arriba de 860px (.bottom-nav en main.css). -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <span class="bottom-nav__pill" aria-hidden="true"></span>
+    <a href="/" class="bottom-nav__item">
+      <span class="bottom-nav__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 11.5 12 4l8 7.5"/>
+          <path d="M6 10.5V19a1 1 0 0 0 1 1h3v-5.5h4V20h3a1 1 0 0 0 1-1v-8.5"/>
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Inicio</span>
+    </a>
+    <a href="/torneos" class="bottom-nav__item">
+      <span class="bottom-nav__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 4h10v3.5a5 5 0 0 1-10 0V4Z"/>
+          <path d="M7 5.2H5.2a2 2 0 0 0 0 4H7"/>
+          <path d="M17 5.2h1.8a2 2 0 0 1 0 4H17"/>
+          <path d="M12 12.5V16"/>
+          <path d="M9 20h6"/>
+          <path d="M9.5 16h5l.6 4h-6.2l.6-4Z"/>
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Torneos</span>
+    </a>
+    <a href="/jugadores" class="bottom-nav__item">
+      <span class="bottom-nav__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="9" cy="8.2" r="3.2"/>
+          <path d="M3.5 20c0-3.6 2.5-6.3 5.5-6.3s5.5 2.7 5.5 6.3"/>
+          <circle cx="16.8" cy="9" r="2.3"/>
+          <path d="M15 14.2c2.4.5 4.2 2.7 4.5 5.8"/>
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Jugadores</span>
+    </a>
+    <a href="/documentacion" class="bottom-nav__item">
+      <span class="bottom-nav__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7.5 3h6l4 4v12.5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/>
+          <path d="M13.5 3v4h4"/>
+          <path d="M9 13h6M9 16.5h6M9 9.5h2"/>
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Documentación</span>
+    </a>
+    <a href="/login" class="bottom-nav__item bottom-nav__account" aria-current="page" aria-label="Entrar" title="Entrar">
+      <span class="bottom-nav__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="8.2" r="3.4"/>
+          <path d="M4.8 20c0-4 3.2-7.2 7.2-7.2s7.2 3.2 7.2 7.2"/>
+        </svg>
+      </span>
+      <span class="bottom-nav__label">Cuenta</span>
+    </a>
+  </nav>
 
   <script src="../../js/main.js?v=16"></script>
   <script src="../../js/dashboard.js"></script>
