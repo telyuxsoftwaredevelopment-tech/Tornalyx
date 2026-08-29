@@ -97,16 +97,15 @@
         </div>
         <div class="foot-col">
           <h5>Producto</h5>
-          <a href="/torneos">Crear un torneo</a>
-          <a href="/torneos">Buscar torneos</a>
-          <a href="/nosotros">Precios</a>
-          <a href="/nosotros">Programa de afiliados</a>
+          <a href="/torneos">Torneos</a>
+          <a href="/jugadores">Jugadores</a>
+          <a href="/documentacion">Documentación</a>
         </div>
         <div class="foot-col">
-          <h5>Recursos</h5>
-          <a href="/documentacion">Blog</a>
-          <a href="/documentacion">Base de conocimiento</a>
-          <a href="mailto:contacto@telyuxsoftwaredevelopment.com">Escríbenos</a>
+          <h5>Formatos</h5>
+          <a href="/torneos">Liga</a>
+          <a href="/torneos">Eliminación directa</a>
+          <a href="/torneos">Sistema suizo</a>
         </div>
         <div class="foot-col">
           <h5>Conéctate</h5>
