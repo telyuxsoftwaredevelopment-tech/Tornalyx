@@ -27,7 +27,6 @@
 
 .hero-text {
   text-align: left;
-  animation: fade-up .6s .1s cubic-bezier(.22,1,.36,1) both;
 }
 
 .hero-title {
@@ -57,7 +56,6 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  animation: fade-up .6s .25s cubic-bezier(.22,1,.36,1) both;
 }
 
 /* ─── Botón Neumórfico Hero ─── */
@@ -103,11 +101,10 @@
 .hero-media-card {
   position: relative;
   border-radius: 20px;
-  border: 1px solid rgba(229, 9, 20, 0.28);
+  border: 1px solid var(--line);
   background: #12141a;
   overflow: hidden;
-  box-shadow: 0 24px 60px -12px rgba(0,0,0,.7), 0 0 45px -8px rgba(229, 9, 20, 0.22);
-  animation: fade-up .6s .2s cubic-bezier(.22,1,.36,1) both;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 .hero-media-image-wrap {
@@ -189,7 +186,6 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 0 12px rgba(255, 70, 85, 0.4);
 }
 
 /* ─── Audiencias: foto a la izquierda, texto a la derecha ─ */
@@ -215,7 +211,7 @@
   border: 1px solid var(--line);
   background: var(--bg-2);
   overflow: hidden;
-  box-shadow: 0 0 32px -6px var(--red-glow);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
 @media(max-width: 640px) {
@@ -226,11 +222,8 @@
 
 .galeria__slides::before,
 .galeria__slides::after {
-  content: ""; position: absolute; z-index: 2;
-  width: 16px; height: 16px; pointer-events: none;
+  display: none;
 }
-.galeria__slides::before { top: 10px; left: 10px; border-top: 2px solid var(--red); border-left: 2px solid var(--red); }
-.galeria__slides::after { bottom: 10px; right: 10px; border-bottom: 2px solid var(--red); border-right: 2px solid var(--red); }
 
 .galeria__slide {
   position: absolute; inset: 0;

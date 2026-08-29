@@ -148,16 +148,7 @@ function initArrastreBottomNav(nav, items, pill, activeIndex, place) {
 
 /* ─── Scroll Reveal ─────────────────────────────────── */
 function initScrollReveal() {
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(entries => {
-      entries.forEach(e => {
-        if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
-      });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
-  } else {
-    document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('visible'));
-  }
+  document.querySelectorAll('[data-reveal]').forEach(el => el.classList.add('visible'));
 }
 
 /* ─── Tabs genéricos [role="tab"] ───────────────────── */
