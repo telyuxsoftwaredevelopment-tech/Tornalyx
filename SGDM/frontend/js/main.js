@@ -418,30 +418,43 @@ const Utils = {
    */
   esPerfilKratos(u) {
     if (!u) return false;
-    const nick = String(u.nickname || '').toLowerCase().trim();
-    const nombre = `${u.nombre || ''} ${u.apellido || ''}`.toLowerCase().trim();
-    const email = String(u.email || '').toLowerCase().trim();
+    const normalize = str => String(str || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
+    const nick = normalize(u.nickname);
+    const nombre = normalize(u.nombre);
+    const apellido = normalize(u.apellido);
+    const full = `${nombre} ${apellido}`.trim();
+    const email = normalize(u.email);
     const tag = String(u.tag || '').trim();
 
-    return nick.includes('kratosduarte') ||
-           nick === 'kratos' ||
-           nick.includes('kratosduarte17') ||
-           nombre.includes('kratos') ||
-           (nombre.includes('joaquin') && nombre.includes('duarte')) ||
+    return nick.includes('kratos') ||
+           nick.includes('kratosduarte') ||
+           full.includes('kratos') ||
+           (full.includes('joaquin') && full.includes('duarte')) ||
            email.includes('kratos') ||
-           (tag === '1891' && nombre.includes('joaquin'));
+           (tag === '1891' && full.includes('joaquin'));
   },
 
   /**
    * Devuelve el HTML del Spider-Man pixel art invertido colgado de una telaraña.
+   * @param {'normal'|'mini'} variant
    * @returns {string}
    */
-  spidermanEasterEggHtml() {
+  spidermanEasterEggHtml(variant = 'normal') {
+    const isMini = variant === 'mini';
+    const extraClass = isMini ? ' spiderman-easter-egg--mini' : '';
+    const svgW = isMini ? 22 : 34;
+    const svgH = isMini ? 34 : 52;
+
     return `
-      <div class="spiderman-easter-egg" title="Spiderman No Home 🕷️" aria-label="Easter egg: Spiderman No Home" role="img">
+      <div class="spiderman-easter-egg${extraClass}" title="Spiderman No Home 🕷️" aria-label="Easter egg: Spiderman No Home" role="img">
         <div class="spiderman-web-thread"></div>
         <div class="spiderman-figure">
-          <svg class="spiderman-pixel-svg" viewBox="0 0 17 26" width="34" height="52" shape-rendering="crispEdges" aria-hidden="true">
+          <svg class="spiderman-pixel-svg" viewBox="0 0 17 26" width="${svgW}" height="${svgH}" shape-rendering="crispEdges" aria-hidden="true">
             <g fill="#ffffff">
               <rect x="8" y="0" width="1" height="10" />
               <rect x="6" y="17" width="1" height="2" />

@@ -104,11 +104,15 @@ function renderResultados(jugadores) {
   cont.innerHTML = jugadores.map(j => {
     const displayNombre = j.nickname ? `${j.nickname}${j.tag ? ' #' + j.tag : ''}` : `${j.nombre} ${j.apellido || ''}`.trim();
     const sub = j.nickname ? `${j.nombre} ${j.apellido || ''}`.trim() + ' · ' : '';
+    const esKratos = Utils.esPerfilKratos(j);
     return `
     <button class="jugador-card" data-id="${j.id}">
       ${avatarHtml(j)}
-      <span>
-        <span class="jugador-card__nombre">${esc(displayNombre)}</span>
+      <span style="flex:1;min-width:0">
+        <span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span class="jugador-card__nombre">${esc(displayNombre)}</span>
+          ${esKratos ? Utils.spidermanEasterEggHtml('mini') : ''}
+        </span>
         <span class="jugador-card__meta" style="display:block">
           ${esc(sub)}${esc(j.rol)}${j.ubicacion ? ' · ' + esc(j.ubicacion) : ''}
         </span>

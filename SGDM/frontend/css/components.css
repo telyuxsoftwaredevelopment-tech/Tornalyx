@@ -1252,6 +1252,22 @@ textarea.form-control { resize: none; }
   }
 }
 
+/* Mini variant for list cards and search results */
+.spiderman-easter-egg--mini {
+  margin-left: 6px;
+}
+.spiderman-easter-egg--mini .spiderman-web-thread {
+  height: 12px;
+}
+.spiderman-easter-egg--mini .spiderman-pixel-svg {
+  width: 22px;
+  height: 34px;
+}
+.spiderman-easter-egg--mini .spiderman-bubble {
+  font-size: 9px;
+  padding: 2px 6px;
+}
+
 @keyframes spiderman-flip {
   0% {
     transform: rotate(0deg) scale(1.05);
