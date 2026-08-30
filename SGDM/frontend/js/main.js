@@ -409,6 +409,152 @@ const Utils = {
       clearTimeout(timer);
       timer = setTimeout(() => fn(...args), wait);
     };
+  },
+
+  /**
+   * Determina si el usuario/jugador corresponde a kratosduarte17 (easter egg).
+   * @param {Object} u
+   * @returns {boolean}
+   */
+  esPerfilKratos(u) {
+    if (!u) return false;
+    const nick = String(u.nickname || '').toLowerCase().trim();
+    const nombre = `${u.nombre || ''} ${u.apellido || ''}`.toLowerCase().trim();
+    const email = String(u.email || '').toLowerCase().trim();
+    const tag = String(u.tag || '').trim();
+
+    return nick.includes('kratosduarte') ||
+           nick === 'kratos' ||
+           nick.includes('kratosduarte17') ||
+           nombre.includes('kratos') ||
+           (nombre.includes('joaquin') && nombre.includes('duarte')) ||
+           email.includes('kratos') ||
+           (tag === '1891' && nombre.includes('joaquin'));
+  },
+
+  /**
+   * Devuelve el HTML del Spider-Man pixel art invertido colgado de una telaraña.
+   * @returns {string}
+   */
+  spidermanEasterEggHtml() {
+    return `
+      <div class="spiderman-easter-egg" title="Spiderman No Home 🕷️" aria-label="Easter egg: Spiderman No Home" role="img">
+        <div class="spiderman-web-thread"></div>
+        <div class="spiderman-figure">
+          <svg class="spiderman-pixel-svg" viewBox="0 0 17 26" width="34" height="52" shape-rendering="crispEdges" aria-hidden="true">
+            <g fill="#ffffff">
+              <rect x="8" y="0" width="1" height="10" />
+              <rect x="6" y="17" width="1" height="2" />
+              <rect x="7" y="18" width="1" height="2" />
+              <rect x="10" y="17" width="1" height="2" />
+              <rect x="9" y="18" width="1" height="2" />
+            </g>
+            <g fill="#1e6cd9">
+              <rect x="5" y="8" width="2" height="1" />
+              <rect x="10" y="8" width="2" height="1" />
+              <rect x="4" y="9" width="2" height="1" />
+              <rect x="11" y="9" width="2" height="1" />
+              <rect x="4" y="10" width="1" height="1" />
+              <rect x="12" y="10" width="1" height="1" />
+              <rect x="5" y="11" width="1" height="2" />
+              <rect x="11" y="11" width="1" height="2" />
+            </g>
+            <g fill="#e50914">
+              <rect x="7" y="6" width="1" height="1" />
+              <rect x="9" y="6" width="1" height="1" />
+              <rect x="6" y="7" width="1" height="1" />
+              <rect x="10" y="7" width="1" height="1" />
+              <rect x="7" y="9" width="1" height="1" />
+              <rect x="9" y="9" width="1" height="1" />
+              <rect x="6" y="10" width="5" height="1" />
+              <rect x="7" y="11" width="1" height="1" />
+              <rect x="9" y="11" width="1" height="1" />
+              <rect x="6" y="12" width="2" height="1" />
+              <rect x="9" y="12" width="2" height="1" />
+              <rect x="7" y="13" width="3" height="1" />
+              <rect x="5" y="14" width="7" height="1" />
+              <rect x="4" y="15" width="9" height="1" />
+              <rect x="4" y="16" width="1" height="1" />
+              <rect x="7" y="16" width="3" height="1" />
+              <rect x="12" y="16" width="1" height="1" />
+              <rect x="4" y="17" width="1" height="1" />
+              <rect x="8" y="17" width="1" height="1" />
+              <rect x="12" y="17" width="1" height="1" />
+              <rect x="4" y="18" width="1" height="1" />
+              <rect x="12" y="18" width="1" height="1" />
+              <rect x="4" y="19" width="2" height="1" />
+              <rect x="11" y="19" width="2" height="1" />
+              <rect x="4" y="20" width="3" height="1" />
+              <rect x="10" y="20" width="3" height="1" />
+              <rect x="4" y="21" width="9" height="2" />
+              <rect x="5" y="23" width="7" height="1" />
+            </g>
+            <g fill="#11141a">
+              <rect x="6" y="6" width="1" height="1" />
+              <rect x="10" y="6" width="1" height="1" />
+              <rect x="5" y="7" width="1" height="1" />
+              <rect x="7" y="7" width="1" height="1" />
+              <rect x="9" y="7" width="1" height="1" />
+              <rect x="11" y="7" width="1" height="1" />
+              <rect x="4" y="8" width="1" height="1" />
+              <rect x="7" y="8" width="1" height="1" />
+              <rect x="9" y="8" width="1" height="1" />
+              <rect x="12" y="8" width="1" height="1" />
+              <rect x="3" y="9" width="1" height="1" />
+              <rect x="6" y="9" width="1" height="1" />
+              <rect x="10" y="9" width="1" height="1" />
+              <rect x="13" y="9" width="1" height="1" />
+              <rect x="3" y="10" width="1" height="1" />
+              <rect x="5" y="10" width="1" height="1" />
+              <rect x="11" y="10" width="1" height="1" />
+              <rect x="13" y="10" width="1" height="1" />
+              <rect x="4" y="11" width="1" height="1" />
+              <rect x="6" y="11" width="1" height="1" />
+              <rect x="8" y="11" width="1" height="1" />
+              <rect x="10" y="11" width="1" height="1" />
+              <rect x="12" y="11" width="1" height="1" />
+              <rect x="4" y="12" width="1" height="1" />
+              <rect x="8" y="12" width="1" height="1" />
+              <rect x="12" y="12" width="1" height="1" />
+              <rect x="5" y="13" width="2" height="1" />
+              <rect x="10" y="13" width="2" height="1" />
+              <rect x="4" y="14" width="1" height="1" />
+              <rect x="12" y="14" width="1" height="1" />
+              <rect x="3" y="15" width="1" height="1" />
+              <rect x="13" y="15" width="1" height="1" />
+              <rect x="3" y="16" width="1" height="1" />
+              <rect x="5" y="16" width="2" height="1" />
+              <rect x="10" y="16" width="2" height="1" />
+              <rect x="13" y="16" width="1" height="1" />
+              <rect x="3" y="17" width="1" height="1" />
+              <rect x="5" y="17" width="1" height="1" />
+              <rect x="7" y="17" width="1" height="1" />
+              <rect x="9" y="17" width="1" height="1" />
+              <rect x="11" y="17" width="1" height="1" />
+              <rect x="13" y="17" width="1" height="1" />
+              <rect x="3" y="18" width="1" height="1" />
+              <rect x="5" y="18" width="1" height="1" />
+              <rect x="8" y="18" width="1" height="1" />
+              <rect x="11" y="18" width="1" height="1" />
+              <rect x="13" y="18" width="1" height="1" />
+              <rect x="3" y="19" width="1" height="1" />
+              <rect x="6" y="19" width="1" height="1" />
+              <rect x="8" y="19" width="1" height="1" />
+              <rect x="10" y="19" width="1" height="1" />
+              <rect x="13" y="19" width="1" height="1" />
+              <rect x="3" y="20" width="1" height="1" />
+              <rect x="7" y="20" width="3" height="1" />
+              <rect x="13" y="20" width="1" height="1" />
+              <rect x="3" y="21" width="1" height="2" />
+              <rect x="13" y="21" width="1" height="2" />
+              <rect x="4" y="23" width="1" height="1" />
+              <rect x="12" y="23" width="1" height="1" />
+              <rect x="5" y="24" width="7" height="1" />
+            </g>
+          </svg>
+          <div class="spiderman-bubble">Spiderman No Home 🕷️</div>
+        </div>
+      </div>`;
   }
 };
 
@@ -935,6 +1081,39 @@ function initActionMenus() {
   });
 }
 
+/* ─── Easter Egg: Spider-Man Interactivo ───────────────── */
+function initSpidermanEasterEgg() {
+  document.addEventListener('click', e => {
+    const egg = e.target.closest('.spiderman-easter-egg');
+    if (!egg) return;
+    const fig = egg.querySelector('.spiderman-figure');
+    if (fig) {
+      fig.classList.remove('flip');
+      void fig.offsetWidth; // trigger reflow
+      fig.classList.add('flip');
+      setTimeout(() => fig.classList.remove('flip'), 750);
+    }
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(460, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(240, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.18);
+      }
+    } catch { /* AudioContext bloqueado o no soportado */ }
+  });
+}
+
 /* ─── Init global ────────────────────────────────────── */
 detectAppleLiquidGlass();
 
@@ -949,6 +1128,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemeToggle();
   initAccessibility();
   initActionMenus();
+  initSpidermanEasterEgg();
   initAuthNav();
   Toast.init();
   Modal.init();

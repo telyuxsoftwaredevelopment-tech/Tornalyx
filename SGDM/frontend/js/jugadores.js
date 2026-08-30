@@ -172,8 +172,11 @@ function renderFicha(data) {
       <div class="card__body">
         <div style="display:flex;align-items:center;gap:var(--space-4);flex-wrap:wrap">
           ${avatarHtml(j, 'jugador-avatar')}
-          <div>
-            <h2 style="font-size:var(--font-size-2xl);color:var(--ink)">${esc(nombrePrincipal)}</h2>
+          <div style="flex:1;min-width:0">
+            <div style="display:inline-flex;align-items:center;gap:8px;position:relative;flex-wrap:wrap">
+              <h2 style="font-size:var(--font-size-2xl);color:var(--ink);margin:0;display:inline-block">${esc(nombrePrincipal)}</h2>
+              ${Utils.esPerfilKratos(j) ? Utils.spidermanEasterEggHtml() : ''}
+            </div>
             <div style="font-size:var(--font-size-sm);color:var(--muted)">
               ${subNombre ? '👤 ' + esc(subNombre) + ' · ' : ''}${esc(j.rol)}${j.ubicacion ? ' · 📍 ' + esc(j.ubicacion) : ''}
             </div>

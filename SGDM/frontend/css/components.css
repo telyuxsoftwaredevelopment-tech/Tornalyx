@@ -1125,5 +1125,145 @@ textarea.form-control { resize: none; }
               0 8px 26px rgba(255, 70, 85, 0.48) !important;
 }
 
+/* ─── Easter Egg: Spiderman No Home (KratosDuarte17) ─── */
+.spiderman-easter-egg {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 10px;
+  vertical-align: middle;
+  cursor: pointer;
+  z-index: 25;
+  user-select: none;
+  transform-origin: top center;
+  animation: spiderman-enter 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.spiderman-web-thread {
+  width: 2px;
+  height: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, #ffffff 70%, #ffffff 100%);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  margin-bottom: -1px;
+}
+
+.spiderman-figure {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  animation: spiderman-idle-sway 3.8s ease-in-out 2.2s infinite alternate;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s;
+}
+
+.spiderman-easter-egg:hover .spiderman-figure {
+  transform: scale(1.12) translateY(-3px);
+  filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.65));
+}
+
+.spiderman-pixel-svg {
+  width: 34px;
+  height: 52px;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  shape-rendering: crispEdges;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.55));
+}
+
+/* Tooltip / Speech bubble */
+.spiderman-bubble {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px) scale(0.9);
+  background: rgba(17, 20, 26, 0.95);
+  color: #ffffff;
+  font-family: var(--head, sans-serif);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(229, 9, 20, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(229, 9, 20, 0.3);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 60;
+  backdrop-filter: blur(8px);
+}
+
+.spiderman-bubble::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid rgba(229, 9, 20, 0.7);
+}
+
+.spiderman-easter-egg:hover .spiderman-bubble,
+.spiderman-easter-egg.active .spiderman-bubble {
+  opacity: 1;
+  transform: translateX(-50%) translateY(10px) scale(1);
+}
+
+/* Spider-man web shooting / flip click effect */
+.spiderman-figure.flip {
+  animation: spiderman-flip 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes spiderman-enter {
+  0% {
+    transform: translateY(-130px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(6px);
+  }
+  90% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spiderman-idle-sway {
+  0% {
+    transform: rotate(-3.5deg);
+  }
+  50% {
+    transform: rotate(3.5deg);
+  }
+  100% {
+    transform: rotate(-3.5deg);
+  }
+}
+
+@keyframes spiderman-flip {
+  0% {
+    transform: rotate(0deg) scale(1.05);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.25) translateY(-8px);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+
 
 

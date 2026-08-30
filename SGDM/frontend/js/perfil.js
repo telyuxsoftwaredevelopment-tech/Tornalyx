@@ -81,6 +81,15 @@
       }
     }
 
+    if ($('heroSpidermanEgg')) {
+      $('heroSpidermanEgg').innerHTML = Utils.esPerfilKratos(u) ? Utils.spidermanEasterEggHtml() : '';
+    } else if (Utils.esPerfilKratos(u) && $('heroNombre') && !$('spiderman-hero-egg')) {
+      const spEl = document.createElement('span');
+      spEl.id = 'spiderman-hero-egg';
+      spEl.innerHTML = Utils.spidermanEasterEggHtml();
+      $('heroNombre').parentNode.appendChild(spEl);
+    }
+
     const meta = [];
     if (u.rol) {
       const esAdmin = u.rol === 'administrador';
