@@ -7,7 +7,7 @@
 -- de código leyó ni escribió jamás esta tabla.
 --
 -- Se elimina para que el modelo relacional describa el sistema que existe.
--- Siempre estuvo vacía, así que no hay datos que migrar; el ON DELETE
+-- Siempre estuvo vacía, así que no hay datos que migrar, y el ON DELETE
 -- CASCADE de su FK a usuarios tampoco arrastra nada.
 -- ============================================================
 

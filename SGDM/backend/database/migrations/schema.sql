@@ -317,12 +317,17 @@ CREATE TABLE IF NOT EXISTS doc_otps (
 -- llenando el log de errores de columna duplicada.
 -- ──────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS schema_migrations (
-    filename    VARCHAR(180) NOT NULL PRIMARY KEY,
-    applied_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    filename     VARCHAR(180) NOT NULL PRIMARY KEY,
+    applied_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     -- NULL = aplicada sin errores. Si trae texto, la migracion corrio pero
     -- alguna sentencia fallo: Migracion::faltantes() la sigue reportando
     -- como pendiente y el panel de admin la muestra (ver Migracion.php).
-    error       VARCHAR(500) NULL DEFAULT NULL
+    error        VARCHAR(500) NULL DEFAULT NULL,
+    -- SHA-256 del archivo .sql tal como se ejecuto. Si una migracion fallo y
+    -- despues se corrige, el hash cambia y la auto-migracion la reintenta una
+    -- vez; mientras el archivo siga igual no se reintenta, para no mandar DDL
+    -- condenado a fallar en cada request.
+    content_hash CHAR(64)     NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Backfill: este archivo ya trae plegado el efecto de todas las migraciones

@@ -82,9 +82,10 @@ CREATE DATABASE IF NOT EXISTS tornalyx_db
   COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tornalyx_db.schema_migrations (
-    filename    VARCHAR(180) NOT NULL PRIMARY KEY,
-    applied_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    error       VARCHAR(500) NULL DEFAULT NULL
+    filename     VARCHAR(180) NOT NULL PRIMARY KEY,
+    applied_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    error        VARCHAR(500) NULL DEFAULT NULL,
+    content_hash CHAR(64)     NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 GRANT SELECT, INSERT ON tornalyx_db.schema_migrations TO 'tornalyx_ddl'@'localhost';
