@@ -230,9 +230,15 @@ cd TORNALIX
 ```env
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=sgdm
-DB_USER=root
-DB_PASSWORD=password
+DB_NAME=tornalyx_db
+DB_USER=tornalyx_dml
+DB_PASS=cambiar
+# 1 = la app aplica sola las migraciones pendientes al conectarse (desarrollo
+# y Render, donde no hay shell para correrlas a mano). En el servidor real va
+# en 0: ahí el esquema lo aplica tornalyx_ddl con
+# scripts/servidor/desplegar.sh, porque la app corre como tornalyx_dml y no
+# tiene DDL (ver SGDM/backend/database/dcl.sql).
+DB_AUTO_MIGRATE=1
 ```
 
 ### Levantar el entorno con Docker

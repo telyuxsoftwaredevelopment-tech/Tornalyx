@@ -62,6 +62,23 @@ define('DB_PASS',    envOrDefault('DB_PASS', ''));
 define('DB_CHARSET', 'utf8mb4');
 
 /**
+ * ¿La aplicación puede modificar el esquema por su cuenta?
+ *
+ * En desarrollo y en Render no hay shell para correr las migraciones a mano,
+ * así que la app las aplica sola al conectarse (DB_AUTO_MIGRATE=1, el default).
+ *
+ * En el servidor real tiene que estar APAGADO (DB_AUTO_MIGRATE=0): ahí rige
+ * database/dcl.sql, donde la app corre como tornalyx_dml —que solo tiene
+ * SELECT/INSERT/UPDATE/DELETE— y el DDL lo aplica tornalyx_ddl desde
+ * scripts/servidor/desplegar.sh. Sin este interruptor la app intentaría
+ * CREATE/ALTER con un usuario que por diseño no puede hacerlo, contradiciendo
+ * la separación de privilegios que define el DCL.
+ */
+function autoMigracionHabilitada(): bool {
+    return filter_var(envOrDefault('DB_AUTO_MIGRATE', '1'), FILTER_VALIDATE_BOOLEAN);
+}
+
+/**
  * Retorna la conexión PDO (singleton).
  *
  * @return PDO
@@ -109,15 +126,30 @@ function getDB(): PDO {
 
         try {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-            // Sincronizar automáticamente cualquier columna o tabla faltante
-            require_once __DIR__ . '/../models/Migracion.php';
-            (new Migracion())->ejecutarFaltantes();
         } catch (PDOException $e) {
             // Reason: Never exponer detalles de BD al cliente en producción
             error_log('DB connection error: ' . $e->getMessage());
             throw new RuntimeException('No se pudo conectar a la base de datos.');
-        } catch (Throwable $e) {
-            error_log('Auto-migration error: ' . $e->getMessage());
+        }
+
+        // La auto-migración va DESPUÉS de la conexión y con su propio catch.
+        // Antes compartía el try con el `new PDO`, así que cualquier fallo de
+        // DDL —p. ej. el usuario de la app sin permiso de CREATE, que es
+        // exactamente lo que define dcl.sql— salía por el catch de
+        // PDOException de arriba y el cliente recibía "No se pudo conectar a
+        // la base de datos" con la conexión ya abierta y sana.
+        //
+        // $pdo queda asignado antes de esto a propósito: Migracion extiende
+        // Model, y su acceso a $this->db vuelve a entrar a getDB(); con el
+        // singleton ya seteado, esa reentrada devuelve esta misma conexión en
+        // vez de abrir otra.
+        if (autoMigracionHabilitada()) {
+            try {
+                require_once __DIR__ . '/../models/Migracion.php';
+                (new Migracion())->ejecutarFaltantes();
+            } catch (Throwable $e) {
+                error_log('Auto-migration error: ' . $e->getMessage());
+            }
         }
     }
 

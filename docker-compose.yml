@@ -70,6 +70,12 @@ services:
       # MySQL local sin TLS.
       DB_SSL: "0"
       DB_SSL_VERIFY: "0"
+      # Acá la app aplica sola las migraciones pendientes al conectarse: es
+      # una base descartable y el usuario de desarrollo tiene privilegios
+      # completos sobre ella. En el servidor real va en 0 (ver dcl.sql y
+      # scripts/servidor/desplegar.sh): ahí la app es tornalyx_dml y no
+      # tiene DDL.
+      DB_AUTO_MIGRATE: "1"
     volumes:
       # Bind-mount del código para editar en caliente (PHP no compila):
       # editás en SGDM/ y refrescás el navegador, sin reconstruir la imagen.

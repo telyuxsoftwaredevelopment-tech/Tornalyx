@@ -41,6 +41,15 @@ services:
         sync: false
       - key: DB_SSL_VERIFY
         value: "1"
+      # Render no da shell para correr las migraciones a mano, así que la app
+      # las aplica sola al conectarse. Requiere que el usuario de BD del
+      # proveedor tenga DDL (los MySQL gestionados dan un usuario con todos
+      # los privilegios sobre su base). En el servidor real esto va en 0:
+      # ahí rige SGDM/backend/database/dcl.sql, la app corre como
+      # tornalyx_dml (sin DDL) y el esquema lo aplica tornalyx_ddl desde
+      # scripts/servidor/desplegar.sh.
+      - key: DB_AUTO_MIGRATE
+        value: "1"
 
       # ── Envío de correo / 2FA por email ──────────────────────
       # IMPORTANTE: Render free BLOQUEA el SMTP saliente (puertos 25/465/587),

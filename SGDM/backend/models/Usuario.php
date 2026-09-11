@@ -124,11 +124,22 @@ class Usuario extends Model {
     /**
      * Asegura que las columnas de perfil y redes sociales existan en la tabla.
      * Idempotente y seguro para bases ya migradas o pendientes de migración.
+     *
+     * Es DDL, así que respeta el mismo interruptor que la auto-migración de
+     * getDB(): con DB_AUTO_MIGRATE=0 no toca el esquema. En el servidor real
+     * rige dcl.sql y la app corre como tornalyx_dml, que no tiene ALTER; ahí
+     * estas columnas ya vienen creadas por schema.sql, aplicado por
+     * tornalyx_ddl desde scripts/servidor/desplegar.sh.
      */
     public function asegurarColumnasPerfil(): void {
         static $verificado = false;
         if ($verificado) return;
         $verificado = true;
+
+        require_once __DIR__ . '/../config/database.php';
+        if (!autoMigracionHabilitada()) {
+            return;
+        }
 
         try {
             $cols = $this->db->query("SHOW COLUMNS FROM usuarios")->fetchAll(PDO::FETCH_COLUMN);

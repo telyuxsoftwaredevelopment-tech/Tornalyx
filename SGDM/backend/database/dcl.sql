@@ -8,8 +8,10 @@
 -- Separación por lenguaje SQL (además de por función): los tres usuarios
 -- de aplicación quedan divididos exactamente en lo que cada uno de DDL,
 -- DCL y DML necesita, sin superposición:
---   tornalyx_ddl  — solo Data Definition Language (CREATE/ALTER/DROP/INDEX).
---                   No puede leer ni escribir una sola fila de datos.
+--   tornalyx_ddl  — solo Data Definition Language (CREATE/ALTER/DROP/INDEX),
+--                   más SELECT/INSERT acotado a la tabla schema_migrations
+--                   (el registro de migraciones aplicadas). No puede leer ni
+--                   escribir una sola fila de datos de negocio.
 --   tornalyx_dcl  — solo Data Control Language (GRANT/REVOKE/CREATE USER).
 --                   No puede tocar estructura ni datos directamente; su
 --                   trabajo es administrar los permisos de los demás.
@@ -30,14 +32,20 @@
 --        mysql -u root -p < dcl.sql
 --   3. Cargar cada contraseña en la variable de entorno que le corresponde
 --      (nunca en el código, nunca todas en el mismo .env):
---        - tornalyx_dml -> DB_PASS del .env de la app (SGDM/config/database.php).
+--        - tornalyx_dml -> DB_PASS del .env de la app
+--          (SGDM/backend/config/database.php).
 --        - tornalyx_ddl -> DB_DDL_PASS, exportada a mano antes de correr
---          'desplegar.sh' o 'desplegar.sh solo-migrar' (nunca en el .env
---          de la app: la app en runtime no debe poder tocar el esquema).
+--          scripts/servidor/desplegar.sh (o 'desplegar.sh solo-migrar');
+--          nunca en el .env de la app: la app en runtime no debe poder
+--          tocar el esquema.
 --        - tornalyx_dcl -> uso exclusivamente manual por admin_tornalyx,
 --          igual que root hoy. No vive en ningún .env ni la usa ningún
 --          script; es la cuenta para dar de alta o ajustar el resto de
 --          los usuarios sin repartir la contraseña de root.
+--   4. Poner DB_AUTO_MIGRATE=0 en el .env de la app. Con el valor por
+--      defecto (1) la app aplica sola las migraciones al conectarse, cosa
+--      que en este servidor es imposible por diseño: tornalyx_dml no tiene
+--      DDL. Acá el esquema lo aplica desplegar.sh con tornalyx_ddl.
 --
 -- Cada usuario está atado a 'localhost' porque la app, el backup y el
 -- monitoreo corren en el mismo host que MySQL. Si en algún despliegue la
@@ -47,14 +55,45 @@
 
 -- ──────────────────────────────────────────────────────────────
 -- tornalyx_ddl — usuario DDL: aplica el esquema y las migraciones
--- (SGDM/database/migrations/*.sql) sobre tornalyx_db. Lo usa únicamente
--- desplegar.sh al desplegar (variables DB_DDL_USER/DB_DDL_PASS, jamás las
--- credenciales de la app). Solo estructura: sin SELECT/INSERT/UPDATE/
--- DELETE, no puede leer ni escribir datos de negocio.
+-- (SGDM/backend/database/migrations/*.sql) sobre tornalyx_db. Lo usa
+-- únicamente scripts/servidor/desplegar.sh al desplegar (variables
+-- DB_DDL_USER/DB_DDL_PASS, jamás las credenciales de la app). Solo
+-- estructura: sin SELECT/INSERT/UPDATE/DELETE sobre las tablas de negocio,
+-- no puede leer ni escribir un dato.
 -- ──────────────────────────────────────────────────────────────
 CREATE USER IF NOT EXISTS 'tornalyx_ddl'@'localhost' IDENTIFIED BY 'CAMBIAR_PASSWORD_DDL';
 REVOKE ALL PRIVILEGES, GRANT OPTION FROM 'tornalyx_ddl'@'localhost';
 GRANT CREATE, ALTER, DROP, INDEX, REFERENCES ON tornalyx_db.* TO 'tornalyx_ddl'@'localhost';
+
+-- Única excepción al "sin DML", y acotada a UNA tabla: el mecanismo de
+-- migraciones lleva su propio registro en schema_migrations, y tanto
+-- schema.sql como cada add_*.sql terminan insertándose a sí mismos ahí con
+-- INSERT IGNORE. Sin este permiso tornalyx_ddl no puede aplicar ni un solo
+-- archivo. Al ser un GRANT a nivel de TABLA (no de base), sigue sin poder
+-- leer ni escribir una fila de datos de negocio.
+--
+-- Un GRANT a nivel de tabla exige que la tabla ya exista (MySQL y MariaDB lo
+-- rechazan con ERROR 1146 si no está), y este archivo corre ANTES de que
+-- desplegar.sh aplique el esquema. Por eso se crean acá la base y esa única
+-- tabla, vacías: schema.sql las vuelve a declarar con IF NOT EXISTS y es
+-- quien las rellena, así que esto no duplica ni pisa nada.
+CREATE DATABASE IF NOT EXISTS tornalyx_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS tornalyx_db.schema_migrations (
+    filename    VARCHAR(180) NOT NULL PRIMARY KEY,
+    applied_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    error       VARCHAR(500) NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+GRANT SELECT, INSERT ON tornalyx_db.schema_migrations TO 'tornalyx_ddl'@'localhost';
+
+-- Las migraciones que además traen backfill de datos (hoy solo
+-- add_rol_torneo_simplificado.sql, con su UPDATE sobre usuarios) quedan
+-- deliberadamente fuera del alcance de este usuario: desplegar.sh las
+-- detecta, no las aplica y avisa para correrlas con tornalyx_dcl, que sí
+-- tiene DML sobre tornalyx_db.
 
 -- ──────────────────────────────────────────────────────────────
 -- tornalyx_dcl — usuario DCL: administra permisos y cuentas del resto de
@@ -79,7 +118,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE,
 
 -- ──────────────────────────────────────────────────────────────
 -- tornalyx_dml — usuario DML: la aplicación en runtime
--- (SGDM/config/database.php). Solo CRUD sobre las tablas de negocio, sin
+-- (SGDM/backend/config/database.php). Solo CRUD sobre las tablas de negocio, sin
 -- DDL (CREATE/ALTER/DROP) ni acceso a otras bases o tablas de sistema.
 -- ──────────────────────────────────────────────────────────────
 CREATE USER IF NOT EXISTS 'tornalyx_dml'@'localhost' IDENTIFIED BY 'CAMBIAR_PASSWORD_DML';
@@ -101,8 +140,8 @@ GRANT SELECT ON mysql.slow_log TO 'tornalyx_monitor'@'localhost';
 -- ──────────────────────────────────────────────────────────────
 -- tornalyx_backup — usuario para mysqldump (variables DB_BACKUP_USER/
 -- DB_BACKUP_PASS), usado por el usuario de sistema backup_tornalyx (ver
--- analisis-usuarios-sistema.md y respaldo.sh). Solo lectura + LOCK
--- TABLES/SHOW VIEW, imprescindibles para un dump consistente; sin
+-- docs/entrega2/analisis-usuarios-sistema.md y respaldo.sh). Solo lectura
+-- + LOCK TABLES/SHOW VIEW, imprescindibles para un dump consistente; sin
 -- permisos de escritura.
 -- ──────────────────────────────────────────────────────────────
 CREATE USER IF NOT EXISTS 'tornalyx_backup'@'localhost' IDENTIFIED BY 'CAMBIAR_PASSWORD_BACKUP';
@@ -112,7 +151,7 @@ GRANT SELECT, LOCK TABLES, SHOW VIEW, EVENT, TRIGGER ON tornalyx_db.* TO 'tornal
 -- ──────────────────────────────────────────────────────────────
 -- tornalyx_dev — usuario de desarrollo, acotado a la base tornalyx_dev
 -- (nunca a tornalyx_db de producción). Usado por dev_tornalyx (ver
--- analisis-usuarios-sistema.md: "Acceso a MySQL de desarrollo").
+-- docs/entrega2/analisis-usuarios-sistema.md: "Acceso a MySQL de desarrollo").
 -- Sí puede crear/alterar tablas dentro de SU base para poder iterar el
 -- esquema y correr migraciones/seeders de prueba.
 -- ──────────────────────────────────────────────────────────────
