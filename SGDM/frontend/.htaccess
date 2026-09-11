@@ -2,6 +2,28 @@ Options -Indexes
 
 RewriteEngine On
 
+# ──────────────────────────────────────────────────────────────
+# Forzar HTTPS.
+# docs/entrega2/esquema-red.md dice que el puerto 80 "redirige a HTTPS";
+# esta es la regla que lo cumple. Antes solo estaba el HSTS de más abajo,
+# que recién protege a partir de la segunda visita: la primera petición en
+# claro viajaba igual.
+#
+# Las excepciones evitan un bucle de redirección y no romper desarrollo:
+#   - %{HTTPS} on          -> ya llegó por TLS directo.
+#   - X-Forwarded-Proto    -> TLS terminado en un proxy (Render). SIN esta
+#                             condición el proxy reenviaría en claro al
+#                             contenedor y la regla redirigiría en bucle.
+#                             Es la misma cabecera en la que ya se apoya
+#                             Session::isHttps().
+#   - localhost/127.0.0.1  -> docker compose sirve por HTTP en :8080.
+# ──────────────────────────────────────────────────────────────
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteCond %{HTTP_HOST} !^localhost [NC]
+RewriteCond %{HTTP_HOST} !^127\.0\.0\.1
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
 # /registro y /login sirven el mismo login.html (tarjeta fusionada con flip
 # 3D entre Iniciar sesión / Crear cuenta); no existe un registro.html propio.
 # Solo en GET: un POST /login o POST /registro es un envío de formulario que
@@ -30,9 +52,16 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
 
 # Seguridad: bloquear acceso a archivos sensibles
-<FilesMatch "\.(env|json|md|sql|sh|log)$">
-    Order allow,deny
-    Deny from all
+# "^\.ht" cubre el propio .htaccess y cualquier .htpasswd. La imagen oficial
+# de Apache ya trae esa regla en apache2.conf, pero acá no dependemos de la
+# configuración del servidor: probado sobre un Apache 2.4 mínimo, sin esta
+# alternativa el archivo se servía con 200 y su contenido quedaba a la vista.
+<FilesMatch "^\.ht|\.(env|json|md|sql|sh|log)$">
+    # Sintaxis nativa de Apache 2.4. Antes eran "Order allow,deny" +
+    # "Deny from all", de Apache 2.2, que solo funcionan con mod_access_compat
+    # cargado: en un Apache 2.4 sin ese módulo falla el .htaccess entero y el
+    # sitio responde 500 a TODO. Verificado contra Apache 2.4.58.
+    Require all denied
 </FilesMatch>
 
 # ──────────────────────────────────────────────────────────────

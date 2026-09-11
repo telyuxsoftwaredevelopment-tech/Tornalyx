@@ -4,7 +4,7 @@
 
 | Dato | Origen | Motivo |
 |------|--------|--------|
-| Base de datos completa (`tornalyx_db`), incluidos los avatares | MySQL, vía `mysqldump` con el usuario `tornalyx_backup` (`SGDM/backend/database/dcl.sql:147-149`) | Contiene usuarios, torneos, partidos, resultados — todo el estado de negocio, no reconstruible. Los avatares no se respaldan aparte: desde `add_avatar_blob.sql` viven como BLOB (`avatar_data`/`avatar_mime`) en la propia fila de `usuarios` (Render free no tiene disco persistente), así que ya quedan incluidos en este mismo dump. |
+| Base de datos completa (`tornalyx_db`), incluidos los avatares | MySQL, vía `mysqldump` con el usuario `tornalyx_backup` (usuario `tornalyx_backup` en `SGDM/backend/database/dcl.sql`) | Contiene usuarios, torneos, partidos, resultados — todo el estado de negocio, no reconstruible. Los avatares no se respaldan aparte: desde `add_avatar_blob.sql` viven como BLOB (`avatar_data`/`avatar_mime`) en la propia fila de `usuarios` (Render free no tiene disco persistente), así que ya quedan incluidos en este mismo dump. |
 | Código de la aplicación | — | **No se respalda por separado**: ya vive versionado en git/GitHub, que es su propio sistema de respaldo distribuido. |
 
 ## Tipo de respaldo

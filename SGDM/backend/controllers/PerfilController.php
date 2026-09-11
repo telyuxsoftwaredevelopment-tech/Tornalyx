@@ -219,12 +219,8 @@ class PerfilController extends Controller {
             $this->jsonError('La contraseña actual no es correcta.', [], 401);
             return;
         }
-        $esFuerte = strlen($nueva) >= 8
-            && preg_match('/[A-Z]/', $nueva)
-            && preg_match('/[a-z]/', $nueva)
-            && preg_match('/[0-9]/', $nueva);
-        if (!$esFuerte) {
-            $this->jsonError('La nueva contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas y números.');
+        if (!$this->passwordEsFuerte($nueva)) {
+            $this->jsonError($this->mensajePasswordDebil());
             return;
         }
 

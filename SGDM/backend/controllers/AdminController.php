@@ -344,19 +344,9 @@ class AdminController extends Controller {
         }
         if ($exigePassword && !$this->passwordEsFuerte($d['password'])) {
             $campo = 'password';
-            return 'La contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas y números.';
+            return $this->mensajePasswordDebil();
         }
         return null;
-    }
-
-    /**
-     * Misma política de contraseña que el registro público.
-     */
-    private function passwordEsFuerte(string $password): bool {
-        return strlen($password) >= 8
-            && preg_match('/[A-Z]/', $password)
-            && preg_match('/[a-z]/', $password)
-            && preg_match('/[0-9]/', $password);
     }
 
     /**

@@ -39,10 +39,31 @@ abstract class Model {
      *
      * @param int $id
      * @return array|null
+    /**
+     * Entrecomilla un identificador (tabla o columna) para interpolarlo en el
+     * SQL. Los nombres de columna de insert()/update() salen de las claves del
+     * array que pasa el llamador, y esas claves no pueden ir como parámetro
+     * preparado: PDO solo parametriza valores, no identificadores.
+     *
+     * Hoy todos los llamadores usan claves literales escritas a mano, así que
+     * no hay inyección posible; esto hace que siga sin haberla aunque alguien
+     * más adelante arme el array desde $_POST. El backtick duplicado es la
+     * forma de escaparlo en MySQL (`a``b` es el identificador a`b).
+     */
+    private function quoteId(string $identificador): string {
+        return '`' . str_replace('`', '``', $identificador) . '`';
+    }
+
+    /**
+     * Busca un registro por su clave primaria.
+     *
+     * @param int $id
+     * @return array|null
      */
     public function findById(int $id): ?array {
         $stmt = $this->db->prepare(
-            "SELECT * FROM {$this->table} WHERE {$this->primaryKey} = ?"
+            'SELECT * FROM ' . $this->quoteId($this->table)
+            . ' WHERE ' . $this->quoteId($this->primaryKey) . ' = ?'
         );
         $stmt->execute([$id]);
         $row = $stmt->fetch();
@@ -55,7 +76,7 @@ abstract class Model {
      * @return array
      */
     public function findAll(): array {
-        $stmt = $this->db->query("SELECT * FROM {$this->table}");
+        $stmt = $this->db->query('SELECT * FROM ' . $this->quoteId($this->table));
         return $stmt->fetchAll();
     }
 
@@ -66,10 +87,11 @@ abstract class Model {
      * @return int ID del registro insertado.
      */
     public function insert(array $data): int {
-        $cols   = implode(', ', array_keys($data));
+        $cols   = implode(', ', array_map([$this, 'quoteId'], array_keys($data)));
         $places = implode(', ', array_fill(0, count($data), '?'));
         $stmt   = $this->db->prepare(
-            "INSERT INTO {$this->table} ({$cols}) VALUES ({$places})"
+            'INSERT INTO ' . $this->quoteId($this->table)
+            . " ({$cols}) VALUES ({$places})"
         );
         $stmt->execute(array_values($data));
         return (int) $this->db->lastInsertId();
@@ -83,9 +105,13 @@ abstract class Model {
      * @return bool
      */
     public function update(int $id, array $data): bool {
-        $set  = implode(' = ?, ', array_keys($data)) . ' = ?';
+        $set = implode(', ', array_map(
+            fn(string $col): string => $this->quoteId($col) . ' = ?',
+            array_keys($data)
+        ));
         $stmt = $this->db->prepare(
-            "UPDATE {$this->table} SET {$set} WHERE {$this->primaryKey} = ?"
+            'UPDATE ' . $this->quoteId($this->table)
+            . " SET {$set} WHERE " . $this->quoteId($this->primaryKey) . ' = ?'
         );
         return $stmt->execute([...array_values($data), $id]);
     }
@@ -98,7 +124,8 @@ abstract class Model {
      */
     public function delete(int $id): bool {
         $stmt = $this->db->prepare(
-            "DELETE FROM {$this->table} WHERE {$this->primaryKey} = ?"
+            'DELETE FROM ' . $this->quoteId($this->table)
+            . ' WHERE ' . $this->quoteId($this->primaryKey) . ' = ?'
         );
         return $stmt->execute([$id]);
     }

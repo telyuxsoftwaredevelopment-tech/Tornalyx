@@ -1,6 +1,6 @@
 # Modelo relacional — Tornalyx (Entrega 2)
 
-Esquema completo en `SGDM/backend/database/migrations/schema.sql`: 15 tablas de
+Esquema completo en `SGDM/backend/database/migrations/schema.sql`: 14 tablas de
 negocio (las del diagrama de abajo) más `schema_migrations`, que no modela nada
 del dominio y solo registra qué migraciones se aplicaron a esa base.
 Este documento resume las relaciones y justifica la normalización.
@@ -12,7 +12,6 @@ erDiagram
     usuarios ||--o{ torneos : organiza
     usuarios ||--o{ equipos : capitanea
     usuarios ||--o{ inscripciones : se_inscribe
-    usuarios ||--o{ sesiones : tiene
     usuarios ||--o| login_otps : verifica
     usuarios ||--o{ doc_acceso : solicita
     usuarios ||--o{ avisos : publica
@@ -109,10 +108,3 @@ registrar un resultado— y con la clave única
 `uq_torneo_contendiente (torneo_id, contendiente_id, tipo)`, que impide filas
 duplicadas para el mismo contendiente.
 
-## Esquema muerto conocido
-
-La tabla `sesiones` está declarada en `schema.sql` pero **ningún código la lee
-ni la escribe**: las sesiones reales son archivos PHP nativos en disco
-(`Session::start()`). Quedó de un diseño previo de session store manual. No
-afecta a las demás tablas —nada la referencia— pero es esquema sin uso, no un
-modelo faltante.

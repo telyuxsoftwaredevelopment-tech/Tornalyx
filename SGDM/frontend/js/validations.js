@@ -483,18 +483,44 @@ function initPasswordStrength() {
 }
 
 /* ─── Requisitos de contraseña (checklist en vivo) ───── */
-/* Refleja exactamente lo que valida el backend (AuthController::passwordEsFuerte):
-   8+ caracteres, mayúscula, minúscula y número. Visible desde el inicio. */
+/* Espeja la política del servidor (Controller::passwordEsFuerte): 8+
+   caracteres, mayúscula, minúscula, número, símbolo y que no sea una
+   contraseña común. Visible desde el inicio.
+
+   Esto es ayuda visual, NO una validación: el servidor revalida siempre, y
+   su lista de contraseñas comunes es más larga que la de acá (la de abajo
+   son solo las que alguien tipearía en un formulario de registro). Si una
+   pasa este checklist pero el servidor la rechaza, se muestra el mensaje
+   que devuelve el backend. */
 function initPasswordRequirements() {
   const input = document.getElementById('passReg');
   const list  = document.getElementById('passReqs');
   if (!input || !list) return;
+
+  const COMUNES = [
+    '123456', '1234567', '12345678', '123456789', '1234567890',
+    'password', 'passw0rd', 'contrasena', 'contraseña', 'qwerty',
+    'abc123', 'admin', 'administrador', 'usuario', 'bienvenido',
+    'welcome', 'letmein', 'iloveyou', 'secreto', 'cambiame', 'hola',
+    'futbol', 'football', 'tornalyx', 'uruguay', 'montevideo',
+    'peñarol', 'nacional',
+  ];
 
   const rules = {
     length: v => v.length >= 8,
     upper:  v => /[A-Z]/.test(v),
     lower:  v => /[a-z]/.test(v),
     number: v => /[0-9]/.test(v),
+    symbol: v => /[^A-Za-z0-9]/.test(v),
+    common: v => {
+      if (!v) return false;
+      const norm = v.toLowerCase();
+      // "Futbol2024!" -> "futbol": igual que el backend, se compara también
+      // la palabra base, sin números ni símbolos.
+      const letras = norm.replace(/[^\p{L}]/gu, '');
+      return !COMUNES.includes(norm)
+          && (letras.length < 4 || !COMUNES.includes(letras));
+    },
   };
 
   const evaluate = () => {

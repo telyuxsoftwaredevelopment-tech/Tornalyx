@@ -204,22 +204,6 @@ CREATE TABLE IF NOT EXISTS posiciones (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ──────────────────────────────────────────────────────────────
--- TABLA: sesiones  (PHP session store manual)
--- ──────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS sesiones (
-    id          VARCHAR(128) PRIMARY KEY,
-    usuario_id  INT UNSIGNED NOT NULL,
-    ip          VARCHAR(45)  NOT NULL,
-    user_agent  VARCHAR(255) DEFAULT NULL,
-    expires_at  TIMESTAMP    NOT NULL,
-    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_sesion_usuario
-        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-    INDEX idx_usuario (usuario_id),
-    INDEX idx_expires (expires_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ──────────────────────────────────────────────────────────────
 -- TABLA: login_otps  (códigos de verificación 2FA por email)
 -- Un código activo por usuario; se reemplaza en cada solicitud.
 -- ──────────────────────────────────────────────────────────────
@@ -356,4 +340,5 @@ INSERT IGNORE INTO schema_migrations (filename) VALUES
     ('add_rol_torneo_simplificado.sql'),
     ('add_schema_migrations.sql'),
     ('add_torneo_banner.sql'),
-    ('add_torneo_gestion.sql');
+    ('add_torneo_gestion.sql'),
+    ('add_drop_sesiones.sql');

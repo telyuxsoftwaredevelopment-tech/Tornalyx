@@ -191,7 +191,7 @@ class AuthController extends Controller {
             return;
         }
         if (!$this->passwordEsFuerte($password)) {
-            $this->jsonError('La contraseña debe tener al menos 8 caracteres e incluir mayúsculas, minúsculas y números.');
+            $this->jsonError($this->mensajePasswordDebil());
             return;
         }
         if (!$this->esFechaNacValida($fechaNac)) {
@@ -360,17 +360,6 @@ HTML;
         return substr($name, 0, 1)
              . str_repeat('*', max(1, strlen($name) - 1))
              . '@' . $parts[1];
-    }
-
-    /**
-     * Valida la robustez de la contraseña en el servidor (no confiar en el
-     * medidor del cliente, que es solo visual y se puede evadir).
-     */
-    private function passwordEsFuerte(string $password): bool {
-        return strlen($password) >= 8
-            && preg_match('/[A-Z]/', $password)
-            && preg_match('/[a-z]/', $password)
-            && preg_match('/[0-9]/', $password);
     }
 
 }

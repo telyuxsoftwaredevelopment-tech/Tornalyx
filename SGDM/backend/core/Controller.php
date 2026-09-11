@@ -123,4 +123,66 @@ abstract class Controller {
         $anio = (int) $d->format('Y');
         return $anio >= 1900 && $d <= new DateTimeImmutable('today');
     }
+
+    /**
+     * Contraseñas rechazadas por frecuentes. Se comparan en minúsculas y
+     * también contra la contraseña reducida a solo letras, para que los
+     * disfraces mínimos ("Password1!", "Futbol2024!") caigan igual.
+     *
+     * No pretende ser exhaustiva —para eso haría falta una lista tipo
+     * Have I Been Pwned— pero corta las que aparecen primero en cualquier
+     * diccionario de fuerza bruta, incluidas las locales.
+     */
+    private const PASSWORDS_COMUNES = [
+        '123456', '1234567', '12345678', '123456789', '1234567890',
+        'password', 'passw0rd', 'contrasena', 'contraseña', 'qwerty',
+        'qwertyuiop', 'abc123', 'admin', 'administrador', 'usuario',
+        'bienvenido', 'welcome', 'letmein', 'iloveyou', 'monkey', 'dragon',
+        'secreto', 'cambiame', 'hola', 'holamundo', 'football', 'futbol',
+        'master', 'sunshine', 'princesa', 'tornalyx', 'uruguay',
+        'montevideo', 'peñarol', 'nacional',
+    ];
+
+    /**
+     * Política de contraseña del proyecto, en un solo lugar: la usan el
+     * registro público (AuthController), el alta/edición desde el panel
+     * (AdminController) y el cambio de contraseña del perfil
+     * (PerfilController).
+     *
+     * Se valida SIEMPRE en el servidor: el checklist en vivo de
+     * frontend/js/validations.js es solo ayuda visual y se puede evadir
+     * desactivando JavaScript o llamando al endpoint directamente.
+     *
+     * No se aplica al login: las cuentas creadas bajo una política anterior
+     * siguen entrando con su contraseña, y solo se les exige la nueva regla
+     * cuando la cambian.
+     */
+    protected function passwordEsFuerte(string $password): bool {
+        if (strlen($password) < 8
+            || !preg_match('/[A-Z]/', $password)
+            || !preg_match('/[a-z]/', $password)
+            || !preg_match('/[0-9]/', $password)
+            || !preg_match('/[^A-Za-z0-9]/', $password)) {
+            return false;
+        }
+
+        $normalizada = mb_strtolower($password, 'UTF-8');
+        if (in_array($normalizada, self::PASSWORDS_COMUNES, true)) {
+            return false;
+        }
+        // "Futbol2024!" -> "futbol": la palabra base tampoco puede ser común.
+        $soloLetras = (string) preg_replace('/[^\p{L}]/u', '', $normalizada);
+        return mb_strlen($soloLetras) < 4
+            || !in_array($soloLetras, self::PASSWORDS_COMUNES, true);
+    }
+
+    /**
+     * Mensaje único para cuando passwordEsFuerte() falla, para que los tres
+     * formularios digan exactamente lo mismo que valida el servidor.
+     */
+    protected function mensajePasswordDebil(): string {
+        return 'La contraseña debe tener al menos 8 caracteres e incluir '
+             . 'mayúsculas, minúsculas, números y un símbolo, y no puede ser '
+             . 'una contraseña común.';
+    }
 }
