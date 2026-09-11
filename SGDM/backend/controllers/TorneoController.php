@@ -97,14 +97,10 @@ class TorneoController extends Controller {
         // Los torneos no públicos (borradores) solo son visibles para su
         // organizador dueño y para administradores. Para cualquier otro se
         // responde 404 (no 403) para no revelar siquiera su existencia.
-        if (!$torneo['publico']) {
-            $esDueno = Session::getUserId() === (int) $torneo['organizador_id'];
-            $esAdmin = Session::getUserRole() === 'administrador';
-            if (!$esDueno && !$esAdmin) {
-                http_response_code(404);
-                $this->jsonError('Torneo no encontrado.');
-                return;
-            }
+        if (!$torneo['publico'] && !$this->gestionaTorneo($torneo)) {
+            http_response_code(404);
+            $this->jsonError('Torneo no encontrado.');
+            return;
         }
         $this->jsonSuccess([
             'torneo'     => $this->normalizar($torneo),
@@ -188,12 +184,7 @@ class TorneoController extends Controller {
             return;
         }
         $torneo = $this->torneoModel->findById($id);
-        if (!$torneo) {
-            $this->jsonError('Torneo no encontrado.', [], 404);
-            return;
-        }
-        if (!$this->esDueno($torneo)) {
-            $this->jsonError('No tenés permiso para editar este torneo.', [], 403);
+        if (!$this->exigirGestionTorneo($torneo, 'editar este torneo')) {
             return;
         }
 
@@ -285,12 +276,7 @@ class TorneoController extends Controller {
             return;
         }
         $torneo = $this->torneoModel->findById($id);
-        if (!$torneo) {
-            $this->jsonError('Torneo no encontrado.', [], 404);
-            return;
-        }
-        if (!$this->esDueno($torneo)) {
-            $this->jsonError('No tenés permiso para eliminar este torneo.', [], 403);
+        if (!$this->exigirGestionTorneo($torneo, 'eliminar este torneo')) {
             return;
         }
 
@@ -327,12 +313,7 @@ class TorneoController extends Controller {
             return;
         }
         $torneo = $this->torneoModel->findById($id);
-        if (!$torneo) {
-            $this->jsonError('Torneo no encontrado.', [], 404);
-            return;
-        }
-        if (!$this->esDueno($torneo)) {
-            $this->jsonError('No tenés permiso para cancelar este torneo.', [], 403);
+        if (!$this->exigirGestionTorneo($torneo, 'cancelar este torneo')) {
             return;
         }
 
@@ -352,12 +333,7 @@ class TorneoController extends Controller {
             return;
         }
         $torneo = $this->torneoModel->findById($id);
-        if (!$torneo) {
-            $this->jsonError('Torneo no encontrado.', [], 404);
-            return;
-        }
-        if (!$this->esDueno($torneo)) {
-            $this->jsonError('No tenés permiso para editar este torneo.', [], 403);
+        if (!$this->exigirGestionTorneo($torneo, 'editar este torneo')) {
             return;
         }
 
@@ -411,12 +387,6 @@ class TorneoController extends Controller {
         header('Cache-Control: public, max-age=31536000, immutable');
         header('Content-Length: ' . strlen($torneo['banner_data']));
         echo $torneo['banner_data'];
-    }
-
-    /** True si el usuario en sesión organiza el torneo o es administrador. */
-    private function esDueno(array $torneo): bool {
-        return Session::getUserRole() === 'administrador'
-            || (int) $torneo['organizador_id'] === Session::getUserId();
     }
 
     /**

@@ -44,13 +44,7 @@ class AvisoController extends Controller {
         $cuerpo   = trim((string) (filter_input(INPUT_POST, 'cuerpo', FILTER_DEFAULT) ?? ''));
 
         $torneo = $torneoId ? $this->torneoModel->findById($torneoId) : null;
-        if (!$torneo) {
-            $this->jsonError('Torneo no encontrado.', [], 404);
-            return;
-        }
-        if (Session::getUserRole() !== 'administrador'
-            && (int) $torneo['organizador_id'] !== Session::getUserId()) {
-            $this->jsonError('No tenés permiso para publicar en este torneo.', [], 403);
+        if (!$this->exigirGestionTorneo($torneo, 'publicar en este torneo')) {
             return;
         }
         if ($titulo === '' || mb_strlen($titulo) > 140) {

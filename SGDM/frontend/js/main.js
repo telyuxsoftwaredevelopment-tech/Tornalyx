@@ -331,16 +331,6 @@ const Utils = {
   },
 
   /**
-   * Trunca texto a N caracteres.
-   * @param {string} text
-   * @param {number} max
-   * @returns {string}
-   */
-  truncate(text, max = 100) {
-    return text.length > max ? text.slice(0, max) + '…' : text;
-  },
-
-  /**
    * Escapa HTML para prevenir XSS.
    * @param {string} str
    * @returns {string}

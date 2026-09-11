@@ -50,16 +50,6 @@ class Mailer {
     }
 
     /**
-     * Indica si hay configuración suficiente para intentar un envío, por
-     * cualquiera de los dos transportes (API HTTP o SMTP).
-     */
-    public function isConfigured(): bool {
-        $apiOk  = $this->apiKey !== '' && $this->from !== '';
-        $smtpOk = $this->host !== '' && $this->user !== '' && $this->pass !== '';
-        return $apiOk || $smtpOk;
-    }
-
-    /**
      * Envía un correo multipart (texto + HTML) por el transporte disponible:
      * prioriza la API HTTP de Brevo y cae a SMTP si no hay API key.
      *

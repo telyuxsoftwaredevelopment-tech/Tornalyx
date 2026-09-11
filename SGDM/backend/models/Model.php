@@ -71,16 +71,6 @@ abstract class Model {
     }
 
     /**
-     * Retorna todos los registros de la tabla.
-     *
-     * @return array
-     */
-    public function findAll(): array {
-        $stmt = $this->db->query('SELECT * FROM ' . $this->quoteId($this->table));
-        return $stmt->fetchAll();
-    }
-
-    /**
      * Inserta un nuevo registro.
      *
      * @param array $data Pares columna => valor.

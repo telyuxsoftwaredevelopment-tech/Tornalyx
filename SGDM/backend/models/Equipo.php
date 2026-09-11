@@ -81,21 +81,4 @@ class Equipo extends Model {
     public function resolver(int $id, string $estado): bool {
         return $this->update($id, ['estado' => $estado]);
     }
-
-    /**
-     * Jugadores inscriptos con un equipo.
-     *
-     * @return array
-     */
-    public function miembros(int $equipoId): array {
-        $stmt = $this->db->prepare(
-            'SELECT u.id, u.nombre, u.apellido, u.avatar_url, i.estado
-               FROM inscripciones i
-               INNER JOIN usuarios u ON u.id = i.usuario_id
-              WHERE i.equipo_id = ?
-              ORDER BY u.nombre ASC'
-        );
-        $stmt->execute([$equipoId]);
-        return $stmt->fetchAll();
-    }
 }

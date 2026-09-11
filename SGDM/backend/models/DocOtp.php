@@ -99,16 +99,6 @@ class DocOtp extends Model {
                  ->execute([$usuarioId, $materia]);
     }
 
-    /** Indica si hay un código vigente (existe y no expiró). */
-    public function activo(int $usuarioId, string $materia): bool {
-        $stmt = $this->db->prepare(
-            'SELECT UNIX_TIMESTAMP(expires_at) AS exp FROM doc_otps WHERE usuario_id = ? AND materia = ?'
-        );
-        $stmt->execute([$usuarioId, $materia]);
-        $row = $stmt->fetch();
-        return $row && time() <= (int) $row['exp'];
-    }
-
     /** Segundos que faltan para poder reenviar (0 si ya se puede). */
     public function cooldownRestante(int $usuarioId, string $materia): int {
         $stmt = $this->db->prepare(

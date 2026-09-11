@@ -92,6 +92,46 @@ abstract class Controller {
     }
 
     /**
+     * ¿El usuario en sesión puede gestionar este torneo?
+     *
+     * Ser organizador no es un rol de cuenta sino una pertenencia por torneo
+     * (torneos.organizador_id), así que la regla es siempre la misma: la
+     * organiza quien la creó, y un administrador puede gestionar cualquiera.
+     *
+     * Vivía copiada en cuatro lugares con tres nombres distintos (esDueno,
+     * puedeGestionar, esGestor y una comparación suelta): si la regla cambia,
+     * tiene que cambiar en un solo lugar.
+     *
+     * @param array $torneo Fila del torneo, con al menos organizador_id.
+     */
+    protected function gestionaTorneo(array $torneo): bool {
+        return Session::getUserRole() === 'administrador'
+            || (int) $torneo['organizador_id'] === Session::getUserId();
+    }
+
+    /**
+     * Guardia para los endpoints que gestionan un torneo: recibe la fila ya
+     * cargada (o null si no existe) y responde el error que corresponda.
+     *
+     * @param array|null $torneo Resultado de buscar el torneo.
+     * @param string     $accion Qué se intentaba hacer, para el mensaje de
+     *                           error: "editar este torneo", "publicar en
+     *                           este torneo", etc.
+     * @return bool true si la petición puede continuar.
+     */
+    protected function exigirGestionTorneo(?array $torneo, string $accion): bool {
+        if ($torneo === null) {
+            $this->jsonError('Torneo no encontrado.', [], 404);
+            return false;
+        }
+        if (!$this->gestionaTorneo($torneo)) {
+            $this->jsonError("No tenés permiso para {$accion}.", [], 403);
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Exige sesión activa, sin restricción de rol.
      *
      * Los roles de torneo (organizador/participante) ya no son un rol de

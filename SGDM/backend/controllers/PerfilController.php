@@ -29,6 +29,41 @@ class PerfilController extends Controller {
     /** Ruta pública donde se sirve el avatar de un usuario (ver servirAvatar). */
     private const AVATAR_URL = '/api/perfil/avatar';
 
+    /**
+     * Redes sociales del perfil, en un solo lugar:
+     *   columna de la base => [nombre visible, base para un usuario suelto].
+     *
+     * Antes las mismas siete redes estaban listadas en cinco sitios distintos
+     * (lectura del POST, armado del array, nombre para el mensaje de error,
+     * prefijo de URL y las dos salidas JSON). Agregar una red obligaba a tocar
+     * todos; ahora es una línea acá.
+     */
+    private const REDES = [
+        'twitter_url'   => ['X (Twitter)', 'https://x.com/'],
+        'facebook_url'  => ['Facebook',    'https://facebook.com/'],
+        'instagram_url' => ['Instagram',   'https://instagram.com/'],
+        'youtube_url'   => ['YouTube',     'https://youtube.com/@'],
+        'tiktok_url'    => ['TikTok',      'https://tiktok.com/@'],
+        'kick_url'      => ['Kick',        'https://kick.com/'],
+        'twitch_url'    => ['Twitch',      'https://twitch.tv/'],
+    ];
+
+    /**
+     * Extrae las columnas de redes sociales de una fila de usuario, listas
+     * para la respuesta JSON. Usado por el perfil propio y por la ficha
+     * pública, que antes repetían las siete claves cada uno.
+     *
+     * @param array $u Fila de usuarios.
+     * @return array<string,string|null>
+     */
+    private function redesDe(array $u): array {
+        $salida = [];
+        foreach (array_keys(self::REDES) as $campo) {
+            $salida[$campo] = $u[$campo] ?? null;
+        }
+        return $salida;
+    }
+
     private Usuario $usuarioModel;
     private Torneo  $torneoModel;
 
@@ -93,13 +128,11 @@ class PerfilController extends Controller {
         $fechaNac  = trim((string) (filter_input(INPUT_POST, 'fecha_nac', FILTER_DEFAULT) ?? ''));
         $ubicacion = trim((string) (filter_input(INPUT_POST, 'ubicacion', FILTER_DEFAULT) ?? ''));
         $bio       = trim((string) (filter_input(INPUT_POST, 'bio',       FILTER_DEFAULT) ?? ''));
-        $twitter   = trim((string) (filter_input(INPUT_POST, 'twitter_url',   FILTER_DEFAULT) ?? ''));
-        $facebook  = trim((string) (filter_input(INPUT_POST, 'facebook_url',  FILTER_DEFAULT) ?? ''));
-        $instagram = trim((string) (filter_input(INPUT_POST, 'instagram_url', FILTER_DEFAULT) ?? ''));
-        $youtube   = trim((string) (filter_input(INPUT_POST, 'youtube_url',   FILTER_DEFAULT) ?? ''));
-        $tiktok    = trim((string) (filter_input(INPUT_POST, 'tiktok_url',    FILTER_DEFAULT) ?? ''));
-        $kick      = trim((string) (filter_input(INPUT_POST, 'kick_url',      FILTER_DEFAULT) ?? ''));
-        $twitch    = trim((string) (filter_input(INPUT_POST, 'twitch_url',    FILTER_DEFAULT) ?? ''));
+        // Las siete redes se leen recorriendo REDES, no una variable por red.
+        $redes = [];
+        foreach (array_keys(self::REDES) as $campo) {
+            $redes[$campo] = trim((string) (filter_input(INPUT_POST, $campo, FILTER_DEFAULT) ?? ''));
+        }
 
         if ($nombre === '' || $apellido === '' || $email === '' || $fechaNac === '') {
             $this->jsonError('Nombre, apellido, correo y fecha de nacimiento son obligatorios.');
@@ -150,25 +183,11 @@ class PerfilController extends Controller {
         }
 
         $redesProcesadas = [];
-        $redes = [
-            'twitter_url'   => $twitter,   'facebook_url' => $facebook, 'instagram_url' => $instagram,
-            'youtube_url'   => $youtube,   'tiktok_url'   => $tiktok,   'kick_url'      => $kick,
-            'twitch_url'    => $twitch,
-        ];
         foreach ($redes as $campo => $valor) {
             if ($valor !== '') {
                 $norm = $this->normalizarRedSocial($campo, $valor);
                 if ($norm === null) {
-                    $nombreAmigable = match($campo) {
-                        'twitter_url'   => 'X (Twitter)',
-                        'facebook_url'  => 'Facebook',
-                        'instagram_url' => 'Instagram',
-                        'youtube_url'   => 'YouTube',
-                        'tiktok_url'    => 'TikTok',
-                        'kick_url'      => 'Kick',
-                        'twitch_url'    => 'Twitch',
-                        default         => $campo,
-                    };
+                    $nombreAmigable = self::REDES[$campo][0] ?? $campo;
                     $this->jsonError("El enlace o usuario de $nombreAmigable no es válido.");
                     return;
                 }
@@ -187,13 +206,7 @@ class PerfilController extends Controller {
             'fecha_nac'     => $fechaNac,
             'ubicacion'     => $ubicacion !== '' ? $ubicacion : null,
             'bio'           => $bio !== '' ? $bio : null,
-            'twitter_url'   => $redesProcesadas['twitter_url'],
-            'facebook_url'  => $redesProcesadas['facebook_url'],
-            'instagram_url' => $redesProcesadas['instagram_url'],
-            'youtube_url'   => $redesProcesadas['youtube_url'],
-            'tiktok_url'    => $redesProcesadas['tiktok_url'],
-            'kick_url'      => $redesProcesadas['kick_url'],
-            'twitch_url'    => $redesProcesadas['twitch_url'],
+            ...$redesProcesadas,
         ]);
 
         // El nav y los saludos usan el nombre guardado en sesión.
@@ -331,13 +344,7 @@ class PerfilController extends Controller {
                 'bio'           => $u['bio']           ?? null,
                 'ubicacion'     => $u['ubicacion']     ?? null,
                 'avatar_url'    => $u['avatar_url']    ?? null,
-                'twitter_url'   => $u['twitter_url']   ?? null,
-                'facebook_url'  => $u['facebook_url']  ?? null,
-                'instagram_url' => $u['instagram_url'] ?? null,
-                'youtube_url'   => $u['youtube_url']   ?? null,
-                'tiktok_url'    => $u['tiktok_url']    ?? null,
-                'kick_url'      => $u['kick_url']      ?? null,
-                'twitch_url'    => $u['twitch_url']    ?? null,
+                ...$this->redesDe($u),
                 'created_at'    => $u['created_at']    ?? null,
             ],
             'torneos'   => $this->torneoModel->listarDeParticipante($id),
@@ -363,13 +370,7 @@ class PerfilController extends Controller {
             'ubicacion'     => $u['ubicacion']     ?? null,
             'bio'           => $u['bio']           ?? null,
             'avatar_url'    => $u['avatar_url']    ?? null,
-            'twitter_url'   => $u['twitter_url']   ?? null,
-            'facebook_url'  => $u['facebook_url']  ?? null,
-            'instagram_url' => $u['instagram_url'] ?? null,
-            'youtube_url'   => $u['youtube_url']   ?? null,
-            'tiktok_url'    => $u['tiktok_url']    ?? null,
-            'kick_url'      => $u['kick_url']      ?? null,
-            'twitch_url'    => $u['twitch_url']    ?? null,
+            ...$this->redesDe($u),
             'created_at'    => $u['created_at']    ?? null,
         ];
     }
@@ -400,16 +401,7 @@ class PerfilController extends Controller {
 
         // Si es un nombre de usuario alfanumérico (letras, números, puntos, guiones)
         if (preg_match('/^[A-Za-z0-9_.-]{1,60}$/', $v)) {
-            $base = match ($tipo) {
-                'twitter_url'   => 'https://x.com/',
-                'facebook_url'  => 'https://facebook.com/',
-                'instagram_url' => 'https://instagram.com/',
-                'youtube_url'   => 'https://youtube.com/@',
-                'tiktok_url'    => 'https://tiktok.com/@',
-                'kick_url'      => 'https://kick.com/',
-                'twitch_url'    => 'https://twitch.tv/',
-                default         => ''
-            };
+            $base = self::REDES[$tipo][1] ?? '';
             if ($base !== '') {
                 return $base . $v;
             }

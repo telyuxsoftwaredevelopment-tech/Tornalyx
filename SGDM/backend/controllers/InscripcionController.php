@@ -211,20 +211,14 @@ class InscripcionController extends Controller {
     }
 
     /**
-     * Verifica que el usuario pueda gestionar el torneo (es su organizador o
-     * es administrador). Responde el error correspondiente y devuelve false.
+     * Carga el torneo y verifica que el usuario pueda gestionarlo. Responde el
+     * error correspondiente y devuelve false. La regla vive en
+     * Controller::gestionaTorneo(), compartida con el resto de los endpoints.
      */
     private function puedeGestionar(int $torneoId): bool {
-        $torneo = $this->torneoModel->findById($torneoId);
-        if (!$torneo) {
-            $this->jsonError('Torneo no encontrado.', [], 404);
-            return false;
-        }
-        if (Session::getUserRole() !== 'administrador'
-            && (int) $torneo['organizador_id'] !== Session::getUserId()) {
-            $this->jsonError('No tenés permiso para gestionar este torneo.', [], 403);
-            return false;
-        }
-        return true;
+        return $this->exigirGestionTorneo(
+            $this->torneoModel->findById($torneoId),
+            'gestionar este torneo'
+        );
     }
 }

@@ -161,23 +161,6 @@ class Partido extends Model {
     }
 
     /**
-     * Asistencias confirmadas de un partido, con el nombre de cada jugador.
-     *
-     * @return array
-     */
-    public function asistencias(int $partidoId): array {
-        $stmt = $this->db->prepare(
-            'SELECT a.usuario_id, a.estado,
-                    TRIM(CONCAT(u.nombre, \' \', COALESCE(u.apellido, \'\'))) AS jugador
-               FROM asistencias a
-               INNER JOIN usuarios u ON u.id = a.usuario_id
-              WHERE a.partido_id = ?'
-        );
-        $stmt->execute([$partidoId]);
-        return $stmt->fetchAll();
-    }
-
-    /**
      * Torneo al que pertenece un partido (para validar permisos).
      */
     public function torneoDe(int $partidoId): ?int {
