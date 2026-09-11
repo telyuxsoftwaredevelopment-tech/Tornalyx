@@ -2,7 +2,7 @@
 # Tornalyx — instalación de Prometheus + node_exporter + mysqld_exporter +
 # Grafana en el servidor real. Ejecutar como root (Debian/Ubuntu).
 # Requiere que DB_MONITOR_PASS esté seteada con la contraseña real del
-# usuario tornalyx_monitor (SGDM/backend/database/dcl.sql:95-99).
+# usuario tornalyx_monitor (SGDM/backend/database/dcl.sql:134-138).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

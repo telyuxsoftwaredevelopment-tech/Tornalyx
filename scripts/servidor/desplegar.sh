@@ -73,6 +73,12 @@ sin_use() {
 # DML sobre las tablas de negocio, así que esas van aparte con tornalyx_dcl.
 # El auto-registro en schema_migrations no cuenta: ese permiso sí lo tiene,
 # acotado a esa tabla (ver dcl.sql).
+#
+# Es una heurística: detecta INSERT/UPDATE/DELETE/REPLACE al principio de
+# línea, que es como están escritas todas las migraciones del repo. Una
+# sentencia DML indentada o pegada a otra en la misma línea se le escaparía y
+# fallaría al aplicarse, con el error a la vista (no se registra como
+# aplicada). Verificado contra las 11 migraciones actuales.
 tiene_backfill() {
     local dml
     dml="$(grep -iE '^[[:space:]]*(INSERT|UPDATE|DELETE|REPLACE)[[:space:]]' "$1" || true)"

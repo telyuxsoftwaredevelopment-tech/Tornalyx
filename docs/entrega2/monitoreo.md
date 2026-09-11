@@ -11,7 +11,7 @@ más liviano para un único VPS y porque separa claramente colección
 | Exporter | Puerto | Métricas | Usuario/permiso |
 |----------|--------|----------|-------------------|
 | node_exporter | 9100 | CPU, memoria, disco, red, carga del sistema | No requiere credenciales de BD (lee `/proc` del propio host). |
-| mysqld_exporter | 9104 | Conexiones activas, queries lentas, tamaño de tablas, replicación (si la hubiera) | `tornalyx_monitor` (`SGDM/backend/database/dcl.sql:95-99`): solo `SELECT` + `PROCESS`, no puede modificar datos. |
+| mysqld_exporter | 9104 | Conexiones activas, queries lentas, tamaño de tablas, replicación (si la hubiera) | `tornalyx_monitor` (`SGDM/backend/database/dcl.sql:134-138`): solo `SELECT` + `PROCESS`, no puede modificar datos. |
 
 Prometheus scrapea ambos exporters cada 15s (`scripts/servidor/prometheus.yml`)
 y Grafana los consulta para armar dashboards.
